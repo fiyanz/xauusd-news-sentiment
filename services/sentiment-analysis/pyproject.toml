@@ -1,0 +1,33 @@
+[project]
+name = "sentiment-analysis"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Fiyanz", email = "bagusalfiyanyusuf@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "feedparser>=6.0.14",
+    "lightgbm>=4.7.0",
+    "matplotlib>=3.11.2",
+    "nltk>=3.10.4",
+    "numpy>=2.5.4",
+    "pandas>=3.1.1",
+    "pyarrow>=26.0.1",
+    "pytest>=9.2.0",
+    "pyyaml>=6.0.3",
+    "scikit-learn>=1.9.1",
+    "xgboost>=3.4.1",
+    "yfinance>=1.8.0",
+]
+
+[project.scripts]
+sentiment-analysis = "sentiment_analysis:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

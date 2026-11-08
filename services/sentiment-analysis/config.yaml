@@ -1,0 +1,63 @@
+project:
+  name: xau-news-sentiment
+  symbol: XAUUSD
+  timezone: UTC
+  seed: 42
+
+macro:
+  tickers:
+    us10y: "^TNX"
+    dxy: "DX-Y.NYB"
+    oil: "CL=F"
+  start_date: "2010-01-01"
+  # None -> today (UTC); keeps the macro artifact from going stale.
+  end_date: null
+  output_file: "data/raw/macro/macro_context.csv"
+  lag_days: 1
+  delta_windows: [1, 5]
+
+news:
+  lookback_days: 14
+  max_articles_per_feed: 60
+  # Keyless public RSS feeds. No API keys required.
+  rss_feeds:
+    cnbc_markets: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258"
+    cnbc_business: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15839069"
+    marketwatch_top: "https://feeds.content.dowjones.io/public/rss/mw_topstories"
+    wsj_markets: "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain"
+    ft_markets: "https://www.ft.com/markets?format=rss"
+    bloomberg_markets: "https://feeds.bloomberg.com/markets/news.rss"
+    investing_com: "https://www.investing.com/rss/news_11.rss"
+    gnews_gold: "https://news.google.com/rss/search?q=gold+OR+XAUUSD+OR+%22spot+gold%22+when%3A7d&hl=en-US&gl=US&ceid=US:en"
+    gnews_gold_prices: "https://news.google.com/rss/search?q=%22gold+prices%22+OR+%22gold+futures%22+when%3A7d&hl=en-US&gl=US&ceid=US:en"
+
+data:
+  price_file_raw: "/home/kazu/Projects/magang/expert-advisor-trade/data/XAUUSD_H1.csv"
+  price_file_complete: "data/raw/price/xauusd_h1_complete.csv"
+  calendar_file_raw: "/home/kazu/Projects/magang/expert-advisor-trade/data/news_calendar_high_impact.csv"
+  calendar_file_complete: "data/raw/calendar/economic_calendar_enriched.csv"
+  macro_file: "data/raw/macro/macro_context.csv"
+  news_dir_raw: "data/raw/news"
+  processed_dir: "data/processed"
+  intraday_dir: "data/raw/price"
+  provenance_file: "data/processed/provenance.json"
+
+label:
+  timeframe: H1
+  horizons_hours: [1, 4, 24]
+  main_horizon_hours: 1
+  threshold_k: 0.5
+  vol_lookback_days: 20
+  price_tolerance_minutes: 60
+
+split:
+  train: 0.6
+  val: 0.2
+  test: 0.2
+  embargo_hours: 24
+  walk_forward_folds: 5
+
+model:
+  candidates: ["B0", "B1", "B2", "M1", "M2"]
+  metric: "macro_f1"
+  tuning_trials: 30

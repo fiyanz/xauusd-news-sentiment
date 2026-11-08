@@ -1,0 +1,60 @@
+{
+  "test_samples": 8,
+  "target": "ret_4h",
+  "champion_name": "XGBoost",
+  "selection_method": "cv_mean_rank_ic",
+  "models": {
+    "baseline": {
+      "mae": 0.009565,
+      "mae_pct": 0.9565,
+      "mse": 0.00011449,
+      "rmse": 0.0107,
+      "rmse_pct": 1.07,
+      "mape_pct": 1494.94,
+      "r2": -1.9825,
+      "adj_r2": -1.9825,
+      "hit_ratio_all": 50.0,
+      "hit_ratio_sig": 60.0,
+      "hit_ratio_sig_hits": 3,
+      "hit_ratio_sig_n": 5,
+      "spearman_rank_ic": 0.5952,
+      "spearman_pval": 0.11953,
+      "train_mae_pct": 0.4471,
+      "train_hit_ratio": 66.67,
+      "overfit_gap_hit": 6.67
+    },
+    "full": {
+      "mae": 0.00645,
+      "mae_pct": 0.645,
+      "mse": 5.034e-05,
+      "rmse": 0.007095,
+      "rmse_pct": 0.7095,
+      "mape_pct": 666.25,
+      "r2": -0.3114,
+      "adj_r2": -0.3114,
+      "hit_ratio_all": 62.5,
+      "hit_ratio_sig": 80.0,
+      "hit_ratio_sig_hits": 4,
+      "hit_ratio_sig_n": 5,
+      "spearman_rank_ic": -0.5238,
+      "spearman_pval": 0.18272,
+      "train_mae_pct": 0.3498,
+      "train_hit_ratio": 72.22,
+      "overfit_gap_hit": -7.78
+    }
+  },
+  "delta_alpha": {
+    "rank_ic_improvement": -1.119,
+    "hit_ratio_improvement": 20.0,
+    "sentiment_adds_value": false,
+    "sentiment_adds_value_basis": "rank_ic_pvalue < 0.05 or hit_ratio_pvalue < 0.05",
+    "rank_ic_pvalue": 0.18272,
+    "hit_ratio_pvalue": 0.375,
+    "hit_ratio_ci95": [
+      0.3755,
+      0.9638
+    ]
+  },
+  "artifact_status": "verified",
+  "disclaimer": null
+}

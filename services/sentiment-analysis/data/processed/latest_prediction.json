@@ -1,0 +1,31 @@
+{
+  "status": "success",
+  "timestamp_utc": "2026-11-07 18:38:56 UTC",
+  "bucket_time_utc": "2026-11-06 20:00:00+00:00",
+  "model_champion": "XGBoost",
+  "current_price": 4074.9,
+  "prediction_horizon": "4 Jam (4H)",
+  "predicted_return_pct": -0.3318,
+  "predicted_target_price": 4061.38,
+  "predicted_pips_delta": "-135.2 pips",
+  "signal": "BEARISH",
+  "sentiment_label": "Melemah (Bearish)",
+  "confidence_pct": 83.3,
+  "confidence_method": "abs(predicted_return_4h) / (1.5 * vol_pre), capped at 95%; no artificial floor",
+  "threshold": 0.001328,
+  "threshold_pct": 0.1328,
+  "vol_pre": 0.002657,
+  "macro_drivers": [
+    {
+      "driver": "US Dollar Index (DXY \u03941D)",
+      "value": "+0.04",
+      "impact_on_gold": "Bearish Emas"
+    },
+    {
+      "driver": "US 10Y Yield",
+      "value": "4.84%",
+      "impact_on_gold": "Opportunity cost tinggi"
+    }
+  ],
+  "compliance": "FR-10 Validated: Murni Analisis Informasi / Bukan Sinyal Trading Otomatis"
+}

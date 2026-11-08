@@ -1,0 +1,32 @@
+{
+  "test_samples": 292,
+  "champion_model": "M2_LightGBM_All",
+  "metrics": {
+    "champion_macro_f1": 0.3166,
+    "champion_balanced_acc": 0.3199,
+    "baseline_b0_macro_f1": 0.193,
+    "baseline_b0_balanced_acc": 0.3333,
+    "baseline_b1_macro_f1": 0.2691,
+    "baseline_b1_balanced_acc": 0.3035,
+    "spearman_rank_correlation": 0.0635,
+    "spearman_pvalue": 0.27942,
+    "negative_control_shuffled_f1": 0.3287
+  },
+  "confusion_matrix": [
+    [
+      39,
+      34,
+      37
+    ],
+    [
+      21,
+      18,
+      24
+    ],
+    [
+      51,
+      30,
+      38
+    ]
+  ]
+}

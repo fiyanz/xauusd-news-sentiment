@@ -1,0 +1,42 @@
+{
+  "Random Forest": {
+    "mae_train": 0.421,
+    "mae_test": 0.6269,
+    "rmse_test": 0.8829,
+    "hit_train": 63.6,
+    "hit_test_all": 57.53,
+    "hit_test_sig": 57.59,
+    "rank_ic": 0.0422,
+    "overfit_hit_gap": 6.01
+  },
+  "LightGBM": {
+    "mae_train": 0.3985,
+    "mae_test": 0.63,
+    "rmse_test": 0.8814,
+    "hit_train": 70.99,
+    "hit_test_all": 51.61,
+    "hit_test_sig": 52.53,
+    "rank_ic": 0.0722,
+    "overfit_hit_gap": 18.46
+  },
+  "XGBoost": {
+    "mae_train": 0.4299,
+    "mae_test": 0.6286,
+    "rmse_test": 0.8828,
+    "hit_train": 64.32,
+    "hit_test_all": 57.53,
+    "hit_test_sig": 56.96,
+    "rank_ic": -0.0251,
+    "overfit_hit_gap": 7.36
+  },
+  "Ridge Linear": {
+    "mae_train": 0.4532,
+    "mae_test": 0.6695,
+    "rmse_test": 0.9199,
+    "hit_train": 56.4,
+    "hit_test_all": 51.61,
+    "hit_test_sig": 51.9,
+    "rank_ic": 0.0172,
+    "overfit_hit_gap": 4.5
+  }
+}
