@@ -61,13 +61,20 @@ def _flatten_yf_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def refresh_price_data(
-    raw_path: str = "/home/kazu/Projects/magang/expert-advisor-trade/data/XAUUSD_H1.csv",
+    raw_path: str | None = None,
     output_path: str = "data/raw/price/xauusd_h1_complete.csv",
     end_date: str | None = None,
 ) -> pd.DataFrame:
-    """Load historical H1 candles, patch missing recent candles, and save unified UTC CSV."""
-    if not os.path.exists(raw_path):
-        raw_path = "/home/kazu/Projects/magang/prediction-foreign-currency/data/compiled/XAUUSD_H1.csv"
+    """Load historical H1 candles, patch missing recent candles, and save unified UTC CSV.
+
+    ``raw_path`` wajib diset lewat config (``data.price_file_raw``) atau env
+    ``EXTERNAL_DATA_DIR``. Tidak ada path hardcoded.
+    """
+    if not raw_path:
+        raise ValueError(
+            "raw_path kosong: set 'data.price_file_raw' di config.yaml "
+            "atau env EXTERNAL_DATA_DIR."
+        )
     if not os.path.exists(raw_path):
         raise FileNotFoundError(f"H1 source CSV not found: {raw_path}")
 
@@ -244,7 +251,9 @@ def write_price_provenance(
 
 if __name__ == "__main__":
     cfg = load_config()
-    raw = cfg["data"]["price_file_raw"]
+    raw = cfg["data"].get("price_file_raw")
     out = cfg["data"]["price_file_complete"]
+    if not raw:
+        raise SystemExit("data.price_file_raw tidak diset di config.yaml")
     refresh_price_data(raw, out)
     refresh_intraday_data()

@@ -88,7 +88,13 @@ def run_full_sync(write_prediction: bool = True) -> dict:
 
     # 1. H1 Price Data Refresh
     print("\n--- Step 1/8: H1 Price Data Sync ---")
-    refresh_price_data(data_cfg.get("price_file_raw"), data_cfg.get("price_file_complete"))
+    price_raw = data_cfg.get("price_file_raw")
+    if price_raw:
+        refresh_price_data(price_raw, data_cfg.get("price_file_complete"))
+    else:
+        print(
+            "[PipelineSync] price_file_raw tidak diset; memakai data H1 yang sudah ada di repo."
+        )
     provenance_entries.append(write_price_provenance())
 
     # 2. Intraday 5m/15m (real GC=F)
@@ -109,7 +115,13 @@ def run_full_sync(write_prediction: bool = True) -> dict:
     # 4. Calendar Data Enrichment (real BLS/FRED actuals)
     print("\n--- Step 4/8: Economic Calendar Sync ---")
     calendar_csv = data_cfg.get("calendar_file_complete", "data/raw/calendar/economic_calendar_enriched.csv")
-    enrich_economic_calendar(data_cfg.get("calendar_file_raw"), calendar_csv)
+    calendar_raw = data_cfg.get("calendar_file_raw")
+    if calendar_raw:
+        enrich_economic_calendar(calendar_raw, calendar_csv)
+    else:
+        print(
+            "[PipelineSync] calendar_file_raw tidak diset; memakai kalender yang sudah ada di repo."
+        )
     provenance_entries.append(write_calendar_provenance(calendar_csv))
 
     # 5. News Sentiment Stream (real RSS + VADER)

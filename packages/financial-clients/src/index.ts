@@ -28,6 +28,12 @@ export interface EconomicCalendarRaw {
  */
 export type XauusdCandle = OHLCV & { isSimulated?: boolean };
 
+function repoRoot(): string {
+  return process.env.REPO_ROOT
+    ? path.resolve(process.env.REPO_ROOT)
+    : path.resolve(process.cwd(), "../..");
+}
+
 const CALENDAR_CSV_CANDIDATES = [
   path.resolve(
     process.cwd(),
@@ -37,7 +43,10 @@ const CALENDAR_CSV_CANDIDATES = [
     process.cwd(),
     "../../services/sentiment-analysis/data/raw/calendar/economic_calendar_enriched.csv"
   ),
-  "/home/kazu/Projects/magang/sistem-informasi-market-xauusd/services/sentiment-analysis/data/raw/calendar/economic_calendar_enriched.csv",
+  path.resolve(
+    repoRoot(),
+    "services/sentiment-analysis/data/raw/calendar/economic_calendar_enriched.csv"
+  ),
 ];
 
 // CFTC "Futures Only" weekly report (layout legacy, semua komoditas).
@@ -175,11 +184,9 @@ function parseCotReport(text: string): COTReport | null {
 }
 
 export class FinancialClient {
-  private apiKey: string;
   private expertService: ExpertDataService;
 
-  constructor(apiKey: string = process.env.ALPHA_VANTAGE_API_KEY || "demo") {
-    this.apiKey = apiKey;
+  constructor() {
     this.expertService = new ExpertDataService();
   }
 

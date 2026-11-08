@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
+import { sentimentDataPath } from "@/lib/paths";
+
 export const dynamic = "force-dynamic";
 
 const DISCLAIMER = "FR-10: Research Analytics Only • Non-Advisory";
@@ -20,12 +22,15 @@ interface CalendarEvent {
 }
 
 let cachedCalendar: CalendarEvent[] | null = null;
+let cachedCalendarAtMs = 0;
+let cachedCalendarMtimeMs = 0;
+const CALENDAR_CACHE_TTL_MS = 5 * 60 * 1000;
 
 function findCalendarCsv(): string | null {
   const candidates = [
     path.resolve(process.cwd(), "../../services/sentiment-analysis/data/raw/calendar/economic_calendar_enriched.csv"),
     path.resolve(process.cwd(), "services/sentiment-analysis/data/raw/calendar/economic_calendar_enriched.csv"),
-    path.resolve("/home/kazu/Projects/magang/sistem-informasi-market-xauusd/services/sentiment-analysis/data/raw/calendar/economic_calendar_enriched.csv"),
+    sentimentDataPath("data/raw/calendar/economic_calendar_enriched.csv"),
   ];
 
   for (const c of candidates) {
@@ -86,16 +91,31 @@ function classifyEventCode(eventName: string): string {
 }
 
 function loadCalendarData(): CalendarEvent[] {
-  if (cachedCalendar) return cachedCalendar;
-
   const csvPath = findCalendarCsv();
-  if (!csvPath) return [];
+
+  if (csvPath) {
+    let mtimeMs = 0;
+    try {
+      mtimeMs = fs.statSync(csvPath).mtimeMs;
+    } catch {
+      // Ignore unreadable files and fall through to a re-read.
+    }
+    if (
+      cachedCalendar &&
+      Date.now() - cachedCalendarAtMs < CALENDAR_CACHE_TTL_MS &&
+      cachedCalendarMtimeMs === mtimeMs
+    ) {
+      return cachedCalendar;
+    }
+  }
+
+  if (!csvPath) return cachedCalendar ?? [];
 
   let content: string;
   try {
     content = fs.readFileSync(csvPath, "utf-8");
   } catch {
-    return [];
+    return cachedCalendar ?? [];
   }
 
   const lines = content.split(/\r?\n/).filter((line) => line.trim().length > 0);
@@ -130,7 +150,7 @@ function loadCalendarData(): CalendarEvent[] {
       eventCode: classifyEventCode(name),
       eventName: name,
       dateUtc: ts,
-      dateStr: timeStr.split("T")[0] || timeStr.split(" ")[0] || "",
+      dateStr: timeStr.split(" ")[0] || timeStr.split("T")[0] || "",
       impact,
       actual: idxActual === -1 ? null : parseOptionalNumber(cells[idxActual]),
       forecast: idxForecast === -1 ? null : parseOptionalNumber(cells[idxForecast]),
@@ -140,6 +160,12 @@ function loadCalendarData(): CalendarEvent[] {
 
   events.sort((a, b) => a.dateUtc - b.dateUtc);
   cachedCalendar = events;
+  cachedCalendarAtMs = Date.now();
+  try {
+    cachedCalendarMtimeMs = fs.statSync(csvPath).mtimeMs;
+  } catch {
+    cachedCalendarMtimeMs = 0;
+  }
   return cachedCalendar;
 }
 

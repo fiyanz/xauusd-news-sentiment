@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
+import { sentimentDataPath } from "@/lib/paths";
+
 export const dynamic = "force-dynamic";
 
 const API_TIMEOUT_MS = 2000;
@@ -11,7 +13,7 @@ function getPredictionFilePath(): string | null {
   const candidates = [
     path.resolve(process.cwd(), "../../services/sentiment-analysis/data/processed/latest_prediction.json"),
     path.resolve(process.cwd(), "services/sentiment-analysis/data/processed/latest_prediction.json"),
-    path.resolve("/home/kazu/Projects/magang/sistem-informasi-market-xauusd/services/sentiment-analysis/data/processed/latest_prediction.json"),
+    sentimentDataPath("data/processed/latest_prediction.json"),
   ];
 
   for (const c of candidates) {

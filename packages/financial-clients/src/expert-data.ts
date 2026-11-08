@@ -3,11 +3,18 @@ import readline from "node:readline";
 import path from "node:path";
 import type { OHLCV, Timeframe } from "@repo/types";
 
-const REFRESHED_H1_CSV =
-  "/home/kazu/Projects/magang/sistem-informasi-market-xauusd/services/sentiment-analysis/data/raw/price/xauusd_h1_complete.csv";
-const EXPERT_DATA_DIR = "/home/kazu/Projects/magang/expert-advisor-trade/data";
-const REPO_ROOT = "/home/kazu/Projects/magang/sistem-informasi-market-xauusd";
 const PRICE_DIR_REL = path.join("services", "sentiment-analysis", "data", "raw", "price");
+
+/** Root repo, portabel: `REPO_ROOT` di env atau diturunkan dari cwd. */
+function repoRoot(): string {
+  return process.env.REPO_ROOT
+    ? path.resolve(process.env.REPO_ROOT)
+    : path.resolve(process.cwd(), "../..");
+}
+
+const REFRESHED_H1_CSV = path.resolve(repoRoot(), PRICE_DIR_REL, "xauusd_h1_complete.csv");
+const EXPERT_DATA_DIR = process.env.EXTERNAL_DATA_DIR || "";
+const REPO_ROOT = repoRoot();
 
 /** Parsed CSV rows stay in memory for at most 5 minutes before being re-read. */
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -70,8 +77,41 @@ function toNumberOr(raw: string | undefined, fallback: number): number {
   return Number.isFinite(value) ? value : fallback;
 }
 
+/** Parse a single CSV row honouring double-quoted fields. */
+function parseCsvLine(line: string): string[] {
+  const cells: string[] = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i]!;
+    if (inQuotes) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ",") {
+      cells.push(current);
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+
+  cells.push(current);
+  return cells;
+}
+
 function parseCandleLine(line: string, tf: Timeframe): ParsedCandle | null {
-  const parts = line.split(",");
+  const parts = parseCsvLine(line);
   if (parts.length < 5) return null;
 
   const timeStr = (parts[0] ?? "").trim();
@@ -443,7 +483,7 @@ export class ExpertDataService {
   // Load real high-impact economic news releases
   async getHighImpactNews(limit: number = 100): Promise<RealNewsEvent[]> {
     const filePath = path.join(this.dataDir, "news_calendar_high_impact.csv");
-    if (!fs.existsSync(filePath)) return [];
+    if (!this.dataDir || !fs.existsSync(filePath)) return [];
 
     const fileStream = fs.createReadStream(filePath);
     const rl = readline.createInterface({
@@ -461,7 +501,7 @@ export class ExpertDataService {
       }
       if (!line.trim()) continue;
 
-      const parts = line.split(",");
+      const parts = parseCsvLine(line);
       if (parts.length < 4) continue;
 
       const tsStr = parts[0]!;

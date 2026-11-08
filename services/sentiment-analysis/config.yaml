@@ -32,9 +32,11 @@ news:
     gnews_gold_prices: "https://news.google.com/rss/search?q=%22gold+prices%22+OR+%22gold+futures%22+when%3A7d&hl=en-US&gl=US&ceid=US:en"
 
 data:
-  price_file_raw: "/home/kazu/Projects/magang/expert-advisor-trade/data/XAUUSD_H1.csv"
+  # Sumber eksternal (opsional). null -> pakai artifact yang sudah ada di repo,
+  # sehingga pipeline tetap jalan di mesin lain tanpa path khusus.
+  price_file_raw: null
   price_file_complete: "data/raw/price/xauusd_h1_complete.csv"
-  calendar_file_raw: "/home/kazu/Projects/magang/expert-advisor-trade/data/news_calendar_high_impact.csv"
+  calendar_file_raw: null
   calendar_file_complete: "data/raw/calendar/economic_calendar_enriched.csv"
   macro_file: "data/raw/macro/macro_context.csv"
   news_dir_raw: "data/raw/news"

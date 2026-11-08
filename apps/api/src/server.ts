@@ -13,11 +13,50 @@ import type { SurpriseResult } from "@repo/core-analytics";
 import type { EventReaction } from "@repo/types";
 import { COMPLIANCE_DISCLAIMER_FR10 } from "@repo/types";
 
+/** Muat `.env` dari repo root (turbo menjalankan task dengan cwd = package). */
+function loadEnv(): void {
+  const root = process.env.REPO_ROOT
+    ? path.resolve(process.env.REPO_ROOT)
+    : path.resolve(process.cwd(), "../..");
+  const candidates = [path.join(root, ".env"), path.join(process.cwd(), ".env")];
+
+  for (const file of candidates) {
+    if (!fs.existsSync(file)) continue;
+    for (const rawLine of fs.readFileSync(file, "utf-8").split(/\r?\n/)) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith("#")) continue;
+      const eq = line.indexOf("=");
+      if (eq === -1) continue;
+      const key = line.slice(0, eq).trim();
+      let value = line.slice(eq + 1).trim();
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+      if (process.env[key] === undefined) process.env[key] = value;
+    }
+    return;
+  }
+}
+
+loadEnv();
+
 const fastify = Fastify({ logger: true });
 const client = new FinancialClient();
 
+/**
+ * Origin web yang diizinkan. Default localhost:3000; bisa daftar dipisah koma
+ * via WEB_ORIGIN (mis. "http://localhost:3000,https://domain.com").
+ */
+const WEB_ORIGIN = (process.env.WEB_ORIGIN || "http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 await fastify.register(cors, {
-  origin: "*",
+  origin: WEB_ORIGIN,
 });
 
 const EVENT_STUDY_WINDOWS = [5, 15, 60];
@@ -87,7 +126,7 @@ fastify.get<{ Querystring: { tf?: string; limit?: string; to?: string } }>(
   "/api/v1/market/xauusd/candles",
   async (request) => {
     const tf = (request.query.tf as any) || "15m";
-    const limit = Math.min(Number(request.query.limit) || 300, 1000); // capped at 1000 for high performance
+    const limit = Math.max(1, Math.min(Number(request.query.limit) || 300, 1000)); // capped at 1000 for high performance
     const to = request.query.to ? Number(request.query.to) : undefined;
     const candles = await client.fetchXauusdCandles(tf, limit, to);
     const isSimulated = candles.length > 0 && candles.every((c) => c.isSimulated === true);
@@ -112,7 +151,7 @@ fastify.get("/api/v1/market/xauusd/stream", async (request, reply) => {
   reply.raw.setHeader("Content-Type", "text/event-stream");
   reply.raw.setHeader("Cache-Control", "no-cache");
   reply.raw.setHeader("Connection", "keep-alive");
-  reply.raw.setHeader("Access-Control-Allow-Origin", "*");
+  reply.raw.setHeader("Access-Control-Allow-Origin", WEB_ORIGIN[0] ?? "");
 
   const recent = await client.fetchXauusdCandles("1h", 1);
   const lastReal = recent[recent.length - 1]?.close ?? null;
@@ -410,12 +449,18 @@ fastify.get("/api/v1/reports/daily/latest", async () => {
   };
 });
 
+function repoRoot(): string {
+  return process.env.REPO_ROOT
+    ? path.resolve(process.env.REPO_ROOT)
+    : path.resolve(process.cwd(), "../..");
+}
+
 function getPythonServiceDir(): string {
   const direct = path.resolve(process.cwd(), "services/sentiment-analysis");
   if (fs.existsSync(direct)) return direct;
   const fromApps = path.resolve(process.cwd(), "../../services/sentiment-analysis");
   if (fs.existsSync(fromApps)) return fromApps;
-  return "/home/kazu/Projects/magang/sistem-informasi-market-xauusd/services/sentiment-analysis";
+  return path.resolve(repoRoot(), "services/sentiment-analysis");
 }
 
 fastify.get("/api/v1/analytics/macro-sentiment/latest", async () => {
@@ -454,8 +499,34 @@ fastify.get("/api/v1/analytics/macro-sentiment/latest", async () => {
 });
 
 let isSyncRunning = false;
+const PIPELINE_SYNC_TOKEN = process.env.PIPELINE_SYNC_TOKEN || "";
+const PIPELINE_SYNC_TIMEOUT_MS =
+  Number(process.env.PIPELINE_SYNC_TIMEOUT_MS) || 15 * 60 * 1000;
 
-fastify.post("/api/v1/pipeline/sync", async (_request, reply) => {
+fastify.post("/api/v1/pipeline/sync", async (request, reply) => {
+  if (!PIPELINE_SYNC_TOKEN) {
+    return reply.status(503).send({
+      statusCode: 503,
+      status: "disabled",
+      error: "Service Unavailable",
+      reason:
+        "PIPELINE_SYNC_TOKEN tidak diset; endpoint sync dinonaktifkan untuk mencegah penyalahgunaan.",
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  const rawToken = request.headers["x-pipeline-token"];
+  const providedToken = Array.isArray(rawToken) ? undefined : rawToken;
+  if (providedToken !== PIPELINE_SYNC_TOKEN) {
+    return reply.status(401).send({
+      statusCode: 401,
+      status: "unauthorized",
+      error: "Unauthorized",
+      reason: "Header x-pipeline-token tidak valid.",
+      timestamp: new Date().toISOString(),
+    });
+  }
+
   if (isSyncRunning) {
     return reply.status(409).send({
       statusCode: 409,
@@ -473,12 +544,21 @@ fastify.post("/api/v1/pipeline/sync", async (_request, reply) => {
       stdio: "ignore",
     });
 
-    proc.on("exit", () => {
+    // Batas waktu maksimal: cegah proses menggantung memblokir endpoint selamanya.
+    const killTimer = setTimeout(() => {
+      try {
+        proc.kill("SIGKILL");
+      } catch {
+        // Proses sudah keluar.
+      }
+    }, PIPELINE_SYNC_TIMEOUT_MS);
+
+    const clearRun = () => {
+      clearTimeout(killTimer);
       isSyncRunning = false;
-    });
-    proc.on("error", () => {
-      isSyncRunning = false;
-    });
+    };
+    proc.on("exit", clearRun);
+    proc.on("error", clearRun);
 
     return {
       status: "sync_dispatched",

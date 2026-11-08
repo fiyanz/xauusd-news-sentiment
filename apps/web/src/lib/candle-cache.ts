@@ -2,6 +2,8 @@ import fs from "fs";
 import path from "path";
 import readline from "readline";
 
+import { repoRoot } from "./paths";
+
 export interface CandleData {
   timestampUtc: number;
   open: number;
@@ -44,7 +46,7 @@ const DEFAULT_VOLUME = 100;
 const DEFAULT_LIMIT = 250;
 const MAX_LIMIT = 5000;
 
-const DATASET_ROOT = "/home/kazu/Projects/magang/sistem-informasi-market-xauusd";
+const DATASET_ROOT = repoRoot();
 const PRICE_DIR_REL = path.join("services", "sentiment-analysis", "data", "raw", "price");
 
 // In-memory cache singletons
@@ -69,7 +71,7 @@ export function findCsvPath(): string | null {
   const candidates = [
     path.resolve(process.cwd(), "../../services/sentiment-analysis/data/raw/price/xauusd_h1_complete.csv"),
     path.resolve(process.cwd(), "services/sentiment-analysis/data/raw/price/xauusd_h1_complete.csv"),
-    path.resolve("/home/kazu/Projects/magang/sistem-informasi-market-xauusd/services/sentiment-analysis/data/raw/price/xauusd_h1_complete.csv"),
+    path.resolve(repoRoot(), "services/sentiment-analysis/data/raw/price/xauusd_h1_complete.csv"),
   ];
 
   for (const c of candidates) {
@@ -152,9 +154,42 @@ function toNumberOr(raw: string | undefined, fallback: number): number {
   return Number.isFinite(value) ? value : fallback;
 }
 
+/** Parse a single CSV row honouring double-quoted fields. */
+function parseCsvLine(line: string): string[] {
+  const cells: string[] = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i]!;
+    if (inQuotes) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ",") {
+      cells.push(current);
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+
+  cells.push(current);
+  return cells;
+}
+
 /** Parse a single CSV row. Returns `null` for headers and malformed rows. */
 export function parseCandleCsvLine(line: string): CandleData | null {
-  const parts = line.split(",");
+  const parts = parseCsvLine(line);
   if (parts.length < 5) return null;
 
   const timeStr = (parts[0] ?? "").trim();

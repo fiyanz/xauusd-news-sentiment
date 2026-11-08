@@ -149,7 +149,7 @@ def _series_status(series_id: str, statuses: dict[str, str]) -> str:
 # Enrichment
 # --------------------------------------------------------------------------- #
 def enrich_economic_calendar(
-    raw_path: str = "/home/kazu/Projects/magang/expert-advisor-trade/data/news_calendar_high_impact.csv",
+    raw_path: str | None = None,
     output_path: str = "data/raw/calendar/economic_calendar_enriched.csv",
     start_year: int | None = None,
     end_year: int | None = None,
@@ -159,7 +159,18 @@ def enrich_economic_calendar(
 
     Adds provenance columns: ``source``, ``forecast_source``,
     ``surprise_method``, ``is_simulated``.
+
+    ``raw_path`` wajib diset lewat config (``data.calendar_file_raw``) atau env
+    ``EXTERNAL_DATA_DIR``.
     """
+    if not raw_path:
+        raise ValueError(
+            "raw_path kosong: set 'data.calendar_file_raw' di config.yaml "
+            "atau env EXTERNAL_DATA_DIR."
+        )
+    if not os.path.exists(raw_path):
+        raise FileNotFoundError(f"Calendar source CSV not found: {raw_path}")
+
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     print(f"[Calendar] Loading calendar from {raw_path}...")

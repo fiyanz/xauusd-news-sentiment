@@ -39,3 +39,6 @@ __pycache__/
 .pytest_cache/
 services/sentiment-analysis/data/cache/
 
+# TypeScript build info
+*.tsbuildinfo
+

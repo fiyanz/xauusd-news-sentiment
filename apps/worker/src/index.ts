@@ -11,12 +11,18 @@ import {
 
 const client = new FinancialClient();
 
+function repoRoot(): string {
+  return process.env.REPO_ROOT
+    ? path.resolve(process.env.REPO_ROOT)
+    : path.resolve(process.cwd(), "../..");
+}
+
 function getPythonServiceDir(): string {
   const direct = path.resolve(process.cwd(), "services/sentiment-analysis");
   if (fs.existsSync(direct)) return direct;
   const fromApps = path.resolve(process.cwd(), "../../services/sentiment-analysis");
   if (fs.existsSync(fromApps)) return fromApps;
-  return "/home/kazu/Projects/magang/sistem-informasi-market-xauusd/services/sentiment-analysis";
+  return path.resolve(repoRoot(), "services/sentiment-analysis");
 }
 
 async function runIngestionJob() {
@@ -49,6 +55,7 @@ async function runIngestionJob() {
           .onConflictDoUpdate({
             target: priceCandles.id,
             set: {
+              open: sql`EXCLUDED.open`,
               high: sql`EXCLUDED.high`,
               low: sql`EXCLUDED.low`,
               close: sql`EXCLUDED.close`,
