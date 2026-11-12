@@ -63,10 +63,14 @@ def harmonize_dataset(
     df_cal["timestamp_utc"] = pd.to_datetime(df_cal["timestamp_utc"], utc=True)
     calendar_is_simulated = bool(df_cal["is_simulated"].all()) if "is_simulated" in df_cal.columns else False
 
-    # 3. Load news. Accept both the legacy bare list and the provenance envelope
-    # {"status": ..., "articles": [...]}.
+    # 3. Load news. Accept a JSON envelope {"status": ..., "articles": [...]},
+    # a bare JSON list, or a JSONL corpus (one article per line).
     with open(news_path, "r") as f:
-        news_data = json.load(f)
+        raw_news = f.read()
+    try:
+        news_data = json.loads(raw_news)
+    except json.JSONDecodeError:
+        news_data = [json.loads(line) for line in raw_news.splitlines() if line.strip()]
     if isinstance(news_data, dict):
         articles = news_data.get("articles", [])
         news_status = news_data.get("status", "ok" if articles else "unavailable")

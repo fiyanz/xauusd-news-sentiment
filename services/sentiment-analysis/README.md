@@ -32,6 +32,8 @@ src/pipeline/sync.py
 | `src/acquire/data_sources.py` | Client BLS API v2 + FRED CSV dengan cache |
 | `src/acquire/calendar.py` | Enrichment kalender dengan actual BLS/FRED |
 | `src/acquire/news.py` | RSS (feedparser) + sentimen VADER |
+| `src/acquire/corpus.py` | Korpus berita persisten (append-only, dedupe URL) |
+| `src/acquire/gdelt.py` | GDELT Doc API historis (keyless, rate-limited) |
 | `src/acquire/price.py` | H1 history + intraday GC=F 5m/15m |
 | `src/acquire/macro.py` | US10Y, DXY, Oil (PIT lag) |
 | `src/process/harmonize.py` | merge_asof backward, return/label |
@@ -56,7 +58,10 @@ src/pipeline/sync.py
 - Fitur waktu di-encode siklikal (`hour_sin/cos`, `dow_sin/cos`).
 - TF-IDF (50 kolom) yang dulu dihitung tapi menganggur kini masuk lewat
   `tfidf_pc1..3`.
-- Hasil: 25 fitur dari 84 mentah; `block_explained_variance` tersimpan di bundle.
+- Surprise makro di-carry-forward: bila tidak ada rilis dalam 2 jam, fitur diisi
+  surprise rilis terakhir yang sudah terbit + `surprise_age_hours`
+  (point-in-time safe, `merge_asof backward` tanpa tolerance).
+- Hasil: 26 fitur dari 85 mentah; `block_explained_variance` tersimpan di bundle.
 - Baseline pembanding memakai fitur event + komponen makro saja.
 
 ```bash
@@ -84,7 +89,12 @@ uv run python -m src.evaluate.significance
 
 - `data.price_file_raw` / `data.calendar_file_raw` — sumber eksternal opsional.
   `null` → pakai artifact repo yang sudah ada.
+- `data.news_corpus` — korpus berita persisten (JSONL, append-only, dedupe URL).
 - `news.rss_feeds`, `news.lookback_days`, `news.max_articles_per_feed`.
+- `news.gdelt` — sumber historis keyless (rate-limit ~1 request/5 detik):
+  `enabled`, `query`, `start_date`, `end_date`, `max_records_per_window`,
+  `window_days`, `max_windows`, `delay_seconds`. Bila API memblokir (429),
+  pipeline tetap jalan dengan korpus RSS.
 - `macro.tickers`, `macro.start_date`, `macro.end_date` (`null` = hari ini),
   `macro.lag_days`.
 - `split.train/val/test`, `split.embargo_hours`, `split.walk_forward_folds`.

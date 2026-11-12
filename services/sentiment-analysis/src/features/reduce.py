@@ -30,6 +30,7 @@ BLOCK_SPECS = [
 BASE_FEATURES = [
     "z_score",
     "surprise_val",
+    "surprise_age_hours",
     "has_event",
     "session_Asia",
     "session_London",

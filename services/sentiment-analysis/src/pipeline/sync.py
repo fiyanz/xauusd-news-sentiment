@@ -83,26 +83,51 @@ def run_full_sync(write_prediction: bool = True) -> dict:
         )
     provenance_entries.append(write_calendar_provenance(calendar_csv))
 
-    # 5. News Sentiment Stream (real RSS + VADER)
+    # 5. News Sentiment Stream (real RSS + VADER) -> korpus persisten
     print("\n--- Step 5/8: News Sentiment Feed Sync ---")
     news_dir = data_cfg.get("news_dir_raw", "data/raw/news")
     news_cfg = cfg.get("news", {})
+    corpus_path = data_cfg.get("news_corpus", "data/processed/news_corpus.jsonl")
     acquire_news_sentiment(
         output_dir=news_dir,
         feeds=news_cfg.get("rss_feeds"),
         max_articles_per_feed=news_cfg.get("max_articles_per_feed", 60),
         lookback_days=news_cfg.get("lookback_days", 14),
         calendar_path=calendar_csv,
+        corpus_path=corpus_path,
     )
     provenance_entries.append(
         write_news_provenance(f"{news_dir}/news_sentiment_feed.json")
     )
 
-    # 6. Harmonization (news + price -> returns/labels)
+    # 5b. GDELT historical news (keyless, rate-limited) -> korpus yang sama.
+    gdelt_cfg = news_cfg.get("gdelt", {})
+    if gdelt_cfg.get("enabled"):
+        print("\n--- Step 5b/8: GDELT Historical News Sync ---")
+        try:
+            from src.acquire.gdelt import fetch_gdelt_articles
+
+            added = fetch_gdelt_articles(
+                corpus_path=corpus_path,
+                query=gdelt_cfg.get("query", "gold futures language:eng"),
+                start_date=gdelt_cfg.get("start_date"),
+                end_date=gdelt_cfg.get("end_date"),
+                max_records=gdelt_cfg.get("max_records_per_window", 250),
+                window_days=gdelt_cfg.get("window_days", 31),
+                max_windows=gdelt_cfg.get("max_windows", 12),
+                delay=gdelt_cfg.get("delay_seconds", 6.5),
+            )
+            print(f"[PipelineSync] GDELT: +{added} artikel baru di korpus.")
+        except Exception as exc:  # noqa: BLE001 - rate limit / network; jangan crash
+            print(f"[PipelineSync] GDELT dilewati: {type(exc).__name__}: {exc}")
+    else:
+        print("[PipelineSync] GDELT disabled; korpus hanya dari RSS.")
+
+    # 6. Harmonization (korpus berita + price -> returns/labels)
     print("\n--- Step 6/8: Harmonization ---")
     harmonize_dataset(
         price_path=data_cfg.get("price_file_complete", "data/raw/price/xauusd_h1_complete.csv"),
-        news_path=f"{news_dir}/news_sentiment_feed.json",
+        news_path=corpus_path,
         calendar_path=calendar_csv,
         output_dir=processed_dir,
         threshold_k=cfg.get("label", {}).get("threshold_k", 0.5),

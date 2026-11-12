@@ -1,20 +1,20 @@
 {
   "status": "success",
-  "timestamp_utc": "2026-11-12 04:45:52 UTC",
-  "bucket_time_utc": "2026-11-12 00:00:00+00:00",
-  "model_champion": "Random_Forest",
-  "current_price": 3999.7,
+  "timestamp_utc": "2026-11-12 05:10:44 UTC",
+  "bucket_time_utc": "2026-11-12 04:00:00+00:00",
+  "model_champion": "Ridge_Linear",
+  "current_price": 3988.6,
   "prediction_horizon": "4 Jam (4H)",
-  "predicted_return_pct": -0.1576,
-  "predicted_target_price": 3993.4,
-  "predicted_pips_delta": "-63.0 pips",
-  "signal": "BEARISH",
-  "sentiment_label": "Melemah (Bearish)",
-  "confidence_pct": 37.6,
+  "predicted_return_pct": 0.4557,
+  "predicted_target_price": 4006.78,
+  "predicted_pips_delta": "+181.8 pips",
+  "signal": "BULLISH",
+  "sentiment_label": "Menguat (Bullish)",
+  "confidence_pct": 95.0,
   "confidence_method": "abs(predicted_return_4h) / (1.5 * vol_pre), capped at 95%; no artificial floor",
-  "threshold": 0.001398,
-  "threshold_pct": 0.1398,
-  "vol_pre": 0.002796,
+  "threshold": 0.0014,
+  "threshold_pct": 0.14,
+  "vol_pre": 0.0028,
   "macro_drivers": [
     {
       "driver": "US Dollar Index (DXY \u03941D)",
@@ -25,6 +25,11 @@
       "driver": "US 10Y Yield",
       "value": "4.98%",
       "impact_on_gold": "Opportunity cost tinggi"
+    },
+    {
+      "driver": "Kejutan Kalender Makro",
+      "value": "Z=+0.00 (nan)",
+      "impact_on_gold": "Deviasi rilis terhadap konsensus"
     }
   ],
   "compliance": "FR-10 Validated: Murni Analisis Informasi / Bukan Sinyal Trading Otomatis"

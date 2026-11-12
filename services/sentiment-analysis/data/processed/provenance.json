@@ -28,8 +28,8 @@
     "data/raw/calendar/economic_calendar_enriched.csv": {
       "artifact": "data/raw/calendar/economic_calendar_enriched.csv",
       "source": "bls_api_v2 + fred_csv (keyless)",
-      "generated_at": "2026-11-12 04:02:33+00:00",
-      "as_of": "2026-11-12 04:02:33+00:00",
+      "generated_at": "2026-11-12 05:10:02+00:00",
+      "as_of": "2026-11-12 05:10:02+00:00",
       "is_simulated": false,
       "rows": 748,
       "rows_real": 737,
@@ -64,8 +64,8 @@
     "data/raw/news/news_sentiment_feed.json": {
       "artifact": "data/raw/news/news_sentiment_feed.json",
       "source": "rss_feeds (keyless)",
-      "generated_at": "2026-11-12 04:02:43+00:00",
-      "as_of": "2026-11-12 04:02:43+00:00",
+      "generated_at": "2026-11-12 05:10:11+00:00",
+      "as_of": "2026-11-12 05:10:11+00:00",
       "is_simulated": false,
       "status": "ok",
       "article_count": 278,
@@ -85,28 +85,28 @@
     "data/processed/bucketed_features.parquet": {
       "artifact": "data/processed/bucketed_features.parquet",
       "source": "rss_feeds+vader | bls_api_v2+fred_csv | yfinance GC=F | yfinance ^TNX/DX-Y.NYB/CL=F",
-      "generated_at": "2026-11-12 04:02:44+00:00",
+      "generated_at": "2026-11-12 05:10:26+00:00",
       "as_of": null,
       "is_simulated": false
     },
     "models/champion_fair_model.joblib": {
       "artifact": "models/champion_fair_model.joblib",
       "source": "retrain pipeline (src.models.train, champion by CV)",
-      "generated_at": "2026-11-12 04:45:52+00:00",
+      "generated_at": "2026-11-12 05:10:44+00:00",
       "is_simulated": false,
-      "champion_name": "Random_Forest"
+      "champion_name": "Ridge_Linear"
     },
     "reports/significance.json": {
       "artifact": "reports/significance.json",
       "source": "retrain pipeline (src.evaluate.significance)",
-      "generated_at": "2026-11-12 04:45:52+00:00",
+      "generated_at": "2026-11-12 05:10:44+00:00",
       "is_simulated": false,
-      "rank_ic": 0.0,
-      "rank_ic_pvalue": 1.0,
+      "rank_ic": 0.2275,
+      "rank_ic_pvalue": 0.58784,
       "sentiment_adds_value": false
     }
   },
-  "generated_at": "2026-11-12 04:45:52+00:00",
+  "generated_at": "2026-11-12 05:10:44+00:00",
   "is_simulated": false,
   "has_simulated_rows": true
 }

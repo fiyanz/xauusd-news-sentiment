@@ -84,6 +84,47 @@ def harmonize_buckets(
     df_merged["surprise_val"] = df_merged["surprise_val"].where(has_event_mask)
     df_merged["z_score"] = df_merged["z_score"].where(has_event_mask)
 
+    # 1b. Carry-forward surprise (point-in-time safe).
+    # Bila tidak ada rilis dalam 2 jam, fitur makro diisi dengan surprise rilis
+    # terakhir yang sudah terbit (merge_asof backward TANPA tolerance) + umur
+    # surprise. Ini menjaga fitur makro tetap terpakai tanpa membocorkan masa depan.
+    real_cal = df_cal.copy()
+    if "is_simulated" in real_cal.columns:
+        real_cal = real_cal[~real_cal["is_simulated"].fillna(True).astype(bool)]
+    real_cal = real_cal.dropna(subset=["surprise_val"])
+    if not real_cal.empty:
+        cf_right = (
+            real_cal[["timestamp_utc", "surprise_val", "z_score"]]
+            .sort_values("timestamp_utc")
+            .rename(
+                columns={
+                    "timestamp_utc": "cf_timestamp_utc",
+                    "surprise_val": "surprise_val_cf",
+                    "z_score": "z_score_cf",
+                }
+            )
+        )
+        cf = pd.merge_asof(
+            df_merged.sort_values("time_published_utc"),
+            cf_right,
+            left_on="time_published_utc",
+            right_on="cf_timestamp_utc",
+            direction="backward",
+        )
+        cf["surprise_age_hours"] = (
+            cf["time_published_utc"] - cf["cf_timestamp_utc"]
+        ).dt.total_seconds() / 3600.0
+        no_event = cf["_has_event"].astype(int) == 0
+        cf.loc[no_event, "surprise_val"] = cf.loc[no_event, "surprise_val_cf"]
+        cf.loc[no_event, "z_score"] = cf.loc[no_event, "z_score_cf"]
+        df_merged = (
+            cf.drop(columns=["cf_timestamp_utc", "surprise_val_cf", "z_score_cf"])
+            .sort_values("time_published_utc")
+            .reset_index(drop=True)
+        )
+    else:
+        df_merged["surprise_age_hours"] = np.nan
+
     # 2. Extract macro topics & compute interaction features
     # ponytail: keyword regex fine for known templates; upgrade to zero-shot NLI classifier if noisy uncurated text
     text_corpus = (
@@ -117,6 +158,7 @@ def harmonize_buckets(
         "overall_sentiment_score": ["mean", "min", "max"],
         "z_score": _first_real,
         "surprise_val": _first_real,
+        "surprise_age_hours": "min",
         "event_name": _first_event,
         "_has_event": "max",
         "p0": "first",
@@ -151,12 +193,10 @@ def harmonize_buckets(
     df_grouped.columns = flat_cols
     df_b = df_grouped.reset_index()
 
-    # A bucket with no real event has no observable surprise: keep it null and
-    # flag it, rather than presenting 0.0 (which would read as "in line").
+    # A bucket with no real event keeps the *carry-forward* surprise (the last
+    # released one) plus its age, so the macro feature stays usable instead of
+    # being NaN everywhere; `has_event` distinguishes a real in-window event.
     if "_has_event" in df_b.columns:
-        no_event = df_b["_has_event"].fillna(0) == 0
-        df_b.loc[no_event, "surprise_val"] = np.nan
-        df_b.loc[no_event, "z_score"] = np.nan
         df_b["has_event"] = df_b["_has_event"].fillna(0).astype(int)
         df_b = df_b.drop(columns=["_has_event"])
 

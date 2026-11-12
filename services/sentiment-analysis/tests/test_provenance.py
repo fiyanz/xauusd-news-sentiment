@@ -139,11 +139,12 @@ def test_provenance_manifest_written():
     assert not manifest.get("is_simulated", True), "Manifest should not mark real artifacts as simulated"
 
 
-def test_real_surprise_reaches_buckets_not_zero_filled():
-    """A bucket without a real event must carry NaN, not a fabricated 0.0.
+def test_carry_forward_surprise_is_real_not_fabricated():
+    """Buckets without a real event carry the last released surprise.
 
-    This is the core anti-fabrication guard: surprise_val == 0.0 is only
-    legitimate when a real event actually printed in line.
+    Anti-fabrication guard: the carry-forward value must be a real released
+    surprise (matching an event in the calendar), not an invented 0.0, and its
+    age is reported so stale values are distinguishable from a fresh event.
     """
     df = pd.read_parquet(BUCKETED_PARQUET)
     if "has_event" not in df.columns:
@@ -153,9 +154,23 @@ def test_real_surprise_reaches_buckets_not_zero_filled():
     if no_event.empty:
         pytest.skip("All buckets carry a real event")
 
-    assert no_event["surprise_val"].isna().all(), (
-        "Buckets without a real event must have null surprise_val, not 0.0"
+    # Carry-forward: surprise is filled with the last released event's value.
+    assert no_event["surprise_val"].notna().all(), (
+        "Buckets without a real event must carry the last released surprise"
     )
-    assert no_event["z_score"].isna().all(), (
-        "Buckets without a real event must have null z_score, not 0.0"
+    assert no_event["z_score"].notna().all(), (
+        "Buckets without a real event must carry the last released z_score"
     )
+
+    # The carried value must be a real released surprise, not a fabricated 0.0.
+    cal = pd.read_csv(CALENDAR_CSV)
+    real_surprises = set(cal["surprise_val"].dropna().round(4).tolist())
+    for v in no_event["surprise_val"].dropna().tolist():
+        assert round(float(v), 4) in real_surprises, (
+            f"Carry-forward surprise {v} is not a released event value"
+        )
+
+    # Age must be reported so stale values are distinguishable.
+    if "surprise_age_hours" in no_event.columns:
+        assert no_event["surprise_age_hours"].notna().all()
+        assert (no_event["surprise_age_hours"] >= 0).all()

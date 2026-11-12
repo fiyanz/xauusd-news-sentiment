@@ -30,6 +30,18 @@ news:
     investing_com: "https://www.investing.com/rss/news_11.rss"
     gnews_gold: "https://news.google.com/rss/search?q=gold+OR+XAUUSD+OR+%22spot+gold%22+when%3A7d&hl=en-US&gl=US&ceid=US:en"
     gnews_gold_prices: "https://news.google.com/rss/search?q=%22gold+prices%22+OR+%22gold+futures%22+when%3A7d&hl=en-US&gl=US&ceid=US:en"
+  # GDELT historical news (keyless, rate-limited ~1 request / 5 detik).
+  # Menambah volume sampel dari jendela RSS ~14 hari. Bila API memblokir/rate-limit,
+  # pipeline tetap jalan dengan korpus RSS (tidak crash).
+  gdelt:
+    enabled: true
+    query: "gold futures language:eng"
+    start_date: "2025-01-01"
+    end_date: null          # null -> hari ini (UTC)
+    max_records_per_window: 250
+    window_days: 31
+    max_windows: 12         # batas jumlah jendela (rate limit)
+    delay_seconds: 6.5
 
 data:
   # Sumber eksternal (opsional). null -> pakai artifact yang sudah ada di repo,
@@ -40,6 +52,7 @@ data:
   calendar_file_complete: "data/raw/calendar/economic_calendar_enriched.csv"
   macro_file: "data/raw/macro/macro_context.csv"
   news_dir_raw: "data/raw/news"
+  news_corpus: "data/processed/news_corpus.jsonl"
   processed_dir: "data/processed"
   intraday_dir: "data/raw/price"
   provenance_file: "data/processed/provenance.json"

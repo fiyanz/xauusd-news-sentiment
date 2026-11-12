@@ -164,6 +164,7 @@ def acquire_news_sentiment(
     max_articles_per_feed: int = 60,
     lookback_days: int = 14,
     calendar_path: str | None = None,
+    corpus_path: str = "data/processed/news_corpus.jsonl",
     seed: int | None = None,  # kept for backwards-compatible signatures; unused
 ) -> list[dict]:
     """Acquire real RSS articles, score them with VADER, and persist.
@@ -243,6 +244,21 @@ def acquire_news_sentiment(
         f"[News] Saved {len(articles)} real articles to {out_path} "
         f"(status={status}, feeds={len(feed_status)})."
     )
+
+    # Append to the persistent corpus so history accumulates across runs instead
+    # of being reset every 14-day window.
+    try:
+        from src.acquire.corpus import append_articles, corpus_stats
+
+        added = append_articles(corpus_path, articles)
+        stats = corpus_stats(corpus_path)
+        print(
+            f"[News] Corpus: +{added} artikel baru "
+            f"(total {stats['articles']}, {stats['first']} .. {stats['last']})."
+        )
+    except Exception as exc:  # noqa: BLE001 - corpus is an enhancement, not a blocker
+        print(f"[News] Corpus update dilewati: {type(exc).__name__}: {exc}")
+
     return articles
 
 
@@ -274,4 +290,5 @@ if __name__ == "__main__":
         feeds=cfg.get("news", {}).get("rss_feeds", DEFAULT_RSS_FEEDS),
         max_articles_per_feed=cfg.get("news", {}).get("max_articles_per_feed", 60),
         lookback_days=cfg.get("news", {}).get("lookback_days", 14),
+        corpus_path=cfg.get("data", {}).get("news_corpus", "data/processed/news_corpus.jsonl"),
     )

@@ -88,8 +88,13 @@ price → intraday → macro → calendar → news → harmonize
   dan laporan tidak tertinggal dari data.
 - **Preprocessing fitur** (`src/features/reduce.py`): blok berkorelasi (makro,
   topik, interaksi sentimen, TF-IDF) dikompresi PCA yang difit pada data
-  training saja; waktu di-encode siklikal; TF-IDF ikut dipakai. Hasil: 25 fitur
-  dari 84 mentah, dengan explained variance per blok tercatat di bundle.
+  training saja; waktu di-encode siklikal; TF-IDF ikut dipakai.
+- **Korpus berita persisten** (`src/acquire/corpus.py`) + **GDELT historis**
+  (`src/acquire/gdelt.py`, keyless, rate-limited) menambah volume sampel; RSS
+  hanya memberi ~14 hari.
+- **Surprise carry-forward** (`src/process/bucket_harmonize.py`): fitur makro
+  tidak lagi NaN di bucket tanpa rilis — diisi surprise rilis terakhir yang
+  sudah terbit + `surprise_age_hours` (point-in-time safe).
 - Guard: bila sampel < 20 bucket, training dilewati dan model lama dipertahankan
   (tidak ada hasil yang difabrikasi).
 - `data/processed/provenance.json` mencatat sumber, `generated_at`, dan status
