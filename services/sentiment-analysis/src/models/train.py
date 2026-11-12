@@ -1,6 +1,13 @@
 """Multi-Model Training Engine (Random Forest, LightGBM, XGBoost, Ridge).
 
 Includes 5-Fold Walk-Forward Cross Validation and computes MAE, MSE, RMSE, MAPE, R2, and Adjusted R2.
+
+Feature preprocessing (``src.features.reduce``):
+- Correlated blocks (macro, topic, sentiment x topic, tfidf) are compressed with
+  PCA fitted on the training data only, so every original feature still
+  contributes through its component (no feature is dropped).
+- Time features are encoded cyclically (sin/cos).
+- TF-IDF, previously computed but unused, now enters the model via text PCs.
 """
 
 import os
@@ -17,6 +24,8 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import TimeSeriesSplit
 import xgboost as xgb
 import yaml
+
+from src.features.reduce import FeatureReducer
 
 
 def load_config() -> dict:
@@ -108,32 +117,8 @@ def train_models(
 
     print(f"[Train] Training on Train+Val partition: {len(train_val_df)} samples (strictly chronological).")
 
-    macro_cols = [c for c in df.columns if c.startswith("macro_")]
-    base_cols = [
-        "z_score",
-        "surprise_val",
-        "has_event",
-        "hour_utc",
-        "dayofweek",
-        "session_Asia",
-        "session_London",
-        "session_NewYork",
-    ] + macro_cols
-    topic_cols = [c for c in df.columns if c.startswith("topic_") and not c.endswith("_x_sentiment")]
-    inter_cols = [c for c in df.columns if c.startswith("sentiment_x_")]
-    full_cols = base_cols + ["sentiment_score"] + topic_cols + inter_cols
-
-    # Missing feature values (e.g. surprise NaN when no macro release overlaps
-    # the news window) are imputed with 0.0 — the neutral encoding for
-    # "no event" — and the imputation count is recorded in the bundle so the
-    # report can disclose it. NaN is never silently dropped.
-    feature_nan_imputed = int(train_val_df[full_cols].isna().sum().sum())
-    train_val_df = train_val_df.copy()
-    train_val_df[full_cols] = train_val_df[full_cols].fillna(0.0)
-
-    X_train = train_val_df[full_cols].values
-    y_train = train_val_df[target_col].values
-    vol_train = train_val_df["vol_pre"].values
+    y_all = train_val_df[target_col].values
+    vol_all = train_val_df["vol_pre"].values
 
     models = {
         "Random_Forest": RandomForestRegressor(
@@ -161,20 +146,25 @@ def train_models(
         "Ridge_Linear": Ridge(alpha=10.0, random_state=seed),
     }
 
-    # Walk-Forward Cross Validation
+    # Walk-Forward Cross Validation. The reducer (scaler + PCA) is refit on each
+    # fold's training portion only, so validation/test rows never influence the
+    # component basis (anti look-ahead).
     tscv = TimeSeriesSplit(n_splits=n_splits)
     cv_scores = {name: [] for name in models}
 
-    print(f"\n--- Running 5-Fold Walk-Forward Cross Validation ---")
-    for tr_idx, val_idx in tscv.split(X_train):
-        y_tr, y_va = y_train[tr_idx], y_train[val_idx]
-        vol_va = vol_train[val_idx]
+    print(f"\n--- Running {n_splits}-Fold Walk-Forward Cross Validation ---")
+    for tr_idx, val_idx in tscv.split(train_val_df):
+        fold_reducer = FeatureReducer().fit(train_val_df.iloc[tr_idx])
+        X_tr = fold_reducer.transform(train_val_df.iloc[tr_idx]).to_numpy(dtype=float)
+        X_va = fold_reducer.transform(train_val_df.iloc[val_idx]).to_numpy(dtype=float)
+        y_tr, y_va = y_all[tr_idx], y_all[val_idx]
+        vol_va = vol_all[val_idx]
 
         for name, estimator in models.items():
             m = clone(estimator)
-            m.fit(X_train[tr_idx], y_tr)
-            p_va = m.predict(X_train[val_idx])
-            metrics = compute_regression_metrics(y_va, p_va, len(full_cols), vol_va)
+            m.fit(X_tr, y_tr)
+            p_va = m.predict(X_va)
+            metrics = compute_regression_metrics(y_va, p_va, len(fold_reducer.feature_cols), vol_va)
             cv_scores[name].append(metrics)
 
     cv_summary = {}
@@ -199,11 +189,15 @@ def train_models(
         }
         print(f"{name:18s} | {avg_mae:.4f}%    | {avg_rmse:.4f}%   | {avg_r2:+.4f} | {avg_adj_r2:+.4f}  | {avg_hit_sig:.2f}%    | {avg_ic:+.4f}")
 
+    # Final reducer fitted on Train+Val; all production models use it.
+    reducer = FeatureReducer().fit(train_val_df)
+    X_train = reducer.transform(train_val_df).to_numpy(dtype=float)
+
     # Retrain on full Train+Val set
     trained_models = {}
     for name, estimator in models.items():
         m = clone(estimator)
-        m.fit(X_train, y_train)
+        m.fit(X_train, y_all)
         trained_models[name] = m
 
     # Champion is selected by cross-validation, never hardcoded.
@@ -211,11 +205,18 @@ def train_models(
     selection_method = f"cv_mean_{selection_metric}"
 
     # Fair baseline: best model that is NOT the champion, trained on the
-    # baseline (macro-only) feature set so the comparison stays honest.
+    # baseline (event + macro block) feature set so the comparison stays honest.
     baseline_candidates = [name for name in cv_summary if name != champion_name]
     baseline_name = max(baseline_candidates, key=lambda n: cv_summary[n]["rank_ic"])
+    baseline_cols = reducer.base_cols + reducer.block_columns("macro")
     baseline_model = clone(models[baseline_name])
-    baseline_model.fit(train_val_df[base_cols].values, y_train)
+    baseline_model.fit(reducer.transform(train_val_df)[baseline_cols].to_numpy(dtype=float), y_all)
+
+    # Missing raw feature values (e.g. surprise NaN when no macro release overlaps
+    # the news window) are imputed with 0.0 by the reducer — the neutral encoding
+    # for "no event" — and the imputation count is recorded in the bundle.
+    raw_cols = [c for c in reducer.raw_columns() if c in train_val_df.columns]
+    feature_nan_imputed = int(train_val_df[raw_cols].isna().sum().sum())
 
     champion_bundle = {
         "champion_name": champion_name,
@@ -223,11 +224,14 @@ def train_models(
         "selection_metric": selection_metric,
         "champion_model": trained_models[champion_name],
         "model": trained_models[champion_name],
-        "champion_feature_cols": full_cols,
-        "feature_cols": full_cols,
+        "champion_feature_cols": reducer.feature_cols,
+        "feature_cols": reducer.feature_cols,
+        "reducer": reducer,
+        "block_explained_variance": reducer.explained_variance(),
+        "raw_feature_count": len(raw_cols),
         "baseline_name": baseline_name,
         "baseline_model": baseline_model,
-        "baseline_feature_cols": base_cols,
+        "baseline_feature_cols": baseline_cols,
         "target_col": target_col,
         "trained_models": trained_models,
         "cv_summary": cv_summary,
@@ -238,7 +242,9 @@ def train_models(
     champion_path = os.path.join(output_model_dir, "champion_fair_model.joblib")
     joblib.dump(champion_bundle, champion_path)
     print(f"\n[Train] Champion ({selection_method}): {champion_name}")
-    print(f"[Train] Fair baseline: {baseline_name} (trained on {len(base_cols)} baseline features)")
+    print(f"[Train] Fitur: {len(reducer.feature_cols)} dari {len(raw_cols)} mentah "
+          f"(PCA blok: {reducer.explained_variance()})")
+    print(f"[Train] Fair baseline: {baseline_name} (trained on {len(baseline_cols)} baseline features)")
     print(f"[Train] Champion model saved to: {champion_path}")
 
     return cv_summary

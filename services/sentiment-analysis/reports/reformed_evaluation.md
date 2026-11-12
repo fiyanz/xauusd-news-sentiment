@@ -3,7 +3,7 @@
 ## 1. Ringkasan Pengujian
 - **Target Variabel**: Return Kontinu 4 Jam ($R_{4\text{H}}$).
 - **Ukuran Set Uji (Out-of-Time Test Set)**: $N = 9$ sampel (periode diisolasi dengan 24H Embargo).
-- **Jumlah Fitur ($p$)**: 32 fitur (Makro Point-in-Time, Kalender Surprise, Sentimen Teks, & Interaksi Topik).
+- **Jumlah Fitur ($p$)**: 25 fitur (Makro Point-in-Time, Kalender Surprise, Sentimen Teks, & Interaksi Topik).
 - **Champion**: `Random_Forest` (dipilih by `cv_mean_rank_ic`, bukan hardcode).
 
 ---
@@ -13,9 +13,9 @@
 | Algoritma Model | MAE (%) | MSE ($10^{-4}$) | RMSE (%) | MAPE (%) | $R^2$ Score | Adjusted $R^2$ | Hit Ratio Sig ($|R|>0.5\sigma$) | Hit Ratio All | Rank IC |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Random_Forest (Champion)** | 0.3764% | 0.2366 | 0.4864% | 297.72% | -0.0000 | -0.0000 | 57.14% | 55.56% | +0.0000 |
-| XGBoost | 0.4403% | 0.3022 | 0.5497% | 227.75% | -0.2773 | -0.2773 | 42.86% | 33.33% | -0.4667 |
+| XGBoost | 0.4650% | 0.3609 | 0.6008% | 372.58% | -0.5256 | -0.5256 | 42.86% | 44.44% | -0.7667 |
 | LightGBM | 0.3781% | 0.2368 | 0.4866% | 320.98% | -0.0010 | -0.0010 | 57.14% | 55.56% | +0.0000 |
-| Ridge_Linear | 0.8559% | 0.9983 | 0.9992% | 874.63% | -3.2197 | -3.2197 | 42.86% | 33.33% | +0.0333 |
+| Ridge_Linear | 1.7881% | 5.7896 | 2.4062% | 7108.42% | -23.4721 | -23.4721 | 57.14% | 55.56% | -0.0833 |
 
 ---
 
@@ -25,7 +25,7 @@
 | **Random_Forest** | 60.00% | **57.14%** | **2.86%** | Rendah (Generalisasi Kuat) |
 | **XGBoost** | 85.00% | **42.86%** | **42.14%** | Moderat |
 | **LightGBM** | 60.00% | **57.14%** | **2.86%** | Moderat |
-| **Ridge_Linear** | 55.00% | **42.86%** | **12.14%** | Moderat |
+| **Ridge_Linear** | 75.00% | **57.14%** | **17.86%** | Moderat |
 
 ---
 

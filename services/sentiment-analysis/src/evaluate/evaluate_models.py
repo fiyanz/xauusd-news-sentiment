@@ -28,6 +28,7 @@ from src.evaluate.significance import (
     sentiment_adds_value_from_pvalues,
     wilson_ci,
 )
+from src.features.reduce import apply_bundle_features
 
 
 def load_config() -> dict:
@@ -151,10 +152,10 @@ def evaluate_models(
     bundle_champion = bundle.get("champion_name")
     selection_method = bundle.get("selection_method", "cv_mean_rank_ic")
 
-    X_train = train_df[feature_cols].fillna(0.0).values
+    X_train = apply_bundle_features(bundle, train_df).to_numpy(dtype=float)
     y_train = train_df[target_col].values
 
-    X_test = test_df[feature_cols].fillna(0.0).values
+    X_test = apply_bundle_features(bundle, test_df).to_numpy(dtype=float)
     y_test = test_df[target_col].values
     vol_test = test_df["vol_pre"].values
     sig_mask = np.abs(y_test) > (0.5 * vol_test)

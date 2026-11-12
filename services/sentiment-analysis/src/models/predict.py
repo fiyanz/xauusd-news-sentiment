@@ -38,9 +38,15 @@ def generate_live_prediction(
     feature_cols = bundle["champion_feature_cols"]
     champion_name = bundle.get("champion_name", "Random_Forest")
 
-    # Extract feature vector. NaN (e.g. no macro event in the news window) is
-    # imputed with 0.0 — the same neutral encoding used during training.
-    X_live = latest_row[feature_cols].fillna(0.0).values.reshape(1, -1).astype(float)
+    # Extract feature vector. The fitted reducer (scaler + PCA per block) is
+    # applied so the live row matches the training representation; NaN (e.g. no
+    # macro event in the news window) is imputed with 0.0 — the same neutral
+    # encoding used during training.
+    reducer = bundle.get("reducer")
+    if reducer is not None:
+        X_live = reducer.transform_row(latest_row)
+    else:
+        X_live = latest_row[feature_cols].fillna(0.0).values.reshape(1, -1).astype(float)
     pred_return_4h = float(model.predict(X_live)[0])
 
     # Convert to expected target price and pips

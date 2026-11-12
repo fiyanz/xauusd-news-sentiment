@@ -24,6 +24,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import binomtest, norm, spearmanr
 
+from src.features.reduce import apply_bundle_features
+
 SIGNIFICANCE_BASIS = "rank_ic_pvalue < 0.05 or hit_ratio_pvalue < 0.05"
 DEFAULT_PROVENANCE_PATH = "data/processed/provenance.json"
 DEFAULT_OUTPUT_PATH = "reports/significance.json"
@@ -308,7 +310,7 @@ def _model_test_metrics(test_df: pd.DataFrame, bundle: dict, name: str) -> dict:
         return {}
     feature_cols = bundle["champion_feature_cols"]
     try:
-        X = test_df[feature_cols].fillna(0.0).values
+        X = apply_bundle_features(bundle, test_df).to_numpy(dtype=float)
         preds = model.predict(X)
     except Exception as exc:  # noqa: BLE001 - report the gap, don't crash
         return {"error": f"{type(exc).__name__}: {exc}"}
@@ -366,7 +368,7 @@ def build_significance_report(
         model = bundle["champion_model"]
 
     feature_cols = bundle["champion_feature_cols"]
-    X_test = test_df[feature_cols].fillna(0.0).values
+    X_test = apply_bundle_features(bundle, test_df).to_numpy(dtype=float)
     y_test = test_df[bundle["target_col"]].values
     vol_test = test_df["vol_pre"].values
     try:

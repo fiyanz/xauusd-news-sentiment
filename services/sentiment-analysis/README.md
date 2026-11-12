@@ -37,6 +37,7 @@ src/pipeline/sync.py
 | `src/process/harmonize.py` | merge_asof backward, return/label |
 | `src/process/bucket_harmonize.py` | 4H bucket, topik, interaksi, split+embargo |
 | `src/features/build_features.py` | TF-IDF + split + provenance |
+| `src/features/reduce.py` | Preprocessing: PCA per blok berkorelasi + encoding waktu siklikal (TF-IDF ikut dipakai) |
 | `src/models/train.py` | 4 model, CV, champion by CV |
 | `src/models/predict.py` | Prediksi 4H live |
 | `src/evaluate/significance.py` | p-value, Wilson CI, Pesaran-Timmermann |
@@ -44,6 +45,19 @@ src/pipeline/sync.py
 | `src/evaluate/evaluate_models.py` | Metrik lengkap + laporan markdown |
 
 ## 3. Menjalankan
+
+### Preprocessing & reduksi fitur
+
+`src/features/reduce.py`:
+- Blok berkorelasi (`macro_*`, `topic_*`, `sentiment_x_*`, `tfidf_*`) dikompresi
+  PCA (90% varians, maks 2-3 komponen per blok), **difit pada data training
+  saja** (anti look-ahead) — semua fitur asli tetap berkontribusi lewat
+  komponennya, tidak ada yang dibuang.
+- Fitur waktu di-encode siklikal (`hour_sin/cos`, `dow_sin/cos`).
+- TF-IDF (50 kolom) yang dulu dihitung tapi menganggur kini masuk lewat
+  `tfidf_pc1..3`.
+- Hasil: 25 fitur dari 84 mentah; `block_explained_variance` tersimpan di bundle.
+- Baseline pembanding memakai fitur event + komponen makro saja.
 
 ```bash
 uv sync

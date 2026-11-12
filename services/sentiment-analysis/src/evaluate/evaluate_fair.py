@@ -17,6 +17,7 @@ from src.evaluate.significance import (
     sentiment_adds_value_from_pvalues,
     wilson_ci,
 )
+from src.features.reduce import apply_bundle_features
 
 
 def load_config() -> dict:
@@ -55,9 +56,11 @@ def evaluate_fair_test(
         ("full", bundle["champion_name"], bundle["champion_model"], bundle["champion_feature_cols"]),
     ]
 
+    X_all = apply_bundle_features(bundle, test_df)
+
     for model_key, name, model, cols in models_to_test:
 
-        X_test = test_df[cols].fillna(0.0).values
+        X_test = X_all[cols].to_numpy(dtype=float)
         preds = model.predict(X_test)
 
         # 1. Spearman Rank IC

@@ -86,6 +86,10 @@ price → intraday → macro → calendar → news → harmonize
 - **Retrain stage** (`src/pipeline/retrain.py`) menjalankan `train → significance
   → eval fair → eval models → predict` di atas artifact terbaru, sehingga model
   dan laporan tidak tertinggal dari data.
+- **Preprocessing fitur** (`src/features/reduce.py`): blok berkorelasi (makro,
+  topik, interaksi sentimen, TF-IDF) dikompresi PCA yang difit pada data
+  training saja; waktu di-encode siklikal; TF-IDF ikut dipakai. Hasil: 25 fitur
+  dari 84 mentah, dengan explained variance per blok tercatat di bundle.
 - Guard: bila sampel < 20 bucket, training dilewati dan model lama dipertahankan
   (tidak ada hasil yang difabrikasi).
 - `data/processed/provenance.json` mencatat sumber, `generated_at`, dan status
