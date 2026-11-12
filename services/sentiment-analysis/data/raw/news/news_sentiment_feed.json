@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "status_reason": null,
-  "generated_at": "2026-11-12 03:26:22+00:00",
+  "generated_at": "2026-11-12 04:02:43+00:00",
   "sentiment_method": "vader",
   "feeds": {
     "cnbc_markets": "ok:30",
@@ -14,7 +14,7 @@
     "gnews_gold": "ok:60",
     "gnews_gold_prices": "ok:60"
   },
-  "article_count": 279,
+  "article_count": 278,
   "articles": [
     {
       "id": "cb20f766ff107132",
@@ -833,25 +833,6 @@
       "related_event": null
     },
     {
-      "id": "fda0dabe88ddf2df",
-      "title": "Gold futures pull back as strong U.S. payrolls report boosts dollar, yields - TradingView",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMi0gFBVV95cUxQTndsUE1tOGJTWUNmU0ZWZE9rTmN2alVBZGpnRTFpQk1lZTZXbVU1U2FOdzZLRENXMmhiazlNVEthb2xWdjBXNndMWWlJR1pwYUFIMVVNaklHY2cxNGNUNkhSZ2VBRDUyTG10dnVWNlBicEQwTTBLdGQ5d2VjNllCRGI4RHNNN2dKcmtqRzI0X25uVG5LWDRWU0VUTDBVZG9TZVFEa3NXcldDdXNpdDhQOFRxcTVLYzd0b09IRGZWVXBTWmpWeXJJYXFpUXdHdUpfSVE?oc=5\" target=\"_blank\">Gold futures pull back as strong U.S. payrolls report boosts dollar, yields</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">TradingView</font>",
-      "time_published_utc": "2026-11-06 22:45:20+00:00",
-      "overall_sentiment_score": 0.8807,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "economy_macro",
-        "commodities",
-        "forex"
-      ],
-      "url": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxQTndsUE1tOGJTWUNmU0ZWZE9rTmN2alVBZGpnRTFpQk1lZTZXbVU1U2FOdzZLRENXMmhiazlNVEthb2xWdjBXNndMWWlJR1pwYUFIMVVNaklHY2cxNGNUNkhSZ2VBRDUyTG10dnVWNlBicEQwTTBLdGQ5d2VjNllCRGI4RHNNN2dKcmtqRzI0X25uVG5LWDRWU0VUTDBVZG9TZVFEa3NXcldDdXNpdDhQOFRxcTVLYzd0b09IRGZWVXBTWmpWeXJJYXFpUXdHdUpfSVE?oc=5",
-      "source_feed": "gnews_gold_prices",
-      "source_url": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxQTndsUE1tOGJTWUNmU0ZWZE9rTmN2alVBZGpnRTFpQk1lZTZXbVU1U2FOdzZLRENXMmhiazlNVEthb2xWdjBXNndMWWlJR1pwYUFIMVVNaklHY2cxNGNUNkhSZ2VBRDUyTG10dnVWNlBicEQwTTBLdGQ5d2VjNllCRGI4RHNNN2dKcmtqRzI0X25uVG5LWDRWU0VUTDBVZG9TZVFEa3NXcldDdXNpdDhQOFRxcTVLYzd0b09IRGZWVXBTWmpWeXJJYXFpUXdHdUpfSVE?oc=5",
-      "publisher": "TradingView",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
       "id": "140c6a4ca497acc7",
       "title": "Gold (Glove) carpet rolls out for Mattingly, Turang, Winfield at MLB NYC flagship store - MLB.com",
       "summary": "<a href=\"https://news.google.com/rss/articles/CBMiqAFBVV95cUxOYmZoMlI2ZVR2MnRFQ1JULWFlT2pRZ0lsdTBSNlEtdkgxTjUwTUlKeWhMT0lYWEVFUUVLVnQwTzdjQ0JwU1BOcXp2enQ5TWpXZnl1Z09wY25xT1k1bHo4RnNkbGRSQ1k2c1NQb2tCekxrLVNidmpObmZsMGp3cGhnVGVJaDRSWHF3ZDE1LWdmcnl5QW1GakgzWGpKOTYwZ21PdS1ZaFhFWGfSAbQBQVVfeXFMUHlQUktMQThfVnNBZGpLZWliZ3NqbzQyc0ZlN2FYZUNjY1VHQ3BnRjc3Qkl3YmNZMFU4QTBMQ2hLMUFad09pSUdSWGlIS01JeWpsVUNndzBkTU5oQnZ6WW9LN2xvd3otX0tGcHoyb1J6d3dCV2NPRVFlV05icnNoVVZ6RExmX2hpR2hBOW1idEdqdGh3WkNyd3EzSkp1RDU1U3NfM3VNaGg5TDZNX2FiUklFZzZY?oc=5\" target=\"_blank\">Gold (Glove) carpet rolls out for Mattingly, Turang, Winfield at MLB NYC flagship store</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">MLB.com</font>",
@@ -1297,6 +1278,24 @@
       "related_event": null
     },
     {
+      "id": "a0b8072ef37566c1",
+      "title": "Harmony Gold Gets Boost from Higher Gold Prices - marketscreener.com",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMiogFBVV95cUxQclVhaUdOVUk1X0ZrX1JJWjliMXZSbzhPSUltbWZRdHdKQ3NIU2R0VndvTEI1VnRINFQydkRudmExdFdVNlM4eXhTMUtfVUQ3eHRGV0JITnQwZXVHaVY5NjEtdmpJcGtrRHRlVXJxMS1rRGw5M3J5NVN3SjdSX0p5SE1xN1VqdGxKOGJqZDZNVzBjcVNWRzJuelFITVJjNGlBSGc?oc=5\" target=\"_blank\">Harmony Gold Gets Boost from Higher Gold Prices</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">marketscreener.com</font>",
+      "time_published_utc": "2026-11-09 15:15:16+00:00",
+      "overall_sentiment_score": 0.7964,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "financial_markets",
+        "commodities"
+      ],
+      "url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxQclVhaUdOVUk1X0ZrX1JJWjliMXZSbzhPSUltbWZRdHdKQ3NIU2R0VndvTEI1VnRINFQydkRudmExdFdVNlM4eXhTMUtfVUQ3eHRGV0JITnQwZXVHaVY5NjEtdmpJcGtrRHRlVXJxMS1rRGw5M3J5NVN3SjdSX0p5SE1xN1VqdGxKOGJqZDZNVzBjcVNWRzJuelFITVJjNGlBSGc?oc=5",
+      "source_feed": "gnews_gold_prices",
+      "source_url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxQclVhaUdOVUk1X0ZrX1JJWjliMXZSbzhPSUltbWZRdHdKQ3NIU2R0VndvTEI1VnRINFQydkRudmExdFdVNlM4eXhTMUtfVUQ3eHRGV0JITnQwZXVHaVY5NjEtdmpJcGtrRHRlVXJxMS1rRGw5M3J5NVN3SjdSX0p5SE1xN1VqdGxKOGJqZDZNVzBjcVNWRzJuelFITVJjNGlBSGc?oc=5",
+      "publisher": "marketscreener.com",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
       "id": "7355d260c137c755",
       "title": "London's FTSE 100 climbs over 1% as firmer gold prices boost miners - Reuters",
       "summary": "<a href=\"https://news.google.com/rss/articles/CBMipAFBVV95cUxPTS1VbXpNM1ZmZ25GUlRCcng4aFVvbG91N2diSWpkMjZ4ZjdRQmR2RnpZaGo5b3ZkVXotUVVjS2Vtc3p1TERVZTZZLUdhRXlQYXBvMVdQX3hlVDZXM3ZUdkxFWWFkaXRra0pyQ1BPWm9xSGxnYVVCQkJYNVkyT0ZzR2VTckhDVm1mZld0ZHVKR1ZucU05NWcxalk0NGN5b1RFeUdaMQ?oc=5\" target=\"_blank\">London's FTSE 100 climbs over 1% as firmer gold prices boost miners</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Reuters</font>",
@@ -1448,23 +1447,6 @@
       "source_feed": "wsj_markets",
       "source_url": "https://www.wsj.com/finance/currencies/new-zealand-dollar-climbs-as-traders-await-election-result-033c6116?mod=rss_markets_main",
       "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "b107924bb6c795f7",
-      "title": "Last Time Out: USMNT Defeats Haiti in Concacaf Gold Cup - US Soccer",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMipAFBVV95cUxOVmF6OG5qOFNyQ3R6SWp5RFg0WDVrM3Z4c3hRN3ZYdTVtV1lSM0lnN2Z1eGNuc2NBX1VMTURwci0zTVZVblFoVXdNaWJZdEtmUkRxeko3ZEFVR0luT24xYmlqd2hBYTJsSk9wcFU4Y3FZZmtHQmR4d0ZfUmRvbjNpcWF2bnJuNTdYeWxUdVQ3ajlQVFZ6T21nTjFSRmV0dDJYZlQ1UQ?oc=5\" target=\"_blank\">Last Time Out: USMNT Defeats Haiti in Concacaf Gold Cup</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">US Soccer</font>",
-      "time_published_utc": "2026-11-09 22:48:58+00:00",
-      "overall_sentiment_score": -0.5574,
-      "overall_sentiment_label": "Bearish",
-      "topics": [
-        "commodities"
-      ],
-      "url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOVmF6OG5qOFNyQ3R6SWp5RFg0WDVrM3Z4c3hRN3ZYdTVtV1lSM0lnN2Z1eGNuc2NBX1VMTURwci0zTVZVblFoVXdNaWJZdEtmUkRxeko3ZEFVR0luT24xYmlqd2hBYTJsSk9wcFU4Y3FZZmtHQmR4d0ZfUmRvbjNpcWF2bnJuNTdYeWxUdVQ3ajlQVFZ6T21nTjFSRmV0dDJYZlQ1UQ?oc=5",
-      "source_feed": "gnews_gold",
-      "source_url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOVmF6OG5qOFNyQ3R6SWp5RFg0WDVrM3Z4c3hRN3ZYdTVtV1lSM0lnN2Z1eGNuc2NBX1VMTURwci0zTVZVblFoVXdNaWJZdEtmUkRxeko3ZEFVR0luT24xYmlqd2hBYTJsSk9wcFU4Y3FZZmtHQmR4d0ZfUmRvbjNpcWF2bnJuNTdYeWxUdVQ3ajlQVFZ6T21nTjFSRmV0dDJYZlQ1UQ?oc=5",
-      "publisher": "US Soccer",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -2772,24 +2754,6 @@
       "related_event": null
     },
     {
-      "id": "6aff89dd69dbe62f",
-      "title": "Gold challenges the Fed's hawkish rate outlook - Saxo",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMiqAFBVV95cUxPWXJKME5YVndXbWhYTkJVTWpYWDRqWlFrV0wtdFJFcU1qSWIzWmpvdC1IWHUzTVdtaFVDd0hOejB4alc4QlFFSld3bmdxckltQXppWGZFWUZ0OHc3c3lmUVkwNHdXQWFqcS1KNDBha2E5WjFFZUpMMGVQenpnNW1Gb0dQMC1yTlBTYXhVU1lsOG82emI1WnN1N0lEaUdUVjU2MU5ZWWtwS3I?oc=5\" target=\"_blank\">Gold challenges the Fed's hawkish rate outlook</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Saxo</font>",
-      "time_published_utc": "2026-11-11 10:00:00+00:00",
-      "overall_sentiment_score": 0.1531,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "economy_monetary",
-        "commodities"
-      ],
-      "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxPWXJKME5YVndXbWhYTkJVTWpYWDRqWlFrV0wtdFJFcU1qSWIzWmpvdC1IWHUzTVdtaFVDd0hOejB4alc4QlFFSld3bmdxckltQXppWGZFWUZ0OHc3c3lmUVkwNHdXQWFqcS1KNDBha2E5WjFFZUpMMGVQenpnNW1Gb0dQMC1yTlBTYXhVU1lsOG82emI1WnN1N0lEaUdUVjU2MU5ZWWtwS3I?oc=5",
-      "source_feed": "gnews_gold",
-      "source_url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxPWXJKME5YVndXbWhYTkJVTWpYWDRqWlFrV0wtdFJFcU1qSWIzWmpvdC1IWHUzTVdtaFVDd0hOejB4alc4QlFFSld3bmdxckltQXppWGZFWUZ0OHc3c3lmUVkwNHdXQWFqcS1KNDBha2E5WjFFZUpMMGVQenpnNW1Gb0dQMC1yTlBTYXhVU1lsOG82emI1WnN1N0lEaUdUVjU2MU5ZWWtwS3I?oc=5",
-      "publisher": "Saxo",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
       "id": "7f9d7cdfe8f92283",
       "title": "How Much Does a Hawkish Fed Hurt Gold? - Robin J Brooks | Substack",
       "summary": "<a href=\"https://news.google.com/rss/articles/CBMid0FVX3lxTE5FSTB2TF81a1EzdU5ET3BjdmgxeVcyVUNXb0JvQkZpZGE5RTVjZmQzeFN1bmhyYlhodWNOZVJ3S24zY1hpcEZBVmNQT1hVd3p1QzFoVmd3YTlOdjcySmRJS2RjZzYzWHlELTJ3aGpFY0VadUY2NHlr?oc=5\" target=\"_blank\">How Much Does a Hawkish Fed Hurt Gold?</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Robin J Brooks | Substack</font>",
@@ -2958,8 +2922,25 @@
         "commodities"
       ],
       "url": "https://news.google.com/rss/articles/CBMigAJBVV95cUxPa2ZWdnE1NlJaSFUzNWdvMnF5NXpwQzlKUFZ5MUczdFU1ZTNGZkRlRzNoUTFweTZ1aEVRVzR1cHEwWjJ4VS10R2dQYWJiaXk4a2F5UDZFLU1PX2JINGh0dnNBQ0Z1a1I4WXRiTTV5dFhPRWZaR1YxYWxJYzdoVTNCS0dWQ3pjZmJfMmlyX0ZFMk1rNXZEeGxRdWVXWlZmelR0RDA1WGtrbjZRU1FJMmMzaTI3cnJYaXBDVjF5cHJwNjZtTTY2dkpoLWprT2dOb1RENGhld3RBSjE4TU95YWNReGczOWZmYmxYLUc5cWlNQVVmOE9DRXJHRWJIbnpUa3Et?oc=5",
-      "source_feed": "gnews_gold_prices",
+      "source_feed": "gnews_gold",
       "source_url": "https://news.google.com/rss/articles/CBMigAJBVV95cUxPa2ZWdnE1NlJaSFUzNWdvMnF5NXpwQzlKUFZ5MUczdFU1ZTNGZkRlRzNoUTFweTZ1aEVRVzR1cHEwWjJ4VS10R2dQYWJiaXk4a2F5UDZFLU1PX2JINGh0dnNBQ0Z1a1I4WXRiTTV5dFhPRWZaR1YxYWxJYzdoVTNCS0dWQ3pjZmJfMmlyX0ZFMk1rNXZEeGxRdWVXWlZmelR0RDA1WGtrbjZRU1FJMmMzaTI3cnJYaXBDVjF5cHJwNjZtTTY2dkpoLWprT2dOb1RENGhld3RBSjE4TU95YWNReGczOWZmYmxYLUc5cWlNQVVmOE9DRXJHRWJIbnpUa3Et?oc=5",
+      "publisher": "Yahoo Finance",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "6532758934a13049",
+      "title": "META_TITLE_QUOTE - Yahoo Finance",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMiUEFVX3lxTE9LRXk3WmZ5Y1MwZVR2TUhJNEJYakk2Z3ZPbHkyWklVNkdJTnB3bjBpb0ctRzhrUzNhUmstaFJfUkJ0SVZ3VmRGTVJGS3F3aG95?oc=5\" target=\"_blank\">META_TITLE_QUOTE</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Yahoo Finance</font>",
+      "time_published_utc": "2026-11-11 12:17:25+00:00",
+      "overall_sentiment_score": 0.0,
+      "overall_sentiment_label": "Neutral",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE9LRXk3WmZ5Y1MwZVR2TUhJNEJYakk2Z3ZPbHkyWklVNkdJTnB3bjBpb0ctRzhrUzNhUmstaFJfUkJ0SVZ3VmRGTVJGS3F3aG95?oc=5",
+      "source_feed": "gnews_gold",
+      "source_url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE9LRXk3WmZ5Y1MwZVR2TUhJNEJYakk2Z3ZPbHkyWklVNkdJTnB3bjBpb0ctRzhrUzNhUmstaFJfUkJ0SVZ3VmRGTVJGS3F3aG95?oc=5",
       "publisher": "Yahoo Finance",
       "sentiment_method": "vader",
       "related_event": null
@@ -3050,36 +3031,19 @@
       "related_event": null
     },
     {
-      "id": "834f96244ed1bfc7",
-      "title": "Cabral Gold Nears Commercial Production, Cash Flow to Fund Phase 2 Study - Crux Investor",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMiqgFBVV95cUxQY1pjVVdxdUxydVd5RnM0dG5JcnRmeG83WDFQcUtlczJyV0JyM05taXhlSkY1U1NYRkZQbV9xNmt2ck5xM2N0bGlSOXN5WEVoU0o2YTZBNWpwNGtsN3FoMnZCYXNXZ0R3MmJQNThBcUljakUtUnp0S0NPdFQ4Qy1kWXZWazVfeko2a2dHOXJIamF4cnFUdHZaU2xNOVdnTUFxU2FRdFc0S2hCZw?oc=5\" target=\"_blank\">Cabral Gold Nears Commercial Production, Cash Flow to Fund Phase 2 Study</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Crux Investor</font>",
-      "time_published_utc": "2026-11-11 13:02:48+00:00",
-      "overall_sentiment_score": 0.0,
-      "overall_sentiment_label": "Neutral",
-      "topics": [
-        "commodities"
-      ],
-      "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxQY1pjVVdxdUxydVd5RnM0dG5JcnRmeG83WDFQcUtlczJyV0JyM05taXhlSkY1U1NYRkZQbV9xNmt2ck5xM2N0bGlSOXN5WEVoU0o2YTZBNWpwNGtsN3FoMnZCYXNXZ0R3MmJQNThBcUljakUtUnp0S0NPdFQ4Qy1kWXZWazVfeko2a2dHOXJIamF4cnFUdHZaU2xNOVdnTUFxU2FRdFc0S2hCZw?oc=5",
-      "source_feed": "gnews_gold",
-      "source_url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxQY1pjVVdxdUxydVd5RnM0dG5JcnRmeG83WDFQcUtlczJyV0JyM05taXhlSkY1U1NYRkZQbV9xNmt2ck5xM2N0bGlSOXN5WEVoU0o2YTZBNWpwNGtsN3FoMnZCYXNXZ0R3MmJQNThBcUljakUtUnp0S0NPdFQ4Qy1kWXZWazVfeko2a2dHOXJIamF4cnFUdHZaU2xNOVdnTUFxU2FRdFc0S2hCZw?oc=5",
-      "publisher": "Crux Investor",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "e53c40aa1354ad9b",
-      "title": "Woman loses more than $400K of retirement savings to gold courier scam - www.investigatetv.com",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMiqAFBVV95cUxOVDY5ZTVTU0oyTXk2YlRyTXhVRUQ0enFTenhORFVUSWVISlhtcVk3VFctNnNZZmpoc0UxRm53THVVWVA0akozajdYclJfWjQ3REFTdkgtSzdXMWJwQVJwZVhYY1JtcENmNkdDNW1WSmU1TDNrUWRvT0FraXF6bVIxYzk5M2QxaTRCSkFGb2RmSnJ5ME1Bc0NGVFlrQ3liX1B0N3hmb0tZa24?oc=5\" target=\"_blank\">Woman loses more than $400K of retirement savings to gold courier scam</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">www.investigatetv.com</font>",
+      "id": "a333ef25baca8419",
+      "title": "Woman loses more than $400K of retirement savings to gold courier scam - KCBD",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMinAFBVV95cUxNUl92dUsweU5TVzBFVmtUYUF2RmNpQ3pLV3M1U0FXcURIcWJjUG1KcV85NnpOOEhYQU50MlhWVTF3X0FrN3gzZWh3UUkxbElTdlJ0NlhTbHlzSGVEOWhkanlLSkhELXdQRThBX2YwY0RlcDZqYUtXb3pRRVBsZ0prT0R3TUxTUVpJZ1pnQVUyWS1vTnVFRkdkb2Jjc3U?oc=5\" target=\"_blank\">Woman loses more than $400K of retirement savings to gold courier scam</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">KCBD</font>",
       "time_published_utc": "2026-11-11 13:05:00+00:00",
       "overall_sentiment_score": -0.8074,
       "overall_sentiment_label": "Bearish",
       "topics": [
         "commodities"
       ],
-      "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOVDY5ZTVTU0oyTXk2YlRyTXhVRUQ0enFTenhORFVUSWVISlhtcVk3VFctNnNZZmpoc0UxRm53THVVWVA0akozajdYclJfWjQ3REFTdkgtSzdXMWJwQVJwZVhYY1JtcENmNkdDNW1WSmU1TDNrUWRvT0FraXF6bVIxYzk5M2QxaTRCSkFGb2RmSnJ5ME1Bc0NGVFlrQ3liX1B0N3hmb0tZa24?oc=5",
+      "url": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNUl92dUsweU5TVzBFVmtUYUF2RmNpQ3pLV3M1U0FXcURIcWJjUG1KcV85NnpOOEhYQU50MlhWVTF3X0FrN3gzZWh3UUkxbElTdlJ0NlhTbHlzSGVEOWhkanlLSkhELXdQRThBX2YwY0RlcDZqYUtXb3pRRVBsZ0prT0R3TUxTUVpJZ1pnQVUyWS1vTnVFRkdkb2Jjc3U?oc=5",
       "source_feed": "gnews_gold",
-      "source_url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOVDY5ZTVTU0oyTXk2YlRyTXhVRUQ0enFTenhORFVUSWVISlhtcVk3VFctNnNZZmpoc0UxRm53THVVWVA0akozajdYclJfWjQ3REFTdkgtSzdXMWJwQVJwZVhYY1JtcENmNkdDNW1WSmU1TDNrUWRvT0FraXF6bVIxYzk5M2QxaTRCSkFGb2RmSnJ5ME1Bc0NGVFlrQ3liX1B0N3hmb0tZa24?oc=5",
-      "publisher": "www.investigatetv.com",
+      "source_url": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNUl92dUsweU5TVzBFVmtUYUF2RmNpQ3pLV3M1U0FXcURIcWJjUG1KcV85NnpOOEhYQU50MlhWVTF3X0FrN3gzZWh3UUkxbElTdlJ0NlhTbHlzSGVEOWhkanlLSkhELXdQRThBX2YwY0RlcDZqYUtXb3pRRVBsZ0prT0R3TUxTUVpJZ1pnQVUyWS1vTnVFRkdkb2Jjc3U?oc=5",
+      "publisher": "KCBD",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -3563,6 +3527,23 @@
       "source_feed": "ft_markets",
       "source_url": "https://www.ft.com/content/16d4593e-b9ce-4eab-90af-9835c79eb9f2?syn-25a6b1a6=1",
       "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "0c01740dafe61b0c",
+      "title": "Tunnel to Towers Foundation honors fallen Air Force hero by paying off Santa Barbara Gold Star family\u2019s mortgage on Veterans Day - Santa Barbara News-Press",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMi-AFBVV95cUxPOEdXLS1GNlh2ZDRFM1dFeWJnWlBuYzIxNVg1dWxMa3RRWWhKZy0zQ295anZKZHRKZUQzV3pKNi1UTG9tX0lCQVBnRDczNE0tR0RfMFhUcGVZMlJlZEd6TGhOWHA0U3Y3eEFMREl1LTJ1TVNkQXlLUmNFWjFSeTZkRDJWRy1uRERUakI5OFE2dDRQWGhGb2hZU09Za1M1elpFc282SUYyV2tNSjM1ejFBdFcxbXY4bFNDcGhNYzlfeXprODNrX2w3QUMwS1VRTU9XZklxVGxkT0swR1BnQ1lzNnZBeFhCZHRiNlllNmh2Q0xZLWNENWVfSA?oc=5\" target=\"_blank\">Tunnel to Towers Foundation honors fallen Air Force hero by paying off Santa Barbara Gold Star family\u2019s mortgage on Veterans Day</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Santa Barbara News-Press</font>",
+      "time_published_utc": "2026-11-11 19:00:00+00:00",
+      "overall_sentiment_score": 0.8689,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "commodities"
+      ],
+      "url": "https://news.google.com/rss/articles/CBMi-AFBVV95cUxPOEdXLS1GNlh2ZDRFM1dFeWJnWlBuYzIxNVg1dWxMa3RRWWhKZy0zQ295anZKZHRKZUQzV3pKNi1UTG9tX0lCQVBnRDczNE0tR0RfMFhUcGVZMlJlZEd6TGhOWHA0U3Y3eEFMREl1LTJ1TVNkQXlLUmNFWjFSeTZkRDJWRy1uRERUakI5OFE2dDRQWGhGb2hZU09Za1M1elpFc282SUYyV2tNSjM1ejFBdFcxbXY4bFNDcGhNYzlfeXprODNrX2w3QUMwS1VRTU9XZklxVGxkT0swR1BnQ1lzNnZBeFhCZHRiNlllNmh2Q0xZLWNENWVfSA?oc=5",
+      "source_feed": "gnews_gold",
+      "source_url": "https://news.google.com/rss/articles/CBMi-AFBVV95cUxPOEdXLS1GNlh2ZDRFM1dFeWJnWlBuYzIxNVg1dWxMa3RRWWhKZy0zQ295anZKZHRKZUQzV3pKNi1UTG9tX0lCQVBnRDczNE0tR0RfMFhUcGVZMlJlZEd6TGhOWHA0U3Y3eEFMREl1LTJ1TVNkQXlLUmNFWjFSeTZkRDJWRy1uRERUakI5OFE2dDRQWGhGb2hZU09Za1M1elpFc282SUYyV2tNSjM1ejFBdFcxbXY4bFNDcGhNYzlfeXprODNrX2w3QUMwS1VRTU9XZklxVGxkT0swR1BnQ1lzNnZBeFhCZHRiNlllNmh2Q0xZLWNENWVfSA?oc=5",
+      "publisher": "Santa Barbara News-Press",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -4065,13 +4046,14 @@
     },
     {
       "id": "f7f4418b10b67080",
-      "title": "Asian Stocks Edge Up, US Futures Drop on Nvidia: Markets Wrap",
-      "summary": "Asian stocks edged higher while US equity-index futures slipped as investors weighed a leadership crisis at Nvidia Corp., the chipmaker at the heart of this year\u2019s artificial-intelligence boom.",
+      "title": "Stock Rally Falters on Nvidia Woes, Oil Declines: Markets Wrap",
+      "summary": "A rally in global stocks stalled as investors weighed a leadership crisis at Nvidia Corp., the chipmaker at the heart of the artificial-intelligence boom.",
       "time_published_utc": "2026-11-11 22:08:05+00:00",
-      "overall_sentiment_score": -0.7351,
+      "overall_sentiment_score": -0.8316,
       "overall_sentiment_label": "Bearish",
       "topics": [
-        "financial_markets"
+        "financial_markets",
+        "commodities"
       ],
       "url": "https://www.bloomberg.com/news/articles/2026-11-11/stock-market-today-dow-s-p-live-updates",
       "source_feed": "bloomberg_markets",
@@ -4236,23 +4218,6 @@
       "related_event": null
     },
     {
-      "id": "7431fc82ae77c615",
-      "title": "Pod of Gold 11/11: Former Notre Dame football captain/CB Shawn Wooden - South Bend Tribune",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMi6wFBVV95cUxOaUI3V2kzV0lmeC1XaHZ4R3FpSHFJckJrSzdwbTlDYUlkWVdKdHp5M05DVUlDQ056Q0dSbjFxZXhaOVdEdlRQSkwzMk1xc1FuQmdvYkZacTJhMDRmUVlEZUI1UDdad0ZPdHFBaE1WVjlvci1MSlpiR3Q5a01ES3RaQmZ1S2h2TVFKdG9yd2NaZ0x0bmZEeVNEdzVSd3Q4LTBDeUJWRGY2bHctczBpTi0tTi10WVE3ZS1TcGJ3M1JSaG4yMm5aN3hYazZaZlpVdFVlbFp6S2tlOGFrb0xiYkU0NzdNemszQm1EWkJR?oc=5\" target=\"_blank\">Pod of Gold 11/11: Former Notre Dame football captain/CB Shawn Wooden</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">South Bend Tribune</font>",
-      "time_published_utc": "2026-11-11 23:33:00+00:00",
-      "overall_sentiment_score": 0.0,
-      "overall_sentiment_label": "Neutral",
-      "topics": [
-        "commodities"
-      ],
-      "url": "https://news.google.com/rss/articles/CBMi6wFBVV95cUxOaUI3V2kzV0lmeC1XaHZ4R3FpSHFJckJrSzdwbTlDYUlkWVdKdHp5M05DVUlDQ056Q0dSbjFxZXhaOVdEdlRQSkwzMk1xc1FuQmdvYkZacTJhMDRmUVlEZUI1UDdad0ZPdHFBaE1WVjlvci1MSlpiR3Q5a01ES3RaQmZ1S2h2TVFKdG9yd2NaZ0x0bmZEeVNEdzVSd3Q4LTBDeUJWRGY2bHctczBpTi0tTi10WVE3ZS1TcGJ3M1JSaG4yMm5aN3hYazZaZlpVdFVlbFp6S2tlOGFrb0xiYkU0NzdNemszQm1EWkJR?oc=5",
-      "source_feed": "gnews_gold",
-      "source_url": "https://news.google.com/rss/articles/CBMi6wFBVV95cUxOaUI3V2kzV0lmeC1XaHZ4R3FpSHFJckJrSzdwbTlDYUlkWVdKdHp5M05DVUlDQ056Q0dSbjFxZXhaOVdEdlRQSkwzMk1xc1FuQmdvYkZacTJhMDRmUVlEZUI1UDdad0ZPdHFBaE1WVjlvci1MSlpiR3Q5a01ES3RaQmZ1S2h2TVFKdG9yd2NaZ0x0bmZEeVNEdzVSd3Q4LTBDeUJWRGY2bHctczBpTi0tTi10WVE3ZS1TcGJ3M1JSaG4yMm5aN3hYazZaZlpVdFVlbFp6S2tlOGFrb0xiYkU0NzdNemszQm1EWkJR?oc=5",
-      "publisher": "South Bend Tribune",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
       "id": "6dfca54f7cca1448",
       "title": "Oil prices dip 1% on report of more U.S.-Iran diplomacy plans",
       "summary": "",
@@ -4265,40 +4230,6 @@
       "url": "https://www.investing.com/news/commodities-news/oil-prices-dip-on-report-of-more-usiran-diplomacy-plans-5020081",
       "source_feed": "investing_com",
       "source_url": "https://www.investing.com/news/commodities-news/oil-prices-dip-on-report-of-more-usiran-diplomacy-plans-5020081",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "5299565a216a7e9b",
-      "title": "UK Surveyors Face Weakest Housing Market Since 2023, RICS Says",
-      "summary": "British property agents are more downbeat about home sales than at any point in over three years, according to a survey showing that soaring mortgage costs are sapping demand.",
-      "time_published_utc": "2026-11-12 00:01:00+00:00",
-      "overall_sentiment_score": -0.5859,
-      "overall_sentiment_label": "Bearish",
-      "topics": [
-        "financial_markets"
-      ],
-      "url": "https://www.bloomberg.com/news/articles/2026-11-12/uk-surveyors-face-weakest-housing-market-since-2023-rics-says",
-      "source_feed": "bloomberg_markets",
-      "source_url": "https://www.bloomberg.com/news/articles/2026-11-12/uk-surveyors-face-weakest-housing-market-since-2023-rics-says",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "864415849827c4cf",
-      "title": "Indonesia Bonds Lure Global Funds as Yields Hit Six-Year High",
-      "summary": "Indonesian government bonds are drawing bargain-hunters after the benchmark yields\u2019 surge last week to the highest since 2020.",
-      "time_published_utc": "2026-11-12 00:05:36+00:00",
-      "overall_sentiment_score": 0.0,
-      "overall_sentiment_label": "Neutral",
-      "topics": [
-        "financial_markets"
-      ],
-      "url": "https://www.bloomberg.com/news/articles/2026-11-12/indonesia-bonds-lure-global-funds-as-yields-hit-six-year-high",
-      "source_feed": "bloomberg_markets",
-      "source_url": "https://www.bloomberg.com/news/articles/2026-11-12/indonesia-bonds-lure-global-funds-as-yields-hit-six-year-high",
       "publisher": "",
       "sentiment_method": "vader",
       "related_event": null
@@ -4393,27 +4324,9 @@
       "related_event": null
     },
     {
-      "id": "f4507b5c10d3bc39",
-      "title": "Gold Dims Amid Rising Fed Rate-Hike Expectations - WSJ",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMiqAFBVV95cUxPOFRSMC1GZ0NrUl9iRUdXSnFXX0xRTXNTb0dkTTluUE9HMGp3d3N4OG51U0s0WUs2aEVTTEJrYVRyVExXYjJYUzAwWEtHcUx1ZXVFNVkzZV9YWUN3TWE3R2RvdHNPUzJSektyTWpvV1RpSEp4QXVQZ0puLUFNRUZnU2xWYlhaVzIyYVJzN2Z5aWE3UU02Q2tGekp2eXZwa1oyRGpDbGl1NXE?oc=5\" target=\"_blank\">Gold Dims Amid Rising Fed Rate-Hike Expectations</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">WSJ</font>",
-      "time_published_utc": "2026-11-12 00:49:06+00:00",
-      "overall_sentiment_score": 0.0,
-      "overall_sentiment_label": "Neutral",
-      "topics": [
-        "economy_monetary",
-        "commodities"
-      ],
-      "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxPOFRSMC1GZ0NrUl9iRUdXSnFXX0xRTXNTb0dkTTluUE9HMGp3d3N4OG51U0s0WUs2aEVTTEJrYVRyVExXYjJYUzAwWEtHcUx1ZXVFNVkzZV9YWUN3TWE3R2RvdHNPUzJSektyTWpvV1RpSEp4QXVQZ0puLUFNRUZnU2xWYlhaVzIyYVJzN2Z5aWE3UU02Q2tGekp2eXZwa1oyRGpDbGl1NXE?oc=5",
-      "source_feed": "gnews_gold",
-      "source_url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxPOFRSMC1GZ0NrUl9iRUdXSnFXX0xRTXNTb0dkTTluUE9HMGp3d3N4OG51U0s0WUs2aEVTTEJrYVRyVExXYjJYUzAwWEtHcUx1ZXVFNVkzZV9YWUN3TWE3R2RvdHNPUzJSektyTWpvV1RpSEp4QXVQZ0puLUFNRUZnU2xWYlhaVzIyYVJzN2Z5aWE3UU02Q2tGekp2eXZwa1oyRGpDbGl1NXE?oc=5",
-      "publisher": "WSJ",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
       "id": "2885da1f103dbcb2",
       "title": "Long US Bonds Reopen With Gains as Risk Sentiment Sours Again",
-      "summary": "Long-end Treasuries drifted higher as trading resumed after a holiday as turmoil at Nvidia Corp. fueled doubts about the artificial intelligence trade and fueled demand for haven assets.",
+      "summary": "Long-end Treasuries drifted higher as trading resumed after a holiday as turmoil at Nvidia Corp. fueled doubts about the artificial intelligence trade and sparked demand for haven assets.",
       "time_published_utc": "2026-11-12 00:58:09+00:00",
       "overall_sentiment_score": 0.5423,
       "overall_sentiment_label": "Bullish",
@@ -4761,6 +4674,23 @@
       "related_event": null
     },
     {
+      "id": "0b362549ed24e624",
+      "title": "Save the Date: Gold Rush Tickets Available Now for April 10, 2027! - University of Alaska Fairbanks Athletics",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMiwAFBVV95cUxPR1pjMFlhZFFIZzFqaGhLUnlwSVBsamNzMWY4VGlqNUFtNU1ISEdLWENhZFB0T3BzR3dHRXFYZXhEakhfanpNLWpxX3RqZEx5MmxGbVR0U3k2SVV0SVVoNGNXX3ZKblhLdDhOZlhXeXNfUWhqYms2ajVjRTdRM2h3SmdJQ2NldV9xcXFXeUxEVHZFSlB3U0ZYZ2ZfNnQwVlpNWjk1djkxRlZPY3RJTzJhaE1qcmRJM29pdXhadXNDYjA?oc=5\" target=\"_blank\">Save the Date: Gold Rush Tickets Available Now for April 10, 2027!</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">University of Alaska Fairbanks Athletics</font>",
+      "time_published_utc": "2026-11-12 02:41:22+00:00",
+      "overall_sentiment_score": 0.5837,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "commodities"
+      ],
+      "url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPR1pjMFlhZFFIZzFqaGhLUnlwSVBsamNzMWY4VGlqNUFtNU1ISEdLWENhZFB0T3BzR3dHRXFYZXhEakhfanpNLWpxX3RqZEx5MmxGbVR0U3k2SVV0SVVoNGNXX3ZKblhLdDhOZlhXeXNfUWhqYms2ajVjRTdRM2h3SmdJQ2NldV9xcXFXeUxEVHZFSlB3U0ZYZ2ZfNnQwVlpNWjk1djkxRlZPY3RJTzJhaE1qcmRJM29pdXhadXNDYjA?oc=5",
+      "source_feed": "gnews_gold",
+      "source_url": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPR1pjMFlhZFFIZzFqaGhLUnlwSVBsamNzMWY4VGlqNUFtNU1ISEdLWENhZFB0T3BzR3dHRXFYZXhEakhfanpNLWpxX3RqZEx5MmxGbVR0U3k2SVV0SVVoNGNXX3ZKblhLdDhOZlhXeXNfUWhqYms2ajVjRTdRM2h3SmdJQ2NldV9xcXFXeUxEVHZFSlB3U0ZYZ2ZfNnQwVlpNWjk1djkxRlZPY3RJTzJhaE1qcmRJM29pdXhadXNDYjA?oc=5",
+      "publisher": "University of Alaska Fairbanks Athletics",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
       "id": "f6385dd17e44e14c",
       "title": "\u2018I\u2019m sick of flying\u2019: I paid for priority boarding, but the overhead bins were full. Was I duped?",
       "summary": "\u201cMaybe next time I\u2019ll try the other approach: I\u2019ll board whenever I feel like it and drop my suitcase in the first open slot I see.\u201d",
@@ -4859,6 +4789,59 @@
       "source_feed": "wsj_markets",
       "source_url": "https://www.wsj.com/finance/currencies/yen-hitting-160-to-dollar-again-wont-be-surprising-f82f47e6?mod=rss_markets_main",
       "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "7b5a07eeba9a6b2f",
+      "title": "Why Bernstein Downgraded Nvidia Stock",
+      "summary": "Stacy Rasgon, Managing Director and Senior Analyst at Bernstein Research, was asked why his team said in a note they\u2019ve \u201chad enough\u201d before he discusses the outlook for Nvidia in the wake of fresh reports of CEO Jensen Huang\u2019s extramarital affairs. Bernstein was the latest firm to downgrade the stock, cutting its rating to market perform from outperform while lowering its price target to $200 from $400. (Source: Bloomberg)",
+      "time_published_utc": "2026-11-12 03:34:15+00:00",
+      "overall_sentiment_score": -0.0516,
+      "overall_sentiment_label": "Bearish",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://www.bloomberg.com/news/videos/2026-11-12/why-bernstein-downgraded-nvidia-stock-video",
+      "source_feed": "bloomberg_markets",
+      "source_url": "https://www.bloomberg.com/news/videos/2026-11-12/why-bernstein-downgraded-nvidia-stock-video",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "0f22a558db023512",
+      "title": "Japan 5-Year Bond Sale Sees Firmer Demand Than 12-Month Average",
+      "summary": "Japan\u2019s five-year government bond auction drew stronger demand than its 12-month average as elevated yields attracted investors.",
+      "time_published_utc": "2026-11-12 03:39:12+00:00",
+      "overall_sentiment_score": 0.5267,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://www.bloomberg.com/news/articles/2026-11-12/japan-5-year-bond-sale-sees-firmer-demand-than-12-month-average-mwd011h1",
+      "source_feed": "bloomberg_markets",
+      "source_url": "https://www.bloomberg.com/news/articles/2026-11-12/japan-5-year-bond-sale-sees-firmer-demand-than-12-month-average-mwd011h1",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "c4a24ae8fec4102b",
+      "title": "Gold falls to over one-week low on firm dollar, Fed rate hike bets - Reuters",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMiqwFBVV95cUxPc09mRGRCVmlxTnVTdDR2Y0ktNjVkZE1xUHhyTnZWUGZvbFZFS2hsTFk1SkVfNE82SVZlMTFXbUFtckZMaDIwbzA5RlgxWUxKbE5ZMGhrRkl1UWFrVG9ibW9mdWlGM0NYRTVlQnZramhHSTVadmtEaFhWMDRFY1dYVWRPX1RzNm9YNURTVUVzeGo2aEo4UzZReXRCVlQ0amhjVGFWTU1BVFVQR1k?oc=5\" target=\"_blank\">Gold falls to over one-week low on firm dollar, Fed rate hike bets</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Reuters</font>",
+      "time_published_utc": "2026-11-12 03:40:00+00:00",
+      "overall_sentiment_score": -0.4939,
+      "overall_sentiment_label": "Bearish",
+      "topics": [
+        "economy_monetary",
+        "commodities",
+        "forex"
+      ],
+      "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPc09mRGRCVmlxTnVTdDR2Y0ktNjVkZE1xUHhyTnZWUGZvbFZFS2hsTFk1SkVfNE82SVZlMTFXbUFtckZMaDIwbzA5RlgxWUxKbE5ZMGhrRkl1UWFrVG9ibW9mdWlGM0NYRTVlQnZramhHSTVadmtEaFhWMDRFY1dYVWRPX1RzNm9YNURTVUVzeGo2aEo4UzZReXRCVlQ0amhjVGFWTU1BVFVQR1k?oc=5",
+      "source_feed": "gnews_gold",
+      "source_url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPc09mRGRCVmlxTnVTdDR2Y0ktNjVkZE1xUHhyTnZWUGZvbFZFS2hsTFk1SkVfNE82SVZlMTFXbUFtckZMaDIwbzA5RlgxWUxKbE5ZMGhrRkl1UWFrVG9ibW9mdWlGM0NYRTVlQnZramhHSTVadmtEaFhWMDRFY1dYVWRPX1RzNm9YNURTVUVzeGo2aEo4UzZReXRCVlQ0amhjVGFWTU1BVFVQR1k?oc=5",
+      "publisher": "Reuters",
       "sentiment_method": "vader",
       "related_event": null
     }

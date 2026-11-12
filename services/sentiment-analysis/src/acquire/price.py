@@ -67,14 +67,17 @@ def refresh_price_data(
 ) -> pd.DataFrame:
     """Load historical H1 candles, patch missing recent candles, and save unified UTC CSV.
 
-    ``raw_path`` wajib diset lewat config (``data.price_file_raw``) atau env
-    ``EXTERNAL_DATA_DIR``. Tidak ada path hardcoded.
+    ``raw_path`` boleh dikosongkan bila ``output_path`` sudah berisi history
+    (dipakai sebagai base): pipeline tetap menambal ekor data dari yfinance,
+    sehingga H1 tidak basi walau sumber historis eksternal tidak diset.
     """
     if not raw_path:
-        raise ValueError(
-            "raw_path kosong: set 'data.price_file_raw' di config.yaml "
-            "atau env EXTERNAL_DATA_DIR."
-        )
+        if not os.path.exists(output_path):
+            raise ValueError(
+                "raw_path kosong dan "
+                f"{output_path} belum ada: set 'data.price_file_raw' di config.yaml."
+            )
+        raw_path = output_path
     if not os.path.exists(raw_path):
         raise FileNotFoundError(f"H1 source CSV not found: {raw_path}")
 

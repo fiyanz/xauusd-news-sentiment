@@ -3,33 +3,33 @@
     "data/raw/price/xauusd_h1_complete.csv": {
       "artifact": "data/raw/price/xauusd_h1_complete.csv",
       "source": "local H1 CSV + yfinance GC=F (keyless)",
-      "rows": 97618,
-      "as_of": "2026-11-06 21:00:00+00:00",
+      "rows": 97693,
+      "as_of": "2026-11-12 03:00:00+00:00",
       "is_simulated": false
     },
     "data/raw/price/xauusd_m5.csv": {
       "artifact": "data/raw/price/xauusd_m5.csv",
       "source": "yfinance GC=F (keyless)",
-      "generated_at": "2026-11-07 17:55:57+00:00",
-      "as_of": "2026-11-06 21:55:00+00:00",
+      "generated_at": "2026-11-12 03:26:10+00:00",
+      "as_of": "2026-11-12 03:15:00+00:00",
       "is_simulated": false,
-      "rows": 6890,
+      "rows": 6870,
       "is_real": 1
     },
     "data/raw/price/xauusd_m15.csv": {
       "artifact": "data/raw/price/xauusd_m15.csv",
       "source": "yfinance GC=F (keyless)",
-      "generated_at": "2026-11-07 17:55:58+00:00",
-      "as_of": "2026-11-06 21:45:00+00:00",
+      "generated_at": "2026-11-12 03:26:11+00:00",
+      "as_of": "2026-11-12 03:15:00+00:00",
       "is_simulated": false,
-      "rows": 2302,
+      "rows": 2296,
       "is_real": 1
     },
     "data/raw/calendar/economic_calendar_enriched.csv": {
       "artifact": "data/raw/calendar/economic_calendar_enriched.csv",
       "source": "bls_api_v2 + fred_csv (keyless)",
-      "generated_at": "2026-11-12 03:26:14+00:00",
-      "as_of": "2026-11-12 03:26:14+00:00",
+      "generated_at": "2026-11-12 04:02:33+00:00",
+      "as_of": "2026-11-12 04:02:33+00:00",
       "is_simulated": false,
       "rows": 748,
       "rows_real": 737,
@@ -64,11 +64,11 @@
     "data/raw/news/news_sentiment_feed.json": {
       "artifact": "data/raw/news/news_sentiment_feed.json",
       "source": "rss_feeds (keyless)",
-      "generated_at": "2026-11-12 03:26:22+00:00",
-      "as_of": "2026-11-12 03:26:22+00:00",
+      "generated_at": "2026-11-12 04:02:43+00:00",
+      "as_of": "2026-11-12 04:02:43+00:00",
       "is_simulated": false,
       "status": "ok",
-      "article_count": 279,
+      "article_count": 278,
       "sentiment_method": "vader",
       "feeds": {
         "cnbc_markets": "ok:30",
@@ -85,28 +85,28 @@
     "data/processed/bucketed_features.parquet": {
       "artifact": "data/processed/bucketed_features.parquet",
       "source": "rss_feeds+vader | bls_api_v2+fred_csv | yfinance GC=F | yfinance ^TNX/DX-Y.NYB/CL=F",
-      "generated_at": "2026-11-12 03:26:24+00:00",
+      "generated_at": "2026-11-12 04:02:44+00:00",
       "as_of": null,
       "is_simulated": false
     },
     "models/champion_fair_model.joblib": {
       "artifact": "models/champion_fair_model.joblib",
       "source": "retrain pipeline (src.models.train, champion by CV)",
-      "generated_at": "2026-11-12 03:34:46+00:00",
+      "generated_at": "2026-11-12 04:04:23+00:00",
       "is_simulated": false,
       "champion_name": "Random_Forest"
     },
     "reports/significance.json": {
       "artifact": "reports/significance.json",
       "source": "retrain pipeline (src.evaluate.significance)",
-      "generated_at": "2026-11-12 03:34:46+00:00",
+      "generated_at": "2026-11-12 04:04:23+00:00",
       "is_simulated": false,
       "rank_ic": 0.0,
       "rank_ic_pvalue": 1.0,
       "sentiment_adds_value": false
     }
   },
-  "generated_at": "2026-11-12 03:34:46+00:00",
+  "generated_at": "2026-11-12 04:04:23+00:00",
   "is_simulated": false,
   "has_simulated_rows": true
 }

@@ -51,9 +51,9 @@ def run_full_sync(write_prediction: bool = True) -> dict:
     if price_raw:
         refresh_price_data(price_raw, data_cfg.get("price_file_complete"))
     else:
-        print(
-            "[PipelineSync] price_file_raw tidak diset; memakai data H1 yang sudah ada di repo."
-        )
+        # Tanpa sumber eksternal: pakai CSV repo sebagai base history dan
+        # tambal ekor dengan yfinance supaya H1 tidak basi.
+        refresh_price_data(None, data_cfg.get("price_file_complete"))
     provenance_entries.append(write_price_provenance())
 
     # 2. Intraday 5m/15m (real GC=F)
@@ -137,10 +137,25 @@ def run_full_sync(write_prediction: bool = True) -> dict:
         val_ratio=cfg.get("split", {}).get("val", 0.2),
     )
 
-    # 8. Retrain + evaluasi + prediksi di atas artifact baru.
+    # 8. Provenance manifest (artefak data) — ditulis dulu agar stage
+    #    signifikansi bisa memverifikasi artifact (parquet <= provenance).
+    print("\n--- Step 8/9: Provenance Manifest ---")
+    bucketed_entry = {
+        "artifact": f"{processed_dir}/bucketed_features.parquet",
+        "source": "rss_feeds+vader | bls_api_v2+fred_csv | yfinance GC=F | yfinance ^TNX/DX-Y.NYB/CL=F",
+        "generated_at": now_str(),
+        "as_of": None,
+        "is_simulated": False,
+    }
+    manifest = merge_provenance(provenance_path, provenance_entries + [bucketed_entry])
+    write_provenance(provenance_path, manifest)
+    print(f"[PipelineSync] Provenance manifest written: {provenance_path}")
+
+    # 9. Retrain + evaluasi + prediksi di atas artifact baru.
     #    Data yang di-refresh tapi model tidak di-retrain akan membuat prediksi
     #    dan laporan tertinggal dari data — stage ini menjaga konsistensi.
-    print("\n--- Step 8/9: Retrain, Evaluation & Prediction ---")
+    #    (Stage ini juga menambahkan entri model & significance ke provenance.)
+    print("\n--- Step 9/9: Retrain, Evaluation & Prediction ---")
     retrain_result = None
     prediction = None
     try:
@@ -160,37 +175,6 @@ def run_full_sync(write_prediction: bool = True) -> dict:
     except Exception as exc:
         print(f"[PipelineSync] Retrain/evaluasi gagal: {exc}")
         prediction = {"status": "unavailable", "reason": str(exc)}
-
-    # 9. Provenance manifest (ditulis terakhir agar mencakup model & laporan)
-    print("\n--- Step 9/9: Provenance Manifest ---")
-    bucketed_entry = {
-        "artifact": f"{processed_dir}/bucketed_features.parquet",
-        "source": "rss_feeds+vader | bls_api_v2+fred_csv | yfinance GC=F | yfinance ^TNX/DX-Y.NYB/CL=F",
-        "generated_at": now_str(),
-        "as_of": None,
-        "is_simulated": False,
-    }
-    manifest = merge_provenance(provenance_path, provenance_entries + [bucketed_entry])
-    if retrain_result and retrain_result.get("status") == "ok":
-        now = now_str()
-        manifest["artifacts"]["models/champion_fair_model.joblib"] = {
-            "artifact": "models/champion_fair_model.joblib",
-            "source": "retrain pipeline (src.models.train, champion by CV)",
-            "generated_at": now,
-            "is_simulated": False,
-            "champion_name": retrain_result.get("champion_name"),
-        }
-        manifest["artifacts"]["reports/significance.json"] = {
-            "artifact": "reports/significance.json",
-            "source": "retrain pipeline (src.evaluate.significance)",
-            "generated_at": now,
-            "is_simulated": False,
-            "rank_ic": retrain_result.get("rank_ic"),
-            "rank_ic_pvalue": retrain_result.get("rank_ic_pvalue"),
-            "sentiment_adds_value": retrain_result.get("sentiment_adds_value"),
-        }
-    write_provenance(provenance_path, manifest)
-    print(f"[PipelineSync] Provenance manifest written: {provenance_path}")
 
     print("\n" + "=" * 60)
     if prediction:
