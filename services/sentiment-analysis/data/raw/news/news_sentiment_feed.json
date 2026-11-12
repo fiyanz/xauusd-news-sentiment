@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "status_reason": null,
-  "generated_at": "2026-11-12 05:10:11+00:00",
+  "generated_at": "2026-11-12 05:39:50+00:00",
   "sentiment_method": "vader",
   "feeds": {
     "cnbc_markets": "ok:30",
@@ -521,24 +521,6 @@
       "related_event": null
     },
     {
-      "id": "008da51f83991d42",
-      "title": "Wall Street Gets $2.5 Trillion AI Reality Check With Historic Rout of Tech Stocks",
-      "summary": "The Nasdaq composite closes in correction territory in the stock market\u2019s worst day since last April\u2019s tariff turmoil.",
-      "time_published_utc": "2026-11-05 21:41:00+00:00",
-      "overall_sentiment_score": -0.765,
-      "overall_sentiment_label": "Bearish",
-      "topics": [
-        "financial_markets",
-        "commodities"
-      ],
-      "url": "https://www.wsj.com/finance/stocks/wall-street-gets-2-5-trillion-ai-reality-check-with-historic-rout-of-tech-stocks-93985d7c?mod=rss_markets_main",
-      "source_feed": "wsj_markets",
-      "source_url": "https://www.wsj.com/finance/stocks/wall-street-gets-2-5-trillion-ai-reality-check-with-historic-rout-of-tech-stocks-93985d7c?mod=rss_markets_main",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
       "id": "1a16be35a65e35f8",
       "title": "Opinion | Politics Shakes Up the Markets",
       "summary": "A tech correction could force Washington to focus on the economy.",
@@ -551,6 +533,23 @@
       "url": "https://www.wsj.com/opinion/tech-selloff-economy-politics-2e789982?mod=rss_markets_main",
       "source_feed": "wsj_markets",
       "source_url": "https://www.wsj.com/opinion/tech-selloff-economy-politics-2e789982?mod=rss_markets_main",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "2c6afc5229d8f481",
+      "title": "How to Keep These Wild Market Moves From Hijacking Your Financial Future",
+      "summary": "The stunning election results make it more important than ever to stick with your investing playbook.",
+      "time_published_utc": "2026-11-06 00:00:00+00:00",
+      "overall_sentiment_score": 0.5709,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://www.wsj.com/finance/investing/how-to-keep-these-wild-market-moves-from-hijacking-your-financial-future-71ecb216?mod=rss_markets_main",
+      "source_feed": "wsj_markets",
+      "source_url": "https://www.wsj.com/finance/investing/how-to-keep-these-wild-market-moves-from-hijacking-your-financial-future-71ecb216?mod=rss_markets_main",
       "publisher": "",
       "sentiment_method": "vader",
       "related_event": null
@@ -965,23 +964,6 @@
       "source_feed": "gnews_gold_prices",
       "source_url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxQbGNGNlpPSFBHWmp5eU8tLVEtRTJkUFNFdWNEN1FFN2JaN1Z1dXZyQkswRkRYWktwUlpLZnhwWVQ2TWJLVl9NODNaVGpsRVF3MldaTDFsS1l1a1l4RlZ5aU5kdEpHZ1ljVnRKcGViODB2aHB6NEoxcHNjajRKd3lsbWJlQVFfX25CcV93X3VHVmdldjBUc2tpdklTeG1yMllNV0l3blVrQzNScjhIakdJamxGQWhCODB3RFJ6RV9IRDRGZw?oc=5",
       "publisher": "Deccan Herald",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "71c5d71134dadc32",
-      "title": "ZAWYA: Gold prices in Egypt fall on November 8 - TradingView",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMivgFBVV95cUxOQkQ1UTdvNDZpcTlmdEg1VTVTUVY1QmZLLWY5N3hZa2lBNEJVVUlvR3Q3cE9VM3Y1ZzdXUFh3QzloWlM5dDh4Y1JsTEZ0cGFfU1V2QzN6cEx1ekVaaVVZcHZPVm54S1ZHZkxvUmx5Wjd2eG1yRkpqN1pJVDlxaUZiei1CZFRxZzdiTWZwZWtuTUxkRXpVdWh4cGpKSTRtd2Z2NWtOV2ZHVHRaYnZrekxMb1FteTlVeWhtcENCclln?oc=5\" target=\"_blank\">ZAWYA: Gold prices in Egypt fall on November 8</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">TradingView</font>",
-      "time_published_utc": "2026-11-09 06:24:13+00:00",
-      "overall_sentiment_score": 0.0,
-      "overall_sentiment_label": "Neutral",
-      "topics": [
-        "commodities"
-      ],
-      "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxOQkQ1UTdvNDZpcTlmdEg1VTVTUVY1QmZLLWY5N3hZa2lBNEJVVUlvR3Q3cE9VM3Y1ZzdXUFh3QzloWlM5dDh4Y1JsTEZ0cGFfU1V2QzN6cEx1ekVaaVVZcHZPVm54S1ZHZkxvUmx5Wjd2eG1yRkpqN1pJVDlxaUZiei1CZFRxZzdiTWZwZWtuTUxkRXpVdWh4cGpKSTRtd2Z2NWtOV2ZHVHRaYnZrekxMb1FteTlVeWhtcENCclln?oc=5",
-      "source_feed": "gnews_gold_prices",
-      "source_url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxOQkQ1UTdvNDZpcTlmdEg1VTVTUVY1QmZLLWY5N3hZa2lBNEJVVUlvR3Q3cE9VM3Y1ZzdXUFh3QzloWlM5dDh4Y1JsTEZ0cGFfU1V2QzN6cEx1ekVaaVVZcHZPVm54S1ZHZkxvUmx5Wjd2eG1yRkpqN1pJVDlxaUZiei1CZFRxZzdiTWZwZWtuTUxkRXpVdWh4cGpKSTRtd2Z2NWtOV2ZHVHRaYnZrekxMb1FteTlVeWhtcENCclln?oc=5",
-      "publisher": "TradingView",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -1520,6 +1502,23 @@
       "source_feed": "gnews_gold_prices",
       "source_url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxNUUt5d0NsOEFXZzVGWU5qOFFwbGtuT0pyM3RMcTR3ZDRXYzFqV1NkM1VadUV0VzdNUFpZREVYLU1mdWFpSDE5V0w3Qlo5X1luTXVXRkZKNHQ1bXY1X0VCNHRienZVbnhQdE93UWFYRk41T0Fhd2tiQ2dpZzF2WEZmM0hVTFpjMVFzR2JhNlpWN0R5ZkFCY0JkRUVuYw?oc=5",
       "publisher": "Reuters",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "a299620e4515a0d4",
+      "title": "Gold prices decrease - VnExpress International",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMihgFBVV95cUxOYUNBc0NhWk50U1RreFBweFVKRkd0TWJKaTIwekN4Wi12UkgxTk9acXBDYS1yY3g5S1R1Mk5SRGxvNGdVVTliM0NMam85SFBzSHMzUnJFOTdrSm9oOXdaV3F1cjcyelZULXVqT0JydFlTY0lrcUFGeG0tcUdPaEpNdXhnMnJlQQ?oc=5\" target=\"_blank\">Gold prices decrease</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">VnExpress International</font>",
+      "time_published_utc": "2026-11-10 04:38:50+00:00",
+      "overall_sentiment_score": 0.0,
+      "overall_sentiment_label": "Neutral",
+      "topics": [
+        "commodities"
+      ],
+      "url": "https://news.google.com/rss/articles/CBMihgFBVV95cUxOYUNBc0NhWk50U1RreFBweFVKRkd0TWJKaTIwekN4Wi12UkgxTk9acXBDYS1yY3g5S1R1Mk5SRGxvNGdVVTliM0NMam85SFBzSHMzUnJFOTdrSm9oOXdaV3F1cjcyelZULXVqT0JydFlTY0lrcUFGeG0tcUdPaEpNdXhnMnJlQQ?oc=5",
+      "source_feed": "gnews_gold_prices",
+      "source_url": "https://news.google.com/rss/articles/CBMihgFBVV95cUxOYUNBc0NhWk50U1RreFBweFVKRkd0TWJKaTIwekN4Wi12UkgxTk9acXBDYS1yY3g5S1R1Mk5SRGxvNGdVVTliM0NMam85SFBzSHMzUnJFOTdrSm9oOXdaV3F1cjcyelZULXVqT0JydFlTY0lrcUFGeG0tcUdPaEpNdXhnMnJlQQ?oc=5",
+      "publisher": "VnExpress International",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -2511,19 +2510,37 @@
       "related_event": null
     },
     {
-      "id": "de37c67c02055954",
-      "title": "Gold Price Forecast: Failed Breakdown Fuels Bullish Reversal - FXEmpire",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMirwFBVV95cUxQeFpPc0J4eEtWejVveWwzX29EeTdvdU9jZjhqTmJKSFRHR1JsSDlvZHVTWnpBQUVJd3JSSTFZWktTazg1WDZqY3BnYWFMMlNIV0FOTU9UVGdyS1l6bVpPUUw0bWY3YlJMQmVmNU1OV1hrbUFseDZHTUtDSWxzd0ZUUG5fYzVmaDl6RC04bGprY2xtS2prN0VEYXMzMTNXcm5lTV9DYTZPb2RRWGl1Z3ZV?oc=5\" target=\"_blank\">Gold Price Forecast: Failed Breakdown Fuels Bullish Reversal</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">FXEmpire</font>",
-      "time_published_utc": "2026-11-11 05:46:00+00:00",
-      "overall_sentiment_score": -0.765,
-      "overall_sentiment_label": "Bearish",
+      "id": "d51b8d36185f9f6f",
+      "title": "Night surfing may be coming to the Gold Coast - but could the $100,000 plan attract sharks? - The Guardian",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMi_gFBVV95cUxPeFZfMFU5Ui1EMVB3OXg3T0RvdVRGSHRGbmthS3BRVWVESWRhVlZfSEJDQ0VLUVRxMzgyNmNMa0tpcGRTRk9ndTJUUG55U05rOVdTYUJhNTBJRm5EemJZY0gxREN4eHM3T0Z2cWkzU1FycVU4Z1NudXQ4dGRxc3M5RTlHeGRtMUIwaDBNcFc2akJuUEJpNjU4ZTdwUnIweWw4NmVuZUwzdGd2cHhlMEpZSnZiNzI1SkhqV0JRcjZwNW5fRkpOQ244enFUR1VFbnhteE9FSWhrcnRsZHhiV0hETGxVemJXcWJqZjNPZ3Nmd3p2Q3hvN3J5MFdMaDgwdw?oc=5\" target=\"_blank\">Night surfing may be coming to the Gold Coast - but could the $100,000 plan attract sharks?</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">The Guardian</font>",
+      "time_published_utc": "2026-11-11 05:45:00+00:00",
+      "overall_sentiment_score": 0.7929,
+      "overall_sentiment_label": "Bullish",
       "topics": [
         "commodities"
       ],
-      "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxQeFpPc0J4eEtWejVveWwzX29EeTdvdU9jZjhqTmJKSFRHR1JsSDlvZHVTWnpBQUVJd3JSSTFZWktTazg1WDZqY3BnYWFMMlNIV0FOTU9UVGdyS1l6bVpPUUw0bWY3YlJMQmVmNU1OV1hrbUFseDZHTUtDSWxzd0ZUUG5fYzVmaDl6RC04bGprY2xtS2prN0VEYXMzMTNXcm5lTV9DYTZPb2RRWGl1Z3ZV?oc=5",
+      "url": "https://news.google.com/rss/articles/CBMi_gFBVV95cUxPeFZfMFU5Ui1EMVB3OXg3T0RvdVRGSHRGbmthS3BRVWVESWRhVlZfSEJDQ0VLUVRxMzgyNmNMa0tpcGRTRk9ndTJUUG55U05rOVdTYUJhNTBJRm5EemJZY0gxREN4eHM3T0Z2cWkzU1FycVU4Z1NudXQ4dGRxc3M5RTlHeGRtMUIwaDBNcFc2akJuUEJpNjU4ZTdwUnIweWw4NmVuZUwzdGd2cHhlMEpZSnZiNzI1SkhqV0JRcjZwNW5fRkpOQ244enFUR1VFbnhteE9FSWhrcnRsZHhiV0hETGxVemJXcWJqZjNPZ3Nmd3p2Q3hvN3J5MFdMaDgwdw?oc=5",
       "source_feed": "gnews_gold",
-      "source_url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxQeFpPc0J4eEtWejVveWwzX29EeTdvdU9jZjhqTmJKSFRHR1JsSDlvZHVTWnpBQUVJd3JSSTFZWktTazg1WDZqY3BnYWFMMlNIV0FOTU9UVGdyS1l6bVpPUUw0bWY3YlJMQmVmNU1OV1hrbUFseDZHTUtDSWxzd0ZUUG5fYzVmaDl6RC04bGprY2xtS2prN0VEYXMzMTNXcm5lTV9DYTZPb2RRWGl1Z3ZV?oc=5",
-      "publisher": "FXEmpire",
+      "source_url": "https://news.google.com/rss/articles/CBMi_gFBVV95cUxPeFZfMFU5Ui1EMVB3OXg3T0RvdVRGSHRGbmthS3BRVWVESWRhVlZfSEJDQ0VLUVRxMzgyNmNMa0tpcGRTRk9ndTJUUG55U05rOVdTYUJhNTBJRm5EemJZY0gxREN4eHM3T0Z2cWkzU1FycVU4Z1NudXQ4dGRxc3M5RTlHeGRtMUIwaDBNcFc2akJuUEJpNjU4ZTdwUnIweWw4NmVuZUwzdGd2cHhlMEpZSnZiNzI1SkhqV0JRcjZwNW5fRkpOQ244enFUR1VFbnhteE9FSWhrcnRsZHhiV0hETGxVemJXcWJqZjNPZ3Nmd3p2Q3hvN3J5MFdMaDgwdw?oc=5",
+      "publisher": "The Guardian",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "75991e9545e9524a",
+      "title": "Why European Central Banks Want Their Gold Back - Global Finance Magazine",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMif0FVX3lxTE85ejdwaWI5ZnQxMjhrNUNnWVo5azEyRTByalBOLWVlb29COVp4bmhWallsLXYxV2liNy12ZC1nSmIycFZWNDNoNmdKdklxWlNJRjNJQ2JlMUJwQUFYcU5uTWRnTmhaZ0ZFdTZuc2tzZ1lOSzRfeng4UkVZaC1aMzQ?oc=5\" target=\"_blank\">Why European Central Banks Want Their Gold Back</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Global Finance Magazine</font>",
+      "time_published_utc": "2026-11-11 06:00:00+00:00",
+      "overall_sentiment_score": 0.1531,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "commodities",
+        "forex"
+      ],
+      "url": "https://news.google.com/rss/articles/CBMif0FVX3lxTE85ejdwaWI5ZnQxMjhrNUNnWVo5azEyRTByalBOLWVlb29COVp4bmhWallsLXYxV2liNy12ZC1nSmIycFZWNDNoNmdKdklxWlNJRjNJQ2JlMUJwQUFYcU5uTWRnTmhaZ0ZFdTZuc2tzZ1lOSzRfeng4UkVZaC1aMzQ?oc=5",
+      "source_feed": "gnews_gold",
+      "source_url": "https://news.google.com/rss/articles/CBMif0FVX3lxTE85ejdwaWI5ZnQxMjhrNUNnWVo5azEyRTByalBOLWVlb29COVp4bmhWallsLXYxV2liNy12ZC1nSmIycFZWNDNoNmdKdklxWlNJRjNJQ2JlMUJwQUFYcU5uTWRnTmhaZ0ZFdTZuc2tzZ1lOSzRfeng4UkVZaC1aMzQ?oc=5",
+      "publisher": "Global Finance Magazine",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -2740,10 +2757,10 @@
       "related_event": null
     },
     {
-      "id": "cd80dc2dc4d92446",
+      "id": "51e5cbb8f011a38a",
       "title": "Gold Dec 26 (GC=F) stock price, news, quote and history - Yahoo Finance UK",
       "summary": "<a href=\"https://news.google.com/rss/articles/CBMiVEFVX3lxTE1makZJRjg2ZzBXd0JVYVdJbWE1amR1ampYcnVBamtVWUtSWlRRQ28zdHB0VFBDTjhyT0g2bWRKT29Ya2hhS2xET093eTdkUW5ObzRzVg?oc=5\" target=\"_blank\">Gold Dec 26 (GC=F) stock price, news, quote and history</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Yahoo Finance UK</font>",
-      "time_published_utc": "2026-11-11 10:16:27+00:00",
+      "time_published_utc": "2026-11-11 10:21:51+00:00",
       "overall_sentiment_score": 0.0,
       "overall_sentiment_label": "Neutral",
       "topics": [
@@ -2770,23 +2787,6 @@
       "source_feed": "ft_markets",
       "source_url": "https://www.ft.com/content/26fd23df-830e-481b-a3bc-19bcab48c5f6",
       "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "366675c47c887502",
-      "title": "Commentary: Disabled vet honors \u2018gold star\u2019 teacher, families - Iowa Capital Dispatch",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMilAFBVV95cUxPQTBDamU3M01FaW42MHhpZUk1cGlwUnlDdnZGUFFVYnpQaXlyYm5Pajl4UldKVmJBZ3NZdWw3QzNwWXdOZkpPWl9BRjE1Uy1jby1YVFJwYVNLenZtUnh5Z1hkMGJNQVhpUnBQQkVJUFRxM1gxRjNUdEhxVmVrb00xZ1JibjlWQ0JnUFZrM3NmSnV1YU5j?oc=5\" target=\"_blank\">Commentary: Disabled vet honors \u2018gold star\u2019 teacher, families</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Iowa Capital Dispatch</font>",
-      "time_published_utc": "2026-11-11 11:05:56+00:00",
-      "overall_sentiment_score": 0.765,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "commodities"
-      ],
-      "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxPQTBDamU3M01FaW42MHhpZUk1cGlwUnlDdnZGUFFVYnpQaXlyYm5Pajl4UldKVmJBZ3NZdWw3QzNwWXdOZkpPWl9BRjE1Uy1jby1YVFJwYVNLenZtUnh5Z1hkMGJNQVhpUnBQQkVJUFRxM1gxRjNUdEhxVmVrb00xZ1JibjlWQ0JnUFZrM3NmSnV1YU5j?oc=5",
-      "source_feed": "gnews_gold",
-      "source_url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxPQTBDamU3M01FaW42MHhpZUk1cGlwUnlDdnZGUFFVYnpQaXlyYm5Pajl4UldKVmJBZ3NZdWw3QzNwWXdOZkpPWl9BRjE1Uy1jby1YVFJwYVNLenZtUnh5Z1hkMGJNQVhpUnBQQkVJUFRxM1gxRjNUdEhxVmVrb00xZ1JibjlWQ0JnUFZrM3NmSnV1YU5j?oc=5",
-      "publisher": "Iowa Capital Dispatch",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -2821,23 +2821,6 @@
       "source_feed": "wsj_markets",
       "source_url": "https://www.wsj.com/finance/investing/asias-market-meltdown-traps-some-traders-bb89db4a?mod=rss_markets_main",
       "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "1ecdfcd1d85fe9ed",
-      "title": "TSX futures rise as gold rebounds, CoreWeave results lift sentiment - Reuters",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMirAFBVV95cUxNRDBtdHpBV1paSnZBMWxMTzBkY1NrX3h1dTZlYy1kTEFnNTlQOU5PajhrYVc1Z1VKbkpzNmhZVmpvUUJ4cUw0MjBSNkpOOE1wU0FEczNwYzdnV2dUUlRuRno1a1dmMTRnUVpwbGthcFJyNDRrNWFSX1pfRFRBN0lHYUo3OVptYUt4T3hSWFJoa2hKdTRtNWZncC03YUZKc0JhQ0w0Tnc5WElrY2xI?oc=5\" target=\"_blank\">TSX futures rise as gold rebounds, CoreWeave results lift sentiment</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Reuters</font>",
-      "time_published_utc": "2026-11-11 11:43:46+00:00",
-      "overall_sentiment_score": 0.0,
-      "overall_sentiment_label": "Neutral",
-      "topics": [
-        "commodities"
-      ],
-      "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxNRDBtdHpBV1paSnZBMWxMTzBkY1NrX3h1dTZlYy1kTEFnNTlQOU5PajhrYVc1Z1VKbkpzNmhZVmpvUUJ4cUw0MjBSNkpOOE1wU0FEczNwYzdnV2dUUlRuRno1a1dmMTRnUVpwbGthcFJyNDRrNWFSX1pfRFRBN0lHYUo3OVptYUt4T3hSWFJoa2hKdTRtNWZncC03YUZKc0JhQ0w0Tnc5WElrY2xI?oc=5",
-      "source_feed": "gnews_gold",
-      "source_url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxNRDBtdHpBV1paSnZBMWxMTzBkY1NrX3h1dTZlYy1kTEFnNTlQOU5PajhrYVc1Z1VKbkpzNmhZVmpvUUJ4cUw0MjBSNkpOOE1wU0FEczNwYzdnV2dUUlRuRno1a1dmMTRnUVpwbGthcFJyNDRrNWFSX1pfRFRBN0lHYUo3OVptYUt4T3hSWFJoa2hKdTRtNWZncC03YUZKc0JhQ0w0Tnc5WElrY2xI?oc=5",
-      "publisher": "Reuters",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -3078,6 +3061,23 @@
       "url": "https://www.wsj.com/pro/bankruptcy/asset-managers-insurers-dogged-by-fraud-at-777-partners-9e3245cf?mod=rss_markets_main",
       "source_feed": "wsj_markets",
       "source_url": "https://www.wsj.com/pro/bankruptcy/asset-managers-insurers-dogged-by-fraud-at-777-partners-9e3245cf?mod=rss_markets_main",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "4d483a3d7e9db5c2",
+      "title": "Goldman, Fortress and HBSC Back Rare Private Credit Deal in Saudi Arabia",
+      "summary": "Goldman Sachs Group Inc., HSBC Holdings Plc and Fortress Investment Group are among financial heavyweights teaming up on one of Saudi Arabia\u2019s first major private credit deals since the regional war began.",
+      "time_published_utc": "2026-11-11 14:02:18+00:00",
+      "overall_sentiment_score": 0.0772,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "commodities"
+      ],
+      "url": "https://www.bloomberg.com/news/articles/2026-11-11/goldman-fortress-and-hbsc-back-rare-private-credit-deal-in-saudi-arabia",
+      "source_feed": "bloomberg_markets",
+      "source_url": "https://www.bloomberg.com/news/articles/2026-11-11/goldman-fortress-and-hbsc-back-rare-private-credit-deal-in-saudi-arabia",
       "publisher": "",
       "sentiment_method": "vader",
       "related_event": null
@@ -3357,6 +3357,23 @@
       "related_event": null
     },
     {
+      "id": "6807224c152bb12a",
+      "title": "The Elite Squad Out to Win Gold for Team USA at the World Cup of Pastry - WSJ",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMixAFBVV95cUxNelRMZzN1cy1MMXZrQnp4Vi02cnFudF9MellQamgxZWhySU56QTl0czFfcEJqU1JRbW9jaWZNc0pLc01hQ19pWXYxdjlnQXBVQl83NnZqYWJlbGFSVFozN082bDM4WFdEMDljd0hxVTlCeTNVVGNRcWM3MGpORUMyNEZ1Mzh5MGVHX0VYRTVOZDREencwNDJJcFVIcDhibE5EVUxwWlRiRUtNcHpfMjNzSThOekw4NTNFZjZiUDlpaEs5ZVJX?oc=5\" target=\"_blank\">The Elite Squad Out to Win Gold for Team USA at the World Cup of Pastry</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">WSJ</font>",
+      "time_published_utc": "2026-11-11 17:33:00+00:00",
+      "overall_sentiment_score": 0.8225,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "commodities"
+      ],
+      "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNelRMZzN1cy1MMXZrQnp4Vi02cnFudF9MellQamgxZWhySU56QTl0czFfcEJqU1JRbW9jaWZNc0pLc01hQ19pWXYxdjlnQXBVQl83NnZqYWJlbGFSVFozN082bDM4WFdEMDljd0hxVTlCeTNVVGNRcWM3MGpORUMyNEZ1Mzh5MGVHX0VYRTVOZDREencwNDJJcFVIcDhibE5EVUxwWlRiRUtNcHpfMjNzSThOekw4NTNFZjZiUDlpaEs5ZVJX?oc=5",
+      "source_feed": "gnews_gold",
+      "source_url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNelRMZzN1cy1MMXZrQnp4Vi02cnFudF9MellQamgxZWhySU56QTl0czFfcEJqU1JRbW9jaWZNc0pLc01hQ19pWXYxdjlnQXBVQl83NnZqYWJlbGFSVFozN082bDM4WFdEMDljd0hxVTlCeTNVVGNRcWM3MGpORUMyNEZ1Mzh5MGVHX0VYRTVOZDREencwNDJJcFVIcDhibE5EVUxwWlRiRUtNcHpfMjNzSThOekw4NTNFZjZiUDlpaEs5ZVJX?oc=5",
+      "publisher": "WSJ",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
       "id": "f5240890d94755b0",
       "title": "These 5 Gold Mining Stocks Give You a Different Way to Own Gold - Yahoo Finance",
       "summary": "<a href=\"https://news.google.com/rss/articles/CBMiogFBVV95cUxPdTh4YUlXVjhZX1Bpa0VEaEVmS3dWdVhiMHZUQlV2RTNuWUlhUkJoYXloeHpJYzN0T1ZzZTJWWFE5dXpNdDJTaVA4R2k2bjlIN0dsNnBIT2Fxc0tHYzFlWHZfUnYxMWg1QmFuUHdnUDVvY09GdThTNUxpV3laSml4QUVVbDFjU0J0SkpYeGJLZFQteG9sSzQ2WE5adzdVN2RxN2c?oc=5\" target=\"_blank\">These 5 Gold Mining Stocks Give You a Different Way to Own Gold</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Yahoo Finance</font>",
@@ -3371,23 +3388,6 @@
       "source_feed": "gnews_gold",
       "source_url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPdTh4YUlXVjhZX1Bpa0VEaEVmS3dWdVhiMHZUQlV2RTNuWUlhUkJoYXloeHpJYzN0T1ZzZTJWWFE5dXpNdDJTaVA4R2k2bjlIN0dsNnBIT2Fxc0tHYzFlWHZfUnYxMWg1QmFuUHdnUDVvY09GdThTNUxpV3laSml4QUVVbDFjU0J0SkpYeGJLZFQteG9sSzQ2WE5adzdVN2RxN2c?oc=5",
       "publisher": "Yahoo Finance",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "fc64f748b325ff33",
-      "title": "The Elite Squad Out to Win Gold for Team USA at the World Cup of Pastry - WSJ",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMixAFBVV95cUxNelRMZzN1cy1MMXZrQnp4Vi02cnFudF9MellQamgxZWhySU56QTl0czFfcEJqU1JRbW9jaWZNc0pLc01hQ19pWXYxdjlnQXBVQl83NnZqYWJlbGFSVFozN082bDM4WFdEMDljd0hxVTlCeTNVVGNRcWM3MGpORUMyNEZ1Mzh5MGVHX0VYRTVOZDREencwNDJJcFVIcDhibE5EVUxwWlRiRUtNcHpfMjNzSThOekw4NTNFZjZiUDlpaEs5ZVJX?oc=5\" target=\"_blank\">The Elite Squad Out to Win Gold for Team USA at the World Cup of Pastry</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">WSJ</font>",
-      "time_published_utc": "2026-11-11 17:35:04+00:00",
-      "overall_sentiment_score": 0.8225,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "commodities"
-      ],
-      "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNelRMZzN1cy1MMXZrQnp4Vi02cnFudF9MellQamgxZWhySU56QTl0czFfcEJqU1JRbW9jaWZNc0pLc01hQ19pWXYxdjlnQXBVQl83NnZqYWJlbGFSVFozN082bDM4WFdEMDljd0hxVTlCeTNVVGNRcWM3MGpORUMyNEZ1Mzh5MGVHX0VYRTVOZDREencwNDJJcFVIcDhibE5EVUxwWlRiRUtNcHpfMjNzSThOekw4NTNFZjZiUDlpaEs5ZVJX?oc=5",
-      "source_feed": "gnews_gold",
-      "source_url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNelRMZzN1cy1MMXZrQnp4Vi02cnFudF9MellQamgxZWhySU56QTl0czFfcEJqU1JRbW9jaWZNc0pLc01hQ19pWXYxdjlnQXBVQl83NnZqYWJlbGFSVFozN082bDM4WFdEMDljd0hxVTlCeTNVVGNRcWM3MGpORUMyNEZ1Mzh5MGVHX0VYRTVOZDREencwNDJJcFVIcDhibE5EVUxwWlRiRUtNcHpfMjNzSThOekw4NTNFZjZiUDlpaEs5ZVJX?oc=5",
-      "publisher": "WSJ",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -3509,6 +3509,23 @@
       "source_feed": "cnbc_business",
       "source_url": "https://www.cnbc.com/2026/11/11/nvidia-alternatives-4-tech-investing-themes.html",
       "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "30457ea52c2ac2b5",
+      "title": "MVRHS receives Gold Star Award for the Seal of Biliteracy - MV Times",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMimAFBVV95cUxOREx4ajFIeElScnJRbW1EanZMQy1JcTdKZE41TS1hUy16bXozQ0ItTlNrX1RPZEFlR2lsNUl1TkZfYVhyUF85blZJVmVpc0RyMzVRRmFabExwRDF5LVdzU0ZGOE45VjZDTm5IYTNjZmczRG5DYW5IQ000cU1vZ3BMNEVtU2UzS1VSWmZyYThxUVZJSVJNbTFYVQ?oc=5\" target=\"_blank\">MVRHS receives Gold Star Award for the Seal of Biliteracy</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">MV Times</font>",
+      "time_published_utc": "2026-11-11 19:17:56+00:00",
+      "overall_sentiment_score": 0.7906,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "commodities"
+      ],
+      "url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxOREx4ajFIeElScnJRbW1EanZMQy1JcTdKZE41TS1hUy16bXozQ0ItTlNrX1RPZEFlR2lsNUl1TkZfYVhyUF85blZJVmVpc0RyMzVRRmFabExwRDF5LVdzU0ZGOE45VjZDTm5IYTNjZmczRG5DYW5IQ000cU1vZ3BMNEVtU2UzS1VSWmZyYThxUVZJSVJNbTFYVQ?oc=5",
+      "source_feed": "gnews_gold",
+      "source_url": "https://news.google.com/rss/articles/CBMimAFBVV95cUxOREx4ajFIeElScnJRbW1EanZMQy1JcTdKZE41TS1hUy16bXozQ0ItTlNrX1RPZEFlR2lsNUl1TkZfYVhyUF85blZJVmVpc0RyMzVRRmFabExwRDF5LVdzU0ZGOE45VjZDTm5IYTNjZmczRG5DYW5IQ000cU1vZ3BMNEVtU2UzS1VSWmZyYThxUVZJSVJNbTFYVQ?oc=5",
+      "publisher": "MV Times",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -4132,25 +4149,6 @@
       "related_event": null
     },
     {
-      "id": "7ee38fb1bf2ee3c4",
-      "title": "Gold Holds Below $4,000 as Market Looks Ahead to Fed Rate Hike",
-      "summary": "Gold held a drop below $4,000 an ounce, as persistent inflation and hawkish remarks from Federal Reserve officials fueled expectations for an interest-rate hike next month.",
-      "time_published_utc": "2026-11-12 00:12:52+00:00",
-      "overall_sentiment_score": -0.2732,
-      "overall_sentiment_label": "Bearish",
-      "topics": [
-        "economy_monetary",
-        "economy_macro",
-        "commodities"
-      ],
-      "url": "https://www.bloomberg.com/news/articles/2026-11-12/gold-holds-below-4-000-as-market-looks-ahead-to-fed-rate-hike",
-      "source_feed": "bloomberg_markets",
-      "source_url": "https://www.bloomberg.com/news/articles/2026-11-12/gold-holds-below-4-000-as-market-looks-ahead-to-fed-rate-hike",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
       "id": "def64e891c52e23a",
       "title": "Nikkei Falls 0.2%, Dragged by Electronics Stocks",
       "summary": "Japan\u2019s Nikkei Stock Average was down 0.2% as declines in electronics makers offset gains in chemical companies and trading houses.",
@@ -4186,10 +4184,10 @@
       "related_event": null
     },
     {
-      "id": "f4507b5c10d3bc39",
+      "id": "8f2d9fe27e424bd1",
       "title": "Gold Dims Amid Rising Fed Rate-Hike Expectations - WSJ",
       "summary": "<a href=\"https://news.google.com/rss/articles/CBMiqAFBVV95cUxPOFRSMC1GZ0NrUl9iRUdXSnFXX0xRTXNTb0dkTTluUE9HMGp3d3N4OG51U0s0WUs2aEVTTEJrYVRyVExXYjJYUzAwWEtHcUx1ZXVFNVkzZV9YWUN3TWE3R2RvdHNPUzJSektyTWpvV1RpSEp4QXVQZ0puLUFNRUZnU2xWYlhaVzIyYVJzN2Z5aWE3UU02Q2tGekp2eXZwa1oyRGpDbGl1NXE?oc=5\" target=\"_blank\">Gold Dims Amid Rising Fed Rate-Hike Expectations</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">WSJ</font>",
-      "time_published_utc": "2026-11-12 00:49:06+00:00",
+      "time_published_utc": "2026-11-12 00:48:00+00:00",
       "overall_sentiment_score": 0.0,
       "overall_sentiment_label": "Neutral",
       "topics": [
@@ -4200,24 +4198,6 @@
       "source_feed": "gnews_gold",
       "source_url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxPOFRSMC1GZ0NrUl9iRUdXSnFXX0xRTXNTb0dkTTluUE9HMGp3d3N4OG51U0s0WUs2aEVTTEJrYVRyVExXYjJYUzAwWEtHcUx1ZXVFNVkzZV9YWUN3TWE3R2RvdHNPUzJSektyTWpvV1RpSEp4QXVQZ0puLUFNRUZnU2xWYlhaVzIyYVJzN2Z5aWE3UU02Q2tGekp2eXZwa1oyRGpDbGl1NXE?oc=5",
       "publisher": "WSJ",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "2885da1f103dbcb2",
-      "title": "Long US Bonds Reopen With Gains as Risk Sentiment Sours Again",
-      "summary": "Long-end Treasuries drifted higher as trading resumed after a holiday as turmoil at Nvidia Corp. fueled doubts about the artificial intelligence trade and sparked demand for haven assets.",
-      "time_published_utc": "2026-11-12 00:58:09+00:00",
-      "overall_sentiment_score": 0.5423,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "financial_markets",
-        "commodities"
-      ],
-      "url": "https://www.bloomberg.com/news/articles/2026-11-12/long-us-bonds-reopen-with-gains-as-risk-sentiment-sours-again",
-      "source_feed": "bloomberg_markets",
-      "source_url": "https://www.bloomberg.com/news/articles/2026-11-12/long-us-bonds-reopen-with-gains-as-risk-sentiment-sours-again",
-      "publisher": "",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -4257,25 +4237,6 @@
       "related_event": null
     },
     {
-      "id": "ee10ecfa27ea2f35",
-      "title": "Gold clings below $4,000 as inflation fears fuel bets on bigger Fed hikes",
-      "summary": "",
-      "time_published_utc": "2026-11-12 01:11:14+00:00",
-      "overall_sentiment_score": -0.4215,
-      "overall_sentiment_label": "Bearish",
-      "topics": [
-        "economy_monetary",
-        "economy_macro",
-        "commodities"
-      ],
-      "url": "https://www.investing.com/news/commodities-news/gold-clings-below-4000-as-inflation-fears-fuel-bets-on-bigger-fed-hikes-5020139",
-      "source_feed": "investing_com",
-      "source_url": "https://www.investing.com/news/commodities-news/gold-clings-below-4000-as-inflation-fears-fuel-bets-on-bigger-fed-hikes-5020139",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
       "id": "4cc16b8b675922d8",
       "title": "Thursday's big stock stories: What\u2019s likely to move the market in the next trading session",
       "summary": "CoreWeave shares soared on the back of its earnings report, reviving the tech trade and lifting the Nasdaq Composite on Wednesday.",
@@ -4307,23 +4268,6 @@
       "source_feed": "gnews_gold",
       "source_url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNMTJybnByRUZtMk5uajdEUVROVDJnSmZlQVRsazNHSmZaY0FKMVM0d0tvVnhDdlozdUhuMkx4ZkJZV0IyUDRCMmxtSzF0U3RmWWkxckVJVVVUV1pZczI2dmZfN29TYmN0YkVWMml2X2NJY1liZk1WeWFVdXNHbFpqdHBVWmhMTE4zTHozN2l5ZGFOWVBxWVBzTVB6V3dLeTR5UmlYYTVtN0xJQW5MMTVRdUJn?oc=5",
       "publisher": "Bloomberg.com",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "ee4feeaf8c56f58e",
-      "title": "Sri Lanka Budget Targets Growth With IMF Bailout Nearing End",
-      "summary": "Sri Lanka will unveil a budget aimed at keeping its economic recovery on track amid global headwinds and as its $3 billion International Monetary Fund bailout draws to a close.",
-      "time_published_utc": "2026-11-12 01:30:00+00:00",
-      "overall_sentiment_score": 0.2023,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "economy_monetary"
-      ],
-      "url": "https://www.bloomberg.com/news/articles/2026-11-12/sri-lanka-budget-targets-growth-with-imf-bailout-nearing-end",
-      "source_feed": "bloomberg_markets",
-      "source_url": "https://www.bloomberg.com/news/articles/2026-11-12/sri-lanka-budget-targets-growth-with-imf-bailout-nearing-end",
-      "publisher": "",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -4760,10 +4704,10 @@
     },
     {
       "id": "dfeec88afad31167",
-      "title": "Vietnam Dollar Bond Sale on Hold as Fuel Shock Fans Inflation",
-      "summary": "Vietnam\u2019s finance minister told parliament that the timing is not yet right for an international bond issuance, as global disruptions to fuel supplies are fueling inflationary pressures.",
+      "title": "Vietnam Dollar Bond Sale on Hold as Fuel Cost Fans Inflation",
+      "summary": "Vietnam\u2019s plans for an international bond issuance are on hold while officials wait for more suitable conditions, as global disruptions to fuel supplies stoke inflationary pressures and borrowing costs remain elevated.",
       "time_published_utc": "2026-11-12 04:19:44+00:00",
-      "overall_sentiment_score": -0.743,
+      "overall_sentiment_score": -0.5719,
       "overall_sentiment_label": "Bearish",
       "topics": [
         "economy_macro",
@@ -4811,6 +4755,23 @@
       "related_event": null
     },
     {
+      "id": "f8f338d281abcae4",
+      "title": "Najib Barred From Politics, Media Appearances Under House Arrest",
+      "summary": "Former Malaysian Prime Minister Najib Razak is barred from any political activities, media appearances and from receiving visitors without permission under his house arrest conditions, Home Affairs Minister Saifuddin Nasution Ismail said Thursday.",
+      "time_published_utc": "2026-11-12 04:53:01+00:00",
+      "overall_sentiment_score": -0.5859,
+      "overall_sentiment_label": "Bearish",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://www.bloomberg.com/news/articles/2026-11-12/najib-barred-from-politics-media-appearances-under-house-arrest",
+      "source_feed": "bloomberg_markets",
+      "source_url": "https://www.bloomberg.com/news/articles/2026-11-12/najib-barred-from-politics-media-appearances-under-house-arrest",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
       "id": "34e482be6c4f4762",
       "title": "Oil falls over $1 on easing geopolitical fears and oversupply worries",
       "summary": "",
@@ -4823,6 +4784,23 @@
       "url": "https://www.investing.com/news/commodities-news/oil-prices-drop-more-than-1-as-hopes-for-iran-ukraine-peace-talks-pressure-markets-5020171",
       "source_feed": "investing_com",
       "source_url": "https://www.investing.com/news/commodities-news/oil-prices-drop-more-than-1-as-hopes-for-iran-ukraine-peace-talks-pressure-markets-5020171",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "e10c9ec012b5ca35",
+      "title": "Angola\u2019s Oil Windfall Fuels Diversification Push, Citi Says",
+      "summary": "Angola\u2019s drive to diversify its economy away from oil is picking up steam as the government uses a surge in crude revenue to finance structural reforms and investment in energy, transport and other industries, Citigroup Inc. said.",
+      "time_published_utc": "2026-11-12 05:00:00+00:00",
+      "overall_sentiment_score": -0.3818,
+      "overall_sentiment_label": "Bearish",
+      "topics": [
+        "commodities"
+      ],
+      "url": "https://www.bloomberg.com/news/articles/2026-11-12/angola-s-oil-windfall-fuels-diversification-push-citi-says",
+      "source_feed": "bloomberg_markets",
+      "source_url": "https://www.bloomberg.com/news/articles/2026-11-12/angola-s-oil-windfall-fuels-diversification-push-citi-says",
       "publisher": "",
       "sentiment_method": "vader",
       "related_event": null
@@ -4841,6 +4819,24 @@
       "source_feed": "gnews_gold",
       "source_url": "https://news.google.com/rss/articles/CBMilwFBVV95cUxOeXJQTmVQMFVuWV82THhmdjRMLUpwZmpwS1NhZnJZZk50LVJzVElOTE1rMnhLNTQtWVptT2xreFowX1hnd1FRclN1YndWLWN4MEpFRG1uSU9RMDVudWJFdGxXbDdqM2N4bjR5M2R3aGZIWnBmNHVYejhNNk1wU0hoNXB4bzV4RHNvN2wzbnFrTi16V2pKSllR?oc=5",
       "publisher": "WSJ",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "a1558b0821b82a8f",
+      "title": "Gold slips below $4,000 as hawkish Fed bets keep bullion under pressure",
+      "summary": "",
+      "time_published_utc": "2026-11-12 05:18:14+00:00",
+      "overall_sentiment_score": -0.296,
+      "overall_sentiment_label": "Bearish",
+      "topics": [
+        "economy_monetary",
+        "commodities"
+      ],
+      "url": "https://www.investing.com/news/commodities-news/gold-clings-below-4000-as-inflation-fears-fuel-bets-on-bigger-fed-hikes-5020139",
+      "source_feed": "investing_com",
+      "source_url": "https://www.investing.com/news/commodities-news/gold-clings-below-4000-as-inflation-fears-fuel-bets-on-bigger-fed-hikes-5020139",
+      "publisher": "",
       "sentiment_method": "vader",
       "related_event": null
     }

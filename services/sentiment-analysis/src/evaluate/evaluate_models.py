@@ -113,13 +113,18 @@ def _champion_significance(champ_metrics: dict, sig_report: dict, champ_name: st
         rank_p = sig_report.get("rank_ic_pvalue", rank_p)
         hit_p = sig_report.get("hit_ratio_pvalue", hit_p)
         ci = sig_report.get("hit_ratio_ci95", ci)
+        adds_value = sig_report.get("sentiment_adds_value")
+        adds_note = sig_report.get("sentiment_adds_value_note")
         source = "reports/significance.json"
     else:
+        adds_value = sentiment_adds_value_from_pvalues(rank_p, hit_p)
+        adds_note = None
         source = "computed from champion test predictions"
 
     return {
-        "sentiment_adds_value": sentiment_adds_value_from_pvalues(rank_p, hit_p),
+        "sentiment_adds_value": adds_value,
         "sentiment_adds_value_basis": SIGNIFICANCE_BASIS,
+        "sentiment_adds_value_note": adds_note,
         "sentiment_adds_value_source": source,
         "rank_ic_pvalue": rank_p,
         "hit_ratio_pvalue": hit_p,

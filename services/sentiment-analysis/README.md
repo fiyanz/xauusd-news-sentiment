@@ -24,6 +24,11 @@ src/pipeline/sync.py
   eval models → predict` di atas artifact terbaru. Guard: sampel < 20 bucket →
   training dilewati, model lama dipertahankan.
 - **`src/pipeline/provenance.py`** — helper manifest provenance bersama.
+- **Mode bucket** (`data.bucket_mode`):
+  - `price_history` (default): bucket untuk **seluruh history harga**; fitur
+    berita netral (0) bila tidak ada artikel. Sampel ~26k bucket (2010–2026),
+    jadi CV/evaluasi benar-benar bermakna dan tidak dibatasi cakupan berita.
+  - `news_only`: bucket hanya saat ada artikel (legacy, sampel kecil).
 
 ## 2. Modul
 
@@ -38,6 +43,7 @@ src/pipeline/sync.py
 | `src/acquire/macro.py` | US10Y, DXY, Oil (PIT lag) |
 | `src/process/harmonize.py` | merge_asof backward, return/label |
 | `src/process/bucket_harmonize.py` | 4H bucket, topik, interaksi, split+embargo |
+| `src/process/price_buckets.py` | Bucket 4H dari full history harga (berita sebagai fitur sparse) |
 | `src/features/build_features.py` | TF-IDF + split + provenance |
 | `src/features/reduce.py` | Preprocessing: PCA per blok berkorelasi + encoding waktu siklikal (TF-IDF ikut dipakai) |
 | `src/models/train.py` | 4 model, CV, champion by CV |

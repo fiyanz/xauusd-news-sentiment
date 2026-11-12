@@ -245,6 +245,18 @@ def check_artifact(features_parquet: str, provenance_path: str = DEFAULT_PROVENA
 # --------------------------------------------------------------------------- #
 # Report builder
 # --------------------------------------------------------------------------- #
+def sentiment_features_present(feature_cols) -> bool:
+    """True bila model benar-benar memakai fitur sentimen/topik/teks.
+
+    Fitur ``sentiment_score`` saja tidak cukup: di mode price_history berita
+    bisa jadi nol-varians di training, sehingga blok topik/interaksi/teks
+    dilewati dan model identik dengan baseline makro.
+    """
+    return any(
+        str(c).startswith(("topic_", "sentiment_x_", "tfidf_")) for c in (feature_cols or [])
+    )
+
+
 def compute_significance(
     y_true: np.ndarray,
     y_pred: np.ndarray,
@@ -252,6 +264,7 @@ def compute_significance(
     champion_name: str,
     selection_method: str,
     seed: int = 42,
+    has_sentiment_features: bool = True,
 ) -> dict:
     """Compute the full significance contract for one model's test predictions."""
     y_true = np.asarray(y_true, dtype=float)
@@ -290,8 +303,17 @@ def compute_significance(
         "pesaran_timmermann_stat": round(float(pt_stat), 4),
         "pesaran_timmermann_pvalue": round(float(pt_pvalue), 5),
         "negative_control_ic": round(float(neg_ic), 4),
-        "sentiment_adds_value": sentiment_adds_value_from_pvalues(rank_pvalue, hit_pvalue),
+        "sentiment_adds_value": (
+            sentiment_adds_value_from_pvalues(rank_pvalue, hit_pvalue)
+            if has_sentiment_features
+            else False
+        ),
         "sentiment_adds_value_basis": SIGNIFICANCE_BASIS,
+        "sentiment_adds_value_note": (
+            None
+            if has_sentiment_features
+            else "fitur sentimen/topik/teks tidak ada di model (blok nol-varians di training)"
+        ),
         # --- supporting detail (not part of the locked contract) -------------
         "hit_ratio_sig_n": n_sig,
         "hit_ratio_sig_hits": hits,
@@ -386,6 +408,7 @@ def build_significance_report(
         champion_name=champion_name,
         selection_method=selection_method,
         seed=seed,
+        has_sentiment_features=sentiment_features_present(feature_cols),
     )
 
     artifact = check_artifact(features_parquet, provenance_path)

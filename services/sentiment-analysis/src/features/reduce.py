@@ -76,6 +76,10 @@ class FeatureReducer:
             if not cols:
                 continue
             X = df[cols].fillna(self.impute).to_numpy(dtype=float)
+            # Blok konstan di training (mis. TF-IDF/sentimen yang belum ada
+            # riwayatnya) tidak bisa dikompresi -> dilewati, bukan difabrikasi.
+            if X.shape[0] < 2 or np.allclose(X.std(axis=0), 0.0):
+                continue
             scaler = StandardScaler().fit(X)
             Xs = scaler.transform(X)
             n_comp = min(max_components, X.shape[1], max(1, X.shape[0] - 1))

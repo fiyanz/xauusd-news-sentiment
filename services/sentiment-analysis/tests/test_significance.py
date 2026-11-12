@@ -61,10 +61,15 @@ def test_sentiment_adds_value_consistent_with_pvalues():
     sig = _load()
     rank_p = sig["rank_ic_pvalue"]
     hit_p = sig["hit_ratio_pvalue"]
-    expected = (rank_p is not None and rank_p < 0.05) or (hit_p is not None and hit_p < 0.05)
-    assert sig["sentiment_adds_value"] == expected, (
-        "sentiment_adds_value must be derived from the p-values, not hardcoded"
-    )
+    from_pvalues = (rank_p is not None and rank_p < 0.05) or (hit_p is not None and hit_p < 0.05)
+    # When the model carries no sentiment/topic/text features the honest answer
+    # is False, regardless of the champion's own p-values.
+    if sig.get("sentiment_adds_value_note"):
+        assert sig["sentiment_adds_value"] is False
+    else:
+        assert sig["sentiment_adds_value"] == from_pvalues, (
+            "sentiment_adds_value must be derived from the p-values, not hardcoded"
+        )
 
 
 def test_champion_matches_best_cv():

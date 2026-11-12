@@ -151,16 +151,34 @@ def run_full_sync(write_prediction: bool = True) -> dict:
 
     # 7. 4H Bucketing & Interaction Features
     print("\n--- Step 7/8: 4H Bucketing & Interaction Features ---")
-    harmonize_buckets(
-        article_parquet=f"{processed_dir}/dataset_article.parquet",
-        calendar_csv=calendar_csv,
-        price_csv=data_cfg.get("price_file_complete", "data/raw/price/xauusd_h1_complete.csv"),
-        macro_csv=m_cfg.get("output_file", "data/raw/macro/macro_context.csv"),
-        output_parquet=f"{processed_dir}/bucketed_features.parquet",
-        embargo_hours=cfg.get("split", {}).get("embargo_hours", 24),
-        train_ratio=cfg.get("split", {}).get("train", 0.6),
-        val_ratio=cfg.get("split", {}).get("val", 0.2),
-    )
+    bucket_mode = data_cfg.get("bucket_mode", "price_history")
+    if bucket_mode == "price_history":
+        # Bucket untuk SELURUH history harga; fitur berita netral (0) bila tidak
+        # ada artikel, sehingga ukuran sampel tidak dibatasi cakupan berita.
+        from src.process.price_buckets import build_price_history_buckets
+
+        build_price_history_buckets(
+            price_csv=data_cfg.get("price_file_complete", "data/raw/price/xauusd_h1_complete.csv"),
+            article_parquet=f"{processed_dir}/dataset_article.parquet",
+            calendar_csv=calendar_csv,
+            macro_csv=m_cfg.get("output_file", "data/raw/macro/macro_context.csv"),
+            output_parquet=f"{processed_dir}/bucketed_features.parquet",
+            embargo_hours=cfg.get("split", {}).get("embargo_hours", 24),
+            train_ratio=cfg.get("split", {}).get("train", 0.6),
+            val_ratio=cfg.get("split", {}).get("val", 0.2),
+            vol_lookback_days=cfg.get("label", {}).get("vol_lookback_days", 20),
+        )
+    else:
+        harmonize_buckets(
+            article_parquet=f"{processed_dir}/dataset_article.parquet",
+            calendar_csv=calendar_csv,
+            price_csv=data_cfg.get("price_file_complete", "data/raw/price/xauusd_h1_complete.csv"),
+            macro_csv=m_cfg.get("output_file", "data/raw/macro/macro_context.csv"),
+            output_parquet=f"{processed_dir}/bucketed_features.parquet",
+            embargo_hours=cfg.get("split", {}).get("embargo_hours", 24),
+            train_ratio=cfg.get("split", {}).get("train", 0.6),
+            val_ratio=cfg.get("split", {}).get("val", 0.2),
+        )
 
     # 8. Provenance manifest (artefak data) — ditulis dulu agar stage
     #    signifikansi bisa memverifikasi artifact (parquet <= provenance).

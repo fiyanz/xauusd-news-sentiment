@@ -15,6 +15,7 @@ from src.evaluate.significance import (
     load_significance_report,
     pesaran_timmermann_test,  # re-exported for backwards compatibility
     sentiment_adds_value_from_pvalues,
+    sentiment_features_present,
     wilson_ci,
 )
 from src.features.reduce import apply_bundle_features
@@ -130,8 +131,15 @@ def evaluate_fair_test(
     full_hit = full_res["directional_hit_ratio"] or 0.0
     hit_delta = round(full_hit - base_hit, 4)
 
-    sentiment_adds_value = sentiment_adds_value_from_pvalues(
-        full_res["ic_pvalue"], full_res["hit_ratio_pvalue"]
+    # `sentiment_adds_value` only means something if the full model actually
+    # carries sentiment/topic/text features. When those blocks are skipped
+    # (zero variance in training) the full model equals the baseline and no
+    # sentiment value can be claimed.
+    has_sentiment = sentiment_features_present(bundle.get("champion_feature_cols"))
+    sentiment_adds_value = (
+        sentiment_adds_value_from_pvalues(full_res["ic_pvalue"], full_res["hit_ratio_pvalue"])
+        if has_sentiment
+        else False
     )
 
     eval_results["delta_alpha"] = {
@@ -139,6 +147,11 @@ def evaluate_fair_test(
         "hit_ratio_improvement": hit_delta,
         "sentiment_adds_value": bool(sentiment_adds_value),
         "sentiment_adds_value_basis": SIGNIFICANCE_BASIS,
+        "sentiment_adds_value_note": (
+            None
+            if has_sentiment
+            else "fitur sentimen/topik/teks tidak ada di model (blok nol-varians di training)"
+        ),
         "rank_ic_pvalue": full_res["ic_pvalue"],
         "hit_ratio_pvalue": full_res["hit_ratio_pvalue"],
         "hit_ratio_ci95": full_res["hit_ratio_ci95"],

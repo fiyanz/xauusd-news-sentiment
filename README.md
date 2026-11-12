@@ -83,6 +83,12 @@ price → intraday → macro → calendar → news → harmonize
       → features → buckets → retrain → evaluate → predict → provenance
 ```
 
+- **Bucket full-history** (`src/process/price_buckets.py`, `data.bucket_mode:
+  price_history`): bucket dibuat untuk **seluruh history harga** (2010–2026,
+  ~26k bucket 4H), fitur berita netral (0) bila tidak ada artikel. Ukuran sampel
+  tidak lagi dibatasi cakupan berita, sehingga evaluasi benar-benar bermakna.
+  Mode `news_only` (bucket hanya saat ada artikel) masih tersedia.
+
 - **Retrain stage** (`src/pipeline/retrain.py`) menjalankan `train → significance
   → eval fair → eval models → predict` di atas artifact terbaru, sehingga model
   dan laporan tidak tertinggal dari data.

@@ -78,7 +78,18 @@ def test_transform_uses_fitted_basis_not_refit():
 def test_bundle_reducer_is_used():
     bundle = joblib.load("models/champion_fair_model.joblib")
     assert bundle.get("reducer") is not None
-    assert "tfidf_pc1" in bundle["champion_feature_cols"]
     df = pd.read_parquet("data/processed/bucketed_features.parquet")
     X = apply_bundle_features(bundle, df)
     assert X.shape[1] == len(bundle["champion_feature_cols"])
+    # TF-IDF is only present when training had text; the reducer must honor that.
+    if not any(c.startswith("tfidf_") for c in bundle["champion_feature_cols"]):
+        assert not any(c.startswith("tfidf_") for c in X.columns)
+
+
+def test_reducer_skips_constant_block():
+    """A block that is constant in training cannot be compressed and is skipped."""
+    df = _frame()
+    for i in range(4):
+        df[f"tfidf_{i}"] = 0.0
+    r = FeatureReducer().fit(df)
+    assert "tfidf_pc1" not in r.feature_cols

@@ -54,6 +54,9 @@ data:
   news_dir_raw: "data/raw/news"
   news_corpus: "data/processed/news_corpus.jsonl"
   processed_dir: "data/processed"
+  # price_history: bucket untuk seluruh history harga (sampel besar, berita
+  #   sebagai fitur sparse). news_only: bucket hanya saat ada artikel.
+  bucket_mode: "price_history"
   intraday_dir: "data/raw/price"
   provenance_file: "data/processed/provenance.json"
 
