@@ -142,6 +142,19 @@ def run_full_sync(write_prediction: bool = True) -> dict:
     else:
         print("[PipelineSync] HF news disabled.")
 
+    # 5d. Rescore korpus dengan Loughran-McDonald (sekali; artikel yang sudah
+    #     punya sentiment_lm dilewati). VADER tetap tersimpan untuk perbandingan.
+    lm_cfg = news_cfg.get("lm_lexicon", {})
+    if lm_cfg.get("enabled", True):
+        try:
+            from src.acquire.sentiment_lexicon import rescore_corpus_with_lm
+
+            rescore_corpus_with_lm(corpus_path=corpus_path)
+        except Exception as exc:  # noqa: BLE001 - kamus tak ada; jangan crash
+            print(f"[PipelineSync] LM rescore dilewati: {type(exc).__name__}: {exc}")
+    else:
+        print("[PipelineSync] LM lexicon disabled.")
+
     # 6. Harmonization (korpus berita + price -> returns/labels)
     print("\n--- Step 6/8: Harmonization ---")
     harmonize_dataset(
@@ -186,6 +199,7 @@ def run_full_sync(write_prediction: bool = True) -> dict:
             train_ratio=cfg.get("split", {}).get("train", 0.6),
             val_ratio=cfg.get("split", {}).get("val", 0.2),
             vol_lookback_days=cfg.get("label", {}).get("vol_lookback_days", 20),
+            sentiment_col=news_cfg.get("sentiment_column", "overall_sentiment_score"),
         )
     else:
         harmonize_buckets(

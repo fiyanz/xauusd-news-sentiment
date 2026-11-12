@@ -48,6 +48,7 @@ def build_price_history_buckets(
     val_ratio: float = 0.2,
     tfidf_max_features: int = 50,
     vol_lookback_days: int = 20,
+    sentiment_col: str = "overall_sentiment_score",
 ) -> pd.DataFrame:
     """Create 4H buckets covering the whole price history, with sparse news."""
     print(f"[PriceBuckets] Building 4H buckets from {price_csv}...")
@@ -96,15 +97,18 @@ def build_price_history_buckets(
         text_corpus = (
             df_art["title"].fillna("") + " " + df_art["summary"].fillna("") + " " + df_art["related_event"].fillna("")
         ).str.lower()
+        if sentiment_col not in df_art.columns:
+            print(f"[PriceBuckets] kolom sentimen {sentiment_col!r} tidak ada; memakai overall_sentiment_score.")
+            sentiment_col = "overall_sentiment_score"
         for topic_col, pattern in TOPIC_PATTERNS.items():
             df_art[topic_col] = text_corpus.str.contains(pattern, regex=True).astype(float)
             short = topic_col.replace("topic_", "")
-            df_art[f"sentiment_x_{short}"] = df_art["overall_sentiment_score"] * df_art[topic_col]
+            df_art[f"sentiment_x_{short}"] = df_art[sentiment_col] * df_art[topic_col]
             df_art[f"{topic_col}_x_sentiment"] = df_art[f"sentiment_x_{short}"]
 
         agg_spec = {
             "id": "count",
-            "overall_sentiment_score": ["mean", "min", "max"],
+            sentiment_col: ["mean", "min", "max"],
             "title": lambda s: " ".join(s.dropna()),
             "summary": lambda s: " ".join(s.dropna()),
             "related_event": lambda s: " ".join(s.dropna()),
@@ -119,7 +123,7 @@ def build_price_history_buckets(
         flat = []
         for c in news_b.columns:
             if isinstance(c, tuple):
-                if c[0] == "overall_sentiment_score":
+                if c[0] == sentiment_col:
                     flat.append("sentiment_score" if c[1] == "mean" else f"sentiment_{c[1]}")
                 elif c[0] == "id":
                     flat.append("article_count")

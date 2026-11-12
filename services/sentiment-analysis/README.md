@@ -40,6 +40,7 @@ src/pipeline/sync.py
 | `src/acquire/corpus.py` | Korpus berita persisten (append-only, dedupe URL) |
 | `src/acquire/gdelt.py` | GDELT Doc API historis (keyless, rate-limited) |
 | `src/acquire/hf_news.py` | HuggingFace financial news (keyless, snapshot 2010-2020) |
+| `src/acquire/sentiment_lexicon.py` | Loughran-McDonald lexicon keuangan (alternatif VADER) |
 | `src/acquire/price.py` | H1 history + intraday GC=F 5m/15m |
 | `src/acquire/macro.py` | US10Y, DXY, Oil (PIT lag) |
 | `src/process/harmonize.py` | merge_asof backward, return/label |

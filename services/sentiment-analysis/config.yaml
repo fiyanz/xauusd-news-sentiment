@@ -47,6 +47,15 @@ news:
   hf_news:
     enabled: true
     cache: "data/raw/news/hf_gold_news.parquet"
+  # Kolom sentimen yang dipakai fitur: "overall_sentiment_score" (VADER)
+  # atau "sentiment_lm" (Loughran-McDonald). Keduanya selalu disimpan di korpus.
+  sentiment_column: "overall_sentiment_score"
+  lm_lexicon:
+    enabled: true
+    dictionary_cache: "data/raw/news/loughran_mcdonald.csv"
+    # Uji perbandingan VADER vs Loughran-McDonald:
+    #   set news.sentiment_column ke "sentiment_lm" dan jalankan ulang
+    #   harmonize -> bucket -> retrain; bandingkan delta_rank_ic + paired_ic_test.
 
 data:
   # Sumber eksternal (opsional). null -> pakai artifact yang sudah ada di repo,

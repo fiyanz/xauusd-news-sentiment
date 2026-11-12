@@ -82,7 +82,7 @@
     }
   },
   "significance": {
-    "sentiment_adds_value": true,
+    "sentiment_adds_value": false,
     "sentiment_adds_value_basis": "rank_ic_pvalue < 0.05 or hit_ratio_pvalue < 0.05",
     "sentiment_adds_value_note": null,
     "sentiment_adds_value_source": "reports/significance.json",
