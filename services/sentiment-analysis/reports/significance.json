@@ -1,100 +1,100 @@
 {
-  "champion_name": "XGBoost",
+  "champion_name": "Random_Forest",
   "selection_method": "cv_mean_rank_ic",
-  "test_samples": 8,
-  "hit_ratio_sig": 0.8,
+  "test_samples": 4,
+  "hit_ratio_sig": 1.0,
   "hit_ratio_ci95": [
-    0.3755,
-    0.9638
+    0.2065,
+    1.0
   ],
-  "hit_ratio_pvalue": 0.375,
-  "rank_ic": -0.5238,
-  "rank_ic_pvalue": 0.18272,
+  "hit_ratio_pvalue": 1.0,
+  "rank_ic": 0.0,
+  "rank_ic_pvalue": 1.0,
   "pesaran_timmermann_stat": 0.0,
   "pesaran_timmermann_pvalue": 0.5,
   "negative_control_ic": 0.0,
   "sentiment_adds_value": false,
   "sentiment_adds_value_basis": "rank_ic_pvalue < 0.05 or hit_ratio_pvalue < 0.05",
-  "hit_ratio_sig_n": 5,
-  "hit_ratio_sig_hits": 4,
+  "hit_ratio_sig_n": 1,
+  "hit_ratio_sig_hits": 1,
   "alpha": 0.05,
   "artifact_status": "verified",
   "is_simulated": false,
   "artifact_reason": "provenance.json ditemukan, generated_at baru, dan kolom data_source/generated_at ada.",
-  "bundle_champion_name": "XGBoost",
+  "bundle_champion_name": "Random_Forest",
   "cv_summary": {
     "Random_Forest": {
-      "mae_pct": 0.6333,
-      "rmse_pct": 0.7764,
-      "r2": -1.3499,
-      "adj_r2": -1.3499,
-      "hit_ratio_sig": 6.67,
+      "mae_pct": 0.5179,
+      "rmse_pct": 0.5179,
+      "r2": NaN,
+      "adj_r2": NaN,
+      "hit_ratio_sig": 40.0,
       "rank_ic": 0.0
     },
     "XGBoost": {
-      "mae_pct": 0.6567,
-      "rmse_pct": 0.7622,
-      "r2": -1.3698,
-      "adj_r2": -1.3698,
-      "hit_ratio_sig": 30.0,
-      "rank_ic": 0.7
+      "mae_pct": 0.6626,
+      "rmse_pct": 0.6626,
+      "r2": NaN,
+      "adj_r2": NaN,
+      "hit_ratio_sig": 40.0,
+      "rank_ic": 0.0
     },
     "LightGBM": {
-      "mae_pct": 0.6274,
-      "rmse_pct": 0.7694,
-      "r2": -1.2984,
-      "adj_r2": -1.2984,
-      "hit_ratio_sig": 6.67,
+      "mae_pct": 0.5365,
+      "rmse_pct": 0.5365,
+      "r2": NaN,
+      "adj_r2": NaN,
+      "hit_ratio_sig": 40.0,
       "rank_ic": 0.0
     },
     "Ridge_Linear": {
-      "mae_pct": 0.8025,
-      "rmse_pct": 0.9001,
-      "r2": -4.4165,
-      "adj_r2": -4.4165,
-      "hit_ratio_sig": 50.0,
-      "rank_ic": 0.6
+      "mae_pct": 0.8563,
+      "rmse_pct": 0.8563,
+      "r2": NaN,
+      "adj_r2": NaN,
+      "hit_ratio_sig": 80.0,
+      "rank_ic": 0.0
     }
   },
-  "generated_at": "2026-11-07T18:38:48Z",
+  "generated_at": "2026-11-12T03:34:44Z",
   "models": {
     "Random_Forest": {
       "rank_ic": 0.0,
       "rank_ic_pvalue": 1.0,
-      "hit_ratio_sig": 0.2,
+      "hit_ratio_sig": 1.0,
       "hit_ratio_ci95": [
-        0.0362,
-        0.6245
+        0.2065,
+        1.0
       ],
-      "hit_ratio_pvalue": 0.375
+      "hit_ratio_pvalue": 1.0
     },
     "XGBoost": {
-      "rank_ic": -0.5238,
-      "rank_ic_pvalue": 0.18272,
-      "hit_ratio_sig": 0.8,
+      "rank_ic": 0.3162,
+      "rank_ic_pvalue": 0.68377,
+      "hit_ratio_sig": 1.0,
       "hit_ratio_ci95": [
-        0.3755,
-        0.9638
+        0.2065,
+        1.0
       ],
-      "hit_ratio_pvalue": 0.375
+      "hit_ratio_pvalue": 1.0
     },
     "LightGBM": {
       "rank_ic": 0.0,
       "rank_ic_pvalue": 1.0,
-      "hit_ratio_sig": 0.2,
+      "hit_ratio_sig": 1.0,
       "hit_ratio_ci95": [
-        0.0362,
-        0.6245
+        0.2065,
+        1.0
       ],
-      "hit_ratio_pvalue": 0.375
+      "hit_ratio_pvalue": 1.0
     },
     "Ridge_Linear": {
-      "rank_ic": 0.5952,
-      "rank_ic_pvalue": 0.11953,
-      "hit_ratio_sig": 0.6,
+      "rank_ic": 0.4,
+      "rank_ic_pvalue": 0.6,
+      "hit_ratio_sig": 0.0,
       "hit_ratio_ci95": [
-        0.2307,
-        0.8824
+        0.0,
+        0.7935
       ],
       "hit_ratio_pvalue": 1.0
     }

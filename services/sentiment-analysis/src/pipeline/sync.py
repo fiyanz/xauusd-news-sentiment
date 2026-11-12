@@ -3,16 +3,15 @@
 Order matters for point-in-time integrity:
 
     price -> intraday -> macro -> calendar -> news -> harmonize -> buckets
+    -> retrain -> evaluate -> predict -> provenance
 
 The calendar must be enriched *before* news so the harmonizer can attribute
 articles to events using only already-published events (merge_asof backward).
 ``data/processed/provenance.json`` is written last and records the source and
-simulation status of every artifact.
+simulation status of every artifact (data, model, and reports).
 """
 
-import json
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 # Make ``src`` importable when run as a plain script from the repo root.
@@ -30,47 +29,7 @@ from src.acquire.calendar import enrich_economic_calendar, write_calendar_proven
 from src.acquire.news import acquire_news_sentiment, write_news_provenance, load_config
 from src.process.harmonize import harmonize_dataset
 from src.process.bucket_harmonize import harmonize_buckets
-
-
-def _now_str() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S+00:00")
-
-
-def _merge_provenance(manifest_path: str, entries: list[dict]) -> dict:
-    """Merge artifact entries into the provenance manifest on disk.
-
-    ``is_simulated`` is True only when *every* artifact is fully simulated;
-    partial simulation is reported through ``has_simulated_rows``.
-    """
-    now = _now_str()
-    manifest: dict = {"artifacts": {}, "generated_at": now}
-    if Path(manifest_path).exists():
-        try:
-            with open(manifest_path, "r") as f:
-                existing = json.load(f)
-            manifest["artifacts"] = existing.get("artifacts", {})
-        except (json.JSONDecodeError, OSError):
-            pass
-
-    for entry in entries:
-        artifact = entry.get("artifact")
-        if not artifact:
-            # Nested provenance (e.g. price artifacts dict)
-            for key, value in entry.get("artifacts", {}).items():
-                manifest["artifacts"][key] = value
-            continue
-        manifest["artifacts"][artifact] = entry
-
-    manifest["generated_at"] = entries[-1]["generated_at"] if entries else manifest.get("generated_at")
-    all_sim = bool(manifest["artifacts"]) and all(
-        v.get("is_simulated", False) for v in manifest["artifacts"].values()
-    )
-    manifest["is_simulated"] = all_sim
-    manifest["has_simulated_rows"] = any(
-        v.get("is_simulated", False) or v.get("rows_real", v.get("rows", 0)) < v.get("rows", 0)
-        for v in manifest["artifacts"].values()
-    )
-    return manifest
+from src.pipeline.provenance import merge_provenance, now_str, write_provenance
 
 
 def run_full_sync(write_prediction: bool = True) -> dict:
@@ -178,31 +137,60 @@ def run_full_sync(write_prediction: bool = True) -> dict:
         val_ratio=cfg.get("split", {}).get("val", 0.2),
     )
 
-    # 8. Provenance manifest
-    print("\n--- Step 8/8: Provenance Manifest ---")
+    # 8. Retrain + evaluasi + prediksi di atas artifact baru.
+    #    Data yang di-refresh tapi model tidak di-retrain akan membuat prediksi
+    #    dan laporan tertinggal dari data — stage ini menjaga konsistensi.
+    print("\n--- Step 8/9: Retrain, Evaluation & Prediction ---")
+    retrain_result = None
+    prediction = None
+    try:
+        from src.pipeline.retrain import run_training_and_evaluation
+
+        retrain_result = run_training_and_evaluation(
+            features_parquet=f"{processed_dir}/bucketed_features.parquet",
+            write_prediction=write_prediction,
+        )
+        prediction = retrain_result.get("prediction")
+        if retrain_result.get("status") != "ok":
+            print(f"[PipelineSync] Training dilewati: {retrain_result.get('reason')}")
+            prediction = prediction or {
+                "status": "skipped",
+                "reason": retrain_result.get("reason"),
+            }
+    except Exception as exc:
+        print(f"[PipelineSync] Retrain/evaluasi gagal: {exc}")
+        prediction = {"status": "unavailable", "reason": str(exc)}
+
+    # 9. Provenance manifest (ditulis terakhir agar mencakup model & laporan)
+    print("\n--- Step 9/9: Provenance Manifest ---")
     bucketed_entry = {
         "artifact": f"{processed_dir}/bucketed_features.parquet",
         "source": "rss_feeds+vader | bls_api_v2+fred_csv | yfinance GC=F | yfinance ^TNX/DX-Y.NYB/CL=F",
-        "generated_at": _now_str(),
+        "generated_at": now_str(),
         "as_of": None,
         "is_simulated": False,
     }
-    manifest = _merge_provenance(provenance_path, provenance_entries + [bucketed_entry])
-    with open(provenance_path, "w") as f:
-        json.dump(manifest, f, indent=2)
+    manifest = merge_provenance(provenance_path, provenance_entries + [bucketed_entry])
+    if retrain_result and retrain_result.get("status") == "ok":
+        now = now_str()
+        manifest["artifacts"]["models/champion_fair_model.joblib"] = {
+            "artifact": "models/champion_fair_model.joblib",
+            "source": "retrain pipeline (src.models.train, champion by CV)",
+            "generated_at": now,
+            "is_simulated": False,
+            "champion_name": retrain_result.get("champion_name"),
+        }
+        manifest["artifacts"]["reports/significance.json"] = {
+            "artifact": "reports/significance.json",
+            "source": "retrain pipeline (src.evaluate.significance)",
+            "generated_at": now,
+            "is_simulated": False,
+            "rank_ic": retrain_result.get("rank_ic"),
+            "rank_ic_pvalue": retrain_result.get("rank_ic_pvalue"),
+            "sentiment_adds_value": retrain_result.get("sentiment_adds_value"),
+        }
+    write_provenance(provenance_path, manifest)
     print(f"[PipelineSync] Provenance manifest written: {provenance_path}")
-
-    # 9. Live AI Model Prediction (optional: model bundle may not exist yet)
-    prediction = None
-    if write_prediction:
-        print("\n--- Step 9/9: Live Model Inference ---")
-        try:
-            from src.models.predict import generate_live_prediction
-
-            prediction = generate_live_prediction()
-        except Exception as exc:
-            print(f"[PipelineSync] Model inference skipped: {exc}")
-            prediction = {"status": "unavailable", "reason": str(exc)}
 
     print("\n" + "=" * 60)
     if prediction:

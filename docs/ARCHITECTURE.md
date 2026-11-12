@@ -1,202 +1,159 @@
 # Arsitektur Sistem Informasi Pasar Emas (XAUUSD) & Analisis Dampak Berita
 
-Dokumen ini menjelaskan struktur arsitektur teknis, desain monorepo TypeScript, dan diagram pemodelan sistem formal (**Activity Diagram**, **Sequence Diagram**, dan **Deployment Diagram**).
+Dokumen ini menjelaskan arsitektur teknis sistem: monorepo TypeScript (Bun),
+service pipeline Python, alur data, dan integrasi model ML.
 
 ---
 
-## 1. Desain Struktur Monorepo (Turborepo + pnpm)
-
-Sistem menggunakan arsitektur monorepo modular untuk memastikan integritas tipe (*end-to-end type safety*), *code reuse*, dan isolasi dependensi:
+## 1. Struktur Monorepo (Bun + Turborepo)
 
 ```text
 sistem-informasi-market-xauusd/
 ├── apps/
-│   ├── web/                     # Next.js 15 App Router (Dashboard UI, Recharts, Server Actions)
-│   ├── api/                     # Fastify / Hono TS (High-throughput REST API Service)
-│   └── worker/                  # BullMQ / Cron Ingestion Service (Background Tasks)
+│   ├── api/          # Fastify — REST + SSE (port 4000)
+│   ├── web/          # Next.js 15 App Router + lightweight-charts (port 3000)
+│   └── worker/       # Scheduled ingestion (tsx)
 ├── packages/
-│   ├── database/                # Drizzle ORM Schema, PostgreSQL Client, Migrations
-│   ├── core-analytics/          # Event Study Math Engine, Surprise Formula, Statistics
-│   ├── financial-clients/       # Ingestion Adapters (Alpha Vantage, Twelve Data, COT Parser)
-│   ├── types/                   # Zod Schemas, Domain Enums, Shared Interfaces
-│   ├── ui/                      # Shared UI Components (Tailwind v4, Radix Primitives)
-│   ├── eslint-config/           # Shared Linting Rules
-│   └── tsconfig/                # Base TypeScript Configs (Strict Mode)
-├── docs/                        # Dokumentasi Sistem, PRD & Architecture
-├── turbo.json                   # Pipeline task caching configuration
-├── pnpm-workspace.yaml          # Workspace mapping
-└── package.json                 # Monorepo root manifest
+│   ├── types/              # Skema Zod bersama (OHLCV, COT, EconomicRelease, dst.)
+│   ├── database/           # Skema Drizzle (PostgreSQL) + drizzle-kit migration
+│   ├── core-analytics/     # Surprise, reaction windows, agregasi event study
+│   └── financial-clients/  # Kalender, COT CFTC, candle XAUUSD (CSV parser)
+├── services/
+│   └── sentiment-analysis/ # Pipeline Python (uv): acquire → process → ML
+├── docs/                   # PRD, arsitektur, diagram
+├── .hermes/plans/          # Rencana perbaikan
+├── turbo.json
+└── package.json
 ```
 
 ---
 
-## 2. Activity Sequence Diagram (Pipeline Otomatisasi & Ringkasan Harian)
+## 2. Alur Data & ML (services/sentiment-analysis)
 
-Diagram sekuens aktivitas di bawah menggambarkan seluruh tahapan alur kerja proses bisnis (*activity workflow*) dari trigger cron scheduler, ingestion data, validasi, kalkulasi event study, hingga publikasi daily digest:
+```text
+┌──────────────────── ACQUIRE (keyless) ────────────────────┐
+│  BLS API v2   : CPI, core CPI, NFP                         │
+│  FRED CSV     : core PCE, FOMC target range                │
+│  yfinance GC=F: H1 history + intraday 5m/15m               │
+│  RSS (9 feed) : berita + sentimen VADER                    │
+│  CFTC         : COT report                                 │
+└───────────────────────────┬───────────────────────────────┘
+                            ▼
+┌──────────────────── PROCESS / FEATURES ────────────────────┐
+│  harmonize  : merge_asof backward (anti look-ahead)        │
+│  features   : TF-IDF, session, temporal, split + embargo   │
+│  buckets    : 4H bucket, topic interactions, PIT macro     │
+└───────────────────────────┬───────────────────────────────┘
+                            ▼
+┌──────────────────── RETRAIN & EVALUATE ────────────────────┐
+│  train         : champion dipilih by CV (bukan hardcode)   │
+│  significance  : p-value, Wilson CI, Pesaran-Timmermann    │
+│  eval fair     : baseline makro vs full (sentimen)         │
+│  predict       : prediksi 4H terbaru                       │
+│  provenance    : manifest sumber & status simulasi          │
+└────────────────────────────────────────────────────────────┘
+```
+
+Semua artifact membawa metadata *provenance* (`source`, `generated_at`,
+`is_simulated`). Bila sumber gagal, nilai yang dikembalikan adalah
+`unavailable`/NaN — bukan pengganti karangan.
+
+---
+
+## 3. Integrasi Aplikasi TypeScript
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Cron as Cron / Scheduler Trigger
-    participant IngestService as Worker Ingestion Service
-    participant CalendarAPI as External Calendar API
-    participant PriceAPI as External Price API
-    participant Validator as Zod Schema Validator
-    participant DB as PostgreSQL Database
-    participant Analytics as Event Study Engine
-    participant Digest as Daily Digest Generator
-    participant Audit as Audit Log Service
+    actor Analyst
+    participant Web as apps/web (Next.js)
+    participant API as apps/api (Fastify)
+    participant FS as File pipeline (CSV/JSON)
+    participant Worker as apps/worker
 
-    %% Step 1: Trigger & Ingestion
-    Cron->>IngestService: Trigger Jadwal Ingestion (Daily / Intraday)
-    activate IngestService
-    
-    par Ambil Kalender Ekonomi
-        IngestService->>CalendarAPI: Request Economic Calendar Events
-        CalendarAPI-->>IngestService: Raw Calendar Data (JSON)
-        IngestService->>Validator: Validate Releases Schema
-        Validator-->>IngestService: Valid Release Records
-    and Ambil Data Harga XAUUSD
-        IngestService->>PriceAPI: Request OHLCV Candles (1m, 5m, 15m)
-        PriceAPI-->>IngestService: Raw Candle Data (JSON)
-        IngestService->>Validator: Validate Candles Schema
-        Validator-->>IngestService: Valid Candle Records
-    end
+    Note over Worker: Scheduled (cron / recursive)
+    Worker->>FS: Jalankan src.pipeline.sync (data + retrain)
+    Worker->>FS: Update latest_prediction.json & significance.json
 
-    %% Step 2: Persistence
-    IngestService->>DB: Batch Upsert economic_releases & price_candles
-    DB-->>IngestService: Rows Inserted Acknowledged
-
-    %% Step 3: Event Study Processing
-    IngestService->>Analytics: Trigger calculateEventImpact(releases)
-    activate Analytics
-    Analytics->>DB: Fetch 5m, 15m, 60m Pre/Post Event Price Windows
-    DB-->>Analytics: Return Price Windows
-    Analytics->>Analytics: Compute Surprise Score (Actual - Forecast)
-    Analytics->>Analytics: Compute Delta Pips, Max Spike, Max Drawdown, Retrace
-    Analytics->>DB: INSERT INTO event_reactions
-    DB-->>Analytics: Reactions Saved
-    deactivate Analytics
-
-    %% Step 4: Daily Digest Compilation
-    IngestService->>Digest: Trigger generateDailyDigest()
-    activate Digest
-    Digest->>DB: Fetch Today's Price Range, Impact Events, COT Position
-    DB-->>Digest: Market Data Summary
-    Digest->>Digest: Format Markdown / JSON Summary
-    Digest->>Digest: Append Mandatory Compliance Disclaimer (FR-10)
-    Digest->>DB: INSERT INTO daily_summaries
-    DB-->>Digest: Summary Saved
-    deactivate Digest
-
-    %% Step 5: Audit Logging
-    IngestService->>Audit: Record Job Run (Status: SUCCESS, Total Rows, Duration)
-    Audit->>DB: INSERT INTO collection_logs
-    deactivate IngestService
+    Analyst->>Web: Buka terminal
+    Web->>FS: /api/market/candles (cache TTL)
+    FS-->>Web: candle (source: real | estimated)
+    Web->>API: /api/v1/analytics/event-study/:code
+    API->>FS: kalender + candle nyata
+    API-->>Web: surprise, reactions, historical logs
+    Web->>API: /api/v1/market/xauusd/stream (SSE)
+    API-->>Web: tick (ditandai isSimulated)
+    Web-->>Analyst: chart + panel analitik
 ```
 
 ---
 
-## 3. Sequence Diagram
-
-Diagram sekuens ini memodelkan interaksi saat Market Analyst membuka **Event Study Explorer** di web dashboard untuk menganalisis dampak rilis NFP terhadap XAUUSD:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Analyst as Market Analyst / Edu Team
-    participant Web as Web Dashboard (Next.js 15)
-    participant API as API Gateway (Fastify TS)
-    participant Engine as Core Analytics Engine
-    participant DB as PostgreSQL Database
-    participant Worker as Background Ingestion Worker
-    participant External as Financial Web API (Data Provider)
-
-    %% Background Ingestion Loop (Reference)
-    Note over Worker, External: Background Cron Ingestion Phase
-    Worker->>External: GET /economic-calendar & /xauusd-candles
-    External-->>Worker: Raw JSON Data
-    Worker->>Worker: Validate Data (Zod Schema)
-    Worker->>DB: Upsert economic_releases & price_candles
-    Worker->>Engine: Run calculateReactionWindows(releaseId)
-    Engine->>DB: Query 5m/15m/60m Price Windows
-    DB-->>Engine: Candle Records
-    Engine->>Engine: Calculate Surprise Z-Score & Delta Pips
-    Engine->>DB: INSERT INTO event_reactions
-    Worker->>DB: INSERT INTO collection_logs (Status: SUCCESS)
-
-    %% User Request Flow
-    Note over Analyst, DB: User Interactive Query Phase
-    Analyst->>Web: Akses Menu "Event Study Explorer" (Select Event: NFP)
-    Web->>API: GET /api/v1/analytics/event-study/NFP?window=15m
-    API->>DB: Query event_reactions JOIN economic_releases
-    DB-->>API: Array of Reactions (Surprise, DeltaPips, MaxSpike)
-    
-    API->>Engine: aggregateDistributionStats(reactions)
-    Engine-->>API: Stats Object (Mean, Median, DirectionalConsistency, BoxPlotIQR)
-    
-    API-->>Web: JSON Response (Historical Reactions + Aggregated Metrics)
-    Web->>Web: Render Scatter Plot (Surprise vs Delta Pips)
-    Web->>Web: Render Boxplot & Compliance Disclaimer (FR-10)
-    Web-->>Analyst: Tampilan visual interaktif siap dianalisis
-```
-
----
-
-## 4. Deployment Diagram
-
-Diagram penyebaran sistem menggambarkan topologi infrastruktur fisik/container di lingkungan produksi:
+## 4. Diagram Deployment
 
 ```mermaid
 graph TB
-    subgraph Client_Tier [Client Device & Browser]
-        Browser["Web Browser (Desktop / Mobile)\n- Next.js Client Components\n- Recharts Visualization"]
+    subgraph Client
+        Browser["Browser<br/>Next.js + lightweight-charts"]
     end
 
-    subgraph Cloud_Infrastructure [Production Cloud Platform / VPS Linux]
-        subgraph Ingress_Layer [Ingress & Reverse Proxy]
-            Nginx["Nginx Reverse Proxy / Cloudflare Edge\n- SSL Termination (HTTPS)\n- DDoS & WAF Protection"]
-        end
-
-        subgraph Container_Cluster [Docker Container Services]
-            Web_App["Container: apps/web\n- Next.js 15 Node Server\n- Port 3000\n- Server Actions & SSR"]
-            API_App["Container: apps/api\n- Fastify TypeScript API\n- Port 4000\n- High Throughput REST"]
-            Worker_App["Container: apps/worker\n- Node.js Cron Worker\n- BullMQ Job Processor"]
-        end
-
-        subgraph Data_Storage [Persistent Storage Tier]
-            Postgres[("PostgreSQL 16 Database\n- Relational Data & Indexes\n- Port 5432\n- Docker Volume Mounted")]
-            Redis[("Redis 7 In-Memory Cache\n- BullMQ Job Queue\n- API Response Cache\n- Port 6379")]
-        end
+    subgraph Host
+        Web["apps/web<br/>Next.js :3000"]
+        API["apps/api<br/>Fastify :4000"]
+        Worker["apps/worker<br/>ingestion loop"]
+        Python["services/sentiment-analysis<br/>uv pipeline"]
     end
 
-    subgraph External_Providers [External Financial Web APIs]
-        AlphaVantage["Alpha Vantage / Twelve Data API\n(XAUUSD Realtime & Historical Price)"]
-        ForexCal["ForexFactory / Finnhub API\n(Economic Calendar Feed)"]
-        CFTC["CFTC Public Data\n(Weekly COT Reports)"]
+    subgraph Storage
+        Postgres[("PostgreSQL<br/>Drizzle migration")]
+        Files[("data/ + reports/<br/>CSV, parquet, joblib, JSON")]
     end
 
-    %% Network Connections
-    Browser -->|HTTPS :443| Nginx
-    Nginx -->|Proxy Pass :3000| Web_App
-    Nginx -->|Proxy Pass :4000| API_App
-    
-    Web_App -->|Internal HTTP REST| API_App
-    API_App -->|Query / Pool| Postgres
-    API_App -->|Read / Write Cache| Redis
-    
-    Worker_App -->|BullMQ Queue Management| Redis
-    Worker_App -->|Batch Write Data & Logs| Postgres
-    Worker_App -->|HTTPS Outbound API Calls| AlphaVantage
-    Worker_App -->|HTTPS Outbound API Calls| ForexCal
-    Worker_App -->|HTTPS Outbound API Calls| CFTC
+    subgraph External["Sumber Eksternal (keyless)"]
+        BLS["BLS API v2"]
+        FRED["FRED CSV"]
+        YF["yfinance GC=F"]
+        RSS["RSS feeds"]
+        CFTC["CFTC COT"]
+    end
+
+    Browser -->|HTTPS| Web
+    Web -->|internal /api/market/*| Files
+    Web -->|REST/SSE| API
+    API -->|read| Files
+    API -->|optional| Postgres
+    Worker -->|spawn| Python
+    Python --> BLS
+    Python --> FRED
+    Python --> YF
+    Python --> RSS
+    API --> CFTC
+    Python --> Files
 ```
 
 ---
 
-## 5. Ringkasan Hubungan Antar Modul
+## 5. Hubungan Antar Modul
 
-1. **`packages/types`** menjadi jangkar kontrak data tunggal yang diimpor oleh `packages/database`, `packages/core-analytics`, `apps/api`, dan `apps/web`.
-2. **`packages/financial-clients`** mengisolasi integrasi API eksternal sehingga pergantian provider data harga (misal dari Twelve Data ke Alpha Vantage) tidak mempengaruhi modul analitik atau database.
-3. **`apps/worker`** bertanggung jawab menjaga ketersediaan data secara otonom tanpa membebani server web interaktif.
-4. **`apps/web`** berfokus pada pengalaman pengguna yang cepat melalui *React Server Components* (RSC) dan rendering visualisasi data pasar emas yang bersih.
+1. **`packages/types`** adalah kontrak data tunggal (Zod) yang dipakai
+   `database`, `core-analytics`, `api`, dan `web`.
+2. **`packages/financial-clients`** mengisolasi pembacaan data (CSV parser
+   tahan-quote, path portabel via `REPO_ROOT`) sehingga ganti sumber data tidak
+   mengubah modul analitik.
+3. **`packages/core-analytics`** berisi matematika event study murni (tanpa I/O),
+   sehingga teruji unit secara terisolasi.
+4. **`services/sentiment-analysis`** bersifat otonom: pipeline dapat dijalankan
+   tanpa aplikasi TypeScript, dan sebaliknya aplikasi tetap berjalan dengan
+   artifact yang sudah ada.
+5. **`apps/web`** membaca pipeline output langsung (fallback) selain lewat API,
+   sehingga chart tetap cepat walau API analitik sedang mati.
+
+---
+
+## 6. Integritas & Pelaporan
+
+- Setiap angka analitik dapat ditelusuri ke sumbernya lewat
+  `data/processed/provenance.json`.
+- Model dilatih di atas fitur nyata; hasil yang tidak signifikan dilaporkan
+  jujur (`sentiment_adds_value: false`), bukan dipaksa terlihat sebagai *alpha*.
+- Regression tests menjaga: anti look-ahead (merge `backward`), provenance,
+  signifikansi, dan skema fitur.
