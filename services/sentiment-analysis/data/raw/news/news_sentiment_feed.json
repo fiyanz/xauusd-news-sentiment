@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "status_reason": null,
-  "generated_at": "2026-11-12 05:39:50+00:00",
+  "generated_at": "2026-11-12 06:31:32+00:00",
   "sentiment_method": "vader",
   "feeds": {
     "cnbc_markets": "ok:30",
@@ -14,7 +14,7 @@
     "gnews_gold": "ok:60",
     "gnews_gold_prices": "ok:60"
   },
-  "article_count": 278,
+  "article_count": 280,
   "articles": [
     {
       "id": "cb20f766ff107132",
@@ -849,6 +849,23 @@
       "related_event": null
     },
     {
+      "id": "29c51a80270c42cb",
+      "title": "A dip in gold prices brings out jewelry shoppers in Mississauga on Diwali weekend - CBC",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMiygFBVV95cUxPMVVxQzBHYk0tbTN4WjlJUFY4eGJVM2gwaVc1aDB3N0k3akFnQnN6cmJVdl9SMkhzTm5NRGI0dlJtVWkyWENwcVFLci1VbGhUUzU4cEhEUHpUaE1WRWlFWUdmejFaeTdXX19Ka1FhaFl4TDJ6ZnNXdktpQ3JnLWxhLVhWWUluaGY3bDItTjFjc2g0bEpzUHY2MEo4TkJpSlN0Q2QwTFcwWnZzWkRDd1Y5a2YtU18zZXAyUmJiVTc3cWtBUEpBdTJuWGhn?oc=5\" target=\"_blank\">A dip in gold prices brings out jewelry shoppers in Mississauga on Diwali weekend</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">CBC</font>",
+      "time_published_utc": "2026-11-08 00:05:00+00:00",
+      "overall_sentiment_score": 0.0,
+      "overall_sentiment_label": "Neutral",
+      "topics": [
+        "commodities"
+      ],
+      "url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxPMVVxQzBHYk0tbTN4WjlJUFY4eGJVM2gwaVc1aDB3N0k3akFnQnN6cmJVdl9SMkhzTm5NRGI0dlJtVWkyWENwcVFLci1VbGhUUzU4cEhEUHpUaE1WRWlFWUdmejFaeTdXX19Ka1FhaFl4TDJ6ZnNXdktpQ3JnLWxhLVhWWUluaGY3bDItTjFjc2g0bEpzUHY2MEo4TkJpSlN0Q2QwTFcwWnZzWkRDd1Y5a2YtU18zZXAyUmJiVTc3cWtBUEpBdTJuWGhn?oc=5",
+      "source_feed": "gnews_gold_prices",
+      "source_url": "https://news.google.com/rss/articles/CBMiygFBVV95cUxPMVVxQzBHYk0tbTN4WjlJUFY4eGJVM2gwaVc1aDB3N0k3akFnQnN6cmJVdl9SMkhzTm5NRGI0dlJtVWkyWENwcVFLci1VbGhUUzU4cEhEUHpUaE1WRWlFWUdmejFaeTdXX19Ka1FhaFl4TDJ6ZnNXdktpQ3JnLWxhLVhWWUluaGY3bDItTjFjc2g0bEpzUHY2MEo4TkJpSlN0Q2QwTFcwWnZzWkRDd1Y5a2YtU18zZXAyUmJiVTc3cWtBUEpBdTJuWGhn?oc=5",
+      "publisher": "CBC",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
       "id": "107306eb8a04c3e7",
       "title": "DoorDash Shareholders Aren\u2019t Convinced the Company Can Take On Amazon",
       "summary": "Following Instacart acquisition plans and an Amazon deal with rival Uber Eats, DoorDash stock is on sale.",
@@ -947,23 +964,6 @@
       "source_feed": "gnews_gold_prices",
       "source_url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOTDdBSTJ0akwxS09rMkVUZ3lxNG1vcExXVFZ2UlhTYW1wcmFybUdYRm40clZqNXR4Nnk3aE9veFpmWWV6X01VWlFfMXhOcVB6Yy02bm1scmZZSWgzaTUwaC1KS0dNTG1GSDcyMTMtLUQ1YjI1WWJSSmtaTWFMdG5rZA?oc=5",
       "publisher": "VnExpress International",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "1d546c1e03a02385",
-      "title": "Gold futures jump Rs 1,801 to Rs 1.44 lakh per 10 gm on firm spot demand - Deccan Herald",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMiwgFBVV95cUxQbGNGNlpPSFBHWmp5eU8tLVEtRTJkUFNFdWNEN1FFN2JaN1Z1dXZyQkswRkRYWktwUlpLZnhwWVQ2TWJLVl9NODNaVGpsRVF3MldaTDFsS1l1a1l4RlZ5aU5kdEpHZ1ljVnRKcGViODB2aHB6NEoxcHNjajRKd3lsbWJlQVFfX25CcV93X3VHVmdldjBUc2tpdklTeG1yMllNV0l3blVrQzNScjhIakdJamxGQWhCODB3RFJ6RV9IRDRGZw?oc=5\" target=\"_blank\">Gold futures jump Rs 1,801 to Rs 1.44 lakh per 10 gm on firm spot demand</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Deccan Herald</font>",
-      "time_published_utc": "2026-11-09 06:04:25+00:00",
-      "overall_sentiment_score": -0.128,
-      "overall_sentiment_label": "Bearish",
-      "topics": [
-        "commodities"
-      ],
-      "url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxQbGNGNlpPSFBHWmp5eU8tLVEtRTJkUFNFdWNEN1FFN2JaN1Z1dXZyQkswRkRYWktwUlpLZnhwWVQ2TWJLVl9NODNaVGpsRVF3MldaTDFsS1l1a1l4RlZ5aU5kdEpHZ1ljVnRKcGViODB2aHB6NEoxcHNjajRKd3lsbWJlQVFfX25CcV93X3VHVmdldjBUc2tpdklTeG1yMllNV0l3blVrQzNScjhIakdJamxGQWhCODB3RFJ6RV9IRDRGZw?oc=5",
-      "source_feed": "gnews_gold_prices",
-      "source_url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxQbGNGNlpPSFBHWmp5eU8tLVEtRTJkUFNFdWNEN1FFN2JaN1Z1dXZyQkswRkRYWktwUlpLZnhwWVQ2TWJLVl9NODNaVGpsRVF3MldaTDFsS1l1a1l4RlZ5aU5kdEpHZ1ljVnRKcGViODB2aHB6NEoxcHNjajRKd3lsbWJlQVFfX25CcV93X3VHVmdldjBUc2tpdklTeG1yMllNV0l3blVrQzNScjhIakdJamxGQWhCODB3RFJ6RV9IRDRGZw?oc=5",
-      "publisher": "Deccan Herald",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -1433,19 +1433,19 @@
       "related_event": null
     },
     {
-      "id": "b107924bb6c795f7",
-      "title": "Last Time Out: USMNT Defeats Haiti in Concacaf Gold Cup - US Soccer",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMipAFBVV95cUxOVmF6OG5qOFNyQ3R6SWp5RFg0WDVrM3Z4c3hRN3ZYdTVtV1lSM0lnN2Z1eGNuc2NBX1VMTURwci0zTVZVblFoVXdNaWJZdEtmUkRxeko3ZEFVR0luT24xYmlqd2hBYTJsSk9wcFU4Y3FZZmtHQmR4d0ZfUmRvbjNpcWF2bnJuNTdYeWxUdVQ3ajlQVFZ6T21nTjFSRmV0dDJYZlQ1UQ?oc=5\" target=\"_blank\">Last Time Out: USMNT Defeats Haiti in Concacaf Gold Cup</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">US Soccer</font>",
+      "id": "cada6e5323d9be61",
+      "title": "Last Time Out: USMNT Defeats Haiti in Concacaf Gold Cup - U.S. Soccer",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMinwFBVV95cUxPS054UUJSTlNJbXNZSjF3Z1RTR0YyeWR3UTNKbjJEdjBRMWdmZ3RZdDVlcHpDWWJOY014dzAtallWQjVsMkxMNUJ1YmlzV0I0UVV5b3p0OFhwYjNvYUh6VGNLX0dlaWp5eTlhVF82VTFWcUxxcG0ydlZ2Nk55UjVyY1FTQk5SUXViU1RJLUhKZnVHS1hfVnE2bzFwTVVXSW8?oc=5\" target=\"_blank\">Last Time Out: USMNT Defeats Haiti in Concacaf Gold Cup</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">U.S. Soccer</font>",
       "time_published_utc": "2026-11-09 22:48:58+00:00",
       "overall_sentiment_score": -0.5574,
       "overall_sentiment_label": "Bearish",
       "topics": [
         "commodities"
       ],
-      "url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOVmF6OG5qOFNyQ3R6SWp5RFg0WDVrM3Z4c3hRN3ZYdTVtV1lSM0lnN2Z1eGNuc2NBX1VMTURwci0zTVZVblFoVXdNaWJZdEtmUkRxeko3ZEFVR0luT24xYmlqd2hBYTJsSk9wcFU4Y3FZZmtHQmR4d0ZfUmRvbjNpcWF2bnJuNTdYeWxUdVQ3ajlQVFZ6T21nTjFSRmV0dDJYZlQ1UQ?oc=5",
+      "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPS054UUJSTlNJbXNZSjF3Z1RTR0YyeWR3UTNKbjJEdjBRMWdmZ3RZdDVlcHpDWWJOY014dzAtallWQjVsMkxMNUJ1YmlzV0I0UVV5b3p0OFhwYjNvYUh6VGNLX0dlaWp5eTlhVF82VTFWcUxxcG0ydlZ2Nk55UjVyY1FTQk5SUXViU1RJLUhKZnVHS1hfVnE2bzFwTVVXSW8?oc=5",
       "source_feed": "gnews_gold",
-      "source_url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOVmF6OG5qOFNyQ3R6SWp5RFg0WDVrM3Z4c3hRN3ZYdTVtV1lSM0lnN2Z1eGNuc2NBX1VMTURwci0zTVZVblFoVXdNaWJZdEtmUkRxeko3ZEFVR0luT24xYmlqd2hBYTJsSk9wcFU4Y3FZZmtHQmR4d0ZfUmRvbjNpcWF2bnJuNTdYeWxUdVQ3ajlQVFZ6T21nTjFSRmV0dDJYZlQ1UQ?oc=5",
-      "publisher": "US Soccer",
+      "source_url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPS054UUJSTlNJbXNZSjF3Z1RTR0YyeWR3UTNKbjJEdjBRMWdmZ3RZdDVlcHpDWWJOY014dzAtallWQjVsMkxMNUJ1YmlzV0I0UVV5b3p0OFhwYjNvYUh6VGNLX0dlaWp5eTlhVF82VTFWcUxxcG0ydlZ2Nk55UjVyY1FTQk5SUXViU1RJLUhKZnVHS1hfVnE2bzFwTVVXSW8?oc=5",
+      "publisher": "U.S. Soccer",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -1736,23 +1736,6 @@
       "related_event": null
     },
     {
-      "id": "22b0b5eb7992a010",
-      "title": "Countries speed up on renewables as China\u2019s blistering pace slows",
-      "summary": "Ten takeaways from the IEA\u2019s latest report on the fossil fuel transition",
-      "time_published_utc": "2026-11-10 12:00:05+00:00",
-      "overall_sentiment_score": 0.0,
-      "overall_sentiment_label": "Neutral",
-      "topics": [
-        "financial_markets"
-      ],
-      "url": "https://www.ft.com/content/71f35844-9635-4cfe-bf47-39a4014dc8ee?syn-25a6b1a6=1",
-      "source_feed": "ft_markets",
-      "source_url": "https://www.ft.com/content/71f35844-9635-4cfe-bf47-39a4014dc8ee?syn-25a6b1a6=1",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
       "id": "8ca0fca9466ac24d",
       "title": "Gold Prices Fall Rs 500 Amid Strong Dollar, Weak Global Cues - Rediff MoneyWiz",
       "summary": "<a href=\"https://news.google.com/rss/articles/CBMisAFBVV95cUxOdmJIOE92RW0yNnZjWjlTcGMxRnRycG9fTnlmZWJBakFRV3ljcmJtOFNhQnBPYlAzZ093amdydi0xOTdocndIekUySnp6ZlJTaXJySmRxMFQ0eEdVTVRRVmY5eEhFdDlFZlVVLURmOHp4RTJZWHFDODVnSE9iVzV4bWpuQUl4bG9qOC1KMWRIUjBkNUFXWEw2SjVQSE5aeE9qUnRMeUc0N2JONWRQZ2hPadIBtgFBVV95cUxPbmhMNnExTi1zN2U0NUR0YmRiWVBYZHd1bldOdGFXNWJaSy1GZVlIVTRiaGZ1SU5ONU9WR2pYcFZSci1sV3RtRzIzOWNvNnFCWm1fV1puS0djQkxQUVRRWmdOaGFqeUZ4VHNJdmp4WlJMODZJeFpqaVNveGpZT3AtSlpiMGpjM1ZyUV9fVWxRbTNDT2taMGVlLUVsZlJOcUFOWi1FbmdpakM0OE9wNGgwcmV0QTVRUQ?oc=5\" target=\"_blank\">Gold Prices Fall Rs 500 Amid Strong Dollar, Weak Global Cues</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Rediff MoneyWiz</font>",
@@ -1767,40 +1750,6 @@
       "source_feed": "gnews_gold_prices",
       "source_url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxOdmJIOE92RW0yNnZjWjlTcGMxRnRycG9fTnlmZWJBakFRV3ljcmJtOFNhQnBPYlAzZ093amdydi0xOTdocndIekUySnp6ZlJTaXJySmRxMFQ0eEdVTVRRVmY5eEhFdDlFZlVVLURmOHp4RTJZWHFDODVnSE9iVzV4bWpuQUl4bG9qOC1KMWRIUjBkNUFXWEw2SjVQSE5aeE9qUnRMeUc0N2JONWRQZ2hPadIBtgFBVV95cUxPbmhMNnExTi1zN2U0NUR0YmRiWVBYZHd1bldOdGFXNWJaSy1GZVlIVTRiaGZ1SU5ONU9WR2pYcFZSci1sV3RtRzIzOWNvNnFCWm1fV1puS0djQkxQUVRRWmdOaGFqeUZ4VHNJdmp4WlJMODZJeFpqaVNveGpZT3AtSlpiMGpjM1ZyUV9fVWxRbTNDT2taMGVlLUVsZlJOcUFOWi1FbmdpakM0OE9wNGgwcmV0QTVRUQ?oc=5",
       "publisher": "Rediff MoneyWiz",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "c16d9b623918a06f",
-      "title": "Africa\u2019s richest man Aliko Dangote pulls London listing",
-      "summary": "Nigerian billionaire had planned to list $18.4bn group Dangote Cement in UK this year",
-      "time_published_utc": "2026-11-10 12:58:15+00:00",
-      "overall_sentiment_score": 0.5267,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "financial_markets"
-      ],
-      "url": "https://www.ft.com/content/4ca0550f-e524-440f-a31a-de7c38488db2?syn-25a6b1a6=1",
-      "source_feed": "ft_markets",
-      "source_url": "https://www.ft.com/content/4ca0550f-e524-440f-a31a-de7c38488db2?syn-25a6b1a6=1",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "d53d185b18ddab0c",
-      "title": "Anthropic targets valuation of up to $1.4tn in IPO",
-      "summary": "The Claude maker plans to raise as much as $64bn in highly anticipated listing",
-      "time_published_utc": "2026-11-10 13:07:48+00:00",
-      "overall_sentiment_score": 0.0,
-      "overall_sentiment_label": "Neutral",
-      "topics": [
-        "financial_markets"
-      ],
-      "url": "https://www.ft.com/content/5654e210-4be3-4550-b975-129c9a2e7fe5?syn-25a6b1a6=1",
-      "source_feed": "ft_markets",
-      "source_url": "https://www.ft.com/content/5654e210-4be3-4550-b975-129c9a2e7fe5?syn-25a6b1a6=1",
-      "publisher": "",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -1960,77 +1909,6 @@
       "related_event": null
     },
     {
-      "id": "53f75dd5b930aff1",
-      "title": "UK fraudster who invented \u2018too good to be true\u2019 takeover bid given suspended sentence",
-      "summary": "Christopher Woolcott created a cast of characters in a bid to profit from a rise in Touchstone Exploration\u2019s shares",
-      "time_published_utc": "2026-11-10 18:13:21+00:00",
-      "overall_sentiment_score": 0.4019,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "financial_markets"
-      ],
-      "url": "https://www.ft.com/content/ebef64b5-103c-46ba-b3b0-546634f74323?syn-25a6b1a6=1",
-      "source_feed": "ft_markets",
-      "source_url": "https://www.ft.com/content/ebef64b5-103c-46ba-b3b0-546634f74323?syn-25a6b1a6=1",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "4e688ebfdb8185cf",
-      "title": "Treasuries slide as \u2018hot\u2019 inflation sparks bets on Fed rate rise",
-      "summary": "Two-year government bond yields soar most since 2024 as October consumer price growth tops forecasts",
-      "time_published_utc": "2026-11-10 18:53:50+00:00",
-      "overall_sentiment_score": 0.7783,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "economy_monetary",
-        "economy_macro"
-      ],
-      "url": "https://www.ft.com/content/8b564134-dea6-4272-8ede-e0b12ef5aebd?syn-25a6b1a6=1",
-      "source_feed": "ft_markets",
-      "source_url": "https://www.ft.com/content/8b564134-dea6-4272-8ede-e0b12ef5aebd?syn-25a6b1a6=1",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "4477450d9d9f1537",
-      "title": "US regulator postpones Wall Street push to trade AI computing futures",
-      "summary": "Commodity Futures Trading Commission raises concerns over price manipulation as exchanges race to create new asset class",
-      "time_published_utc": "2026-11-10 19:58:11+00:00",
-      "overall_sentiment_score": 0.0772,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "financial_markets",
-        "commodities"
-      ],
-      "url": "https://www.ft.com/content/269b0245-44c4-4e34-94df-202bef642539?syn-25a6b1a6=1",
-      "source_feed": "ft_markets",
-      "source_url": "https://www.ft.com/content/269b0245-44c4-4e34-94df-202bef642539?syn-25a6b1a6=1",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "586735b4a17c2df9",
-      "title": "Oil falls below $90 as Trump pulls back from threat to strike Iran",
-      "summary": "Falling crude prices have supported recovery in global stocks from last week\u2019s sell-off",
-      "time_published_utc": "2026-11-10 20:19:24+00:00",
-      "overall_sentiment_score": -0.7845,
-      "overall_sentiment_label": "Bearish",
-      "topics": [
-        "financial_markets",
-        "commodities"
-      ],
-      "url": "https://www.ft.com/content/07bdb58c-4557-4def-b8cb-db9be304fd72?syn-25a6b1a6=1",
-      "source_feed": "ft_markets",
-      "source_url": "https://www.ft.com/content/07bdb58c-4557-4def-b8cb-db9be304fd72?syn-25a6b1a6=1",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
       "id": "8a635b777d6ec0a3",
       "title": "Vylor, Franco-Nevada On Deck Wednesday As New Coverage, Gold Prices Face Test - Benzinga",
       "summary": "<a href=\"https://news.google.com/rss/articles/CBMivAFBVV95cUxQMTloQ3pQWlpQM1NJMThqZXp4NUd2bUxiUmZZY045ZEpWTmh2Q0NfRVc1MW1pd0NCZGdyRkw1UDdZREc2YXFpaWtoN3Zhd0ZXbnF4WFZrNFUtUnl6Si1UUkZvS3dtbXUtcWN1aTJYVWNhcjFZVi1iVl9fZENPaUtyako5V3lXVUd1OHFYdEFjWDhJaTBrdG15b0tkSktLcnRNcUcwb1hQUUV3Y01pWnRPbjc2eTFoZ2FDNDhkRA?oc=5\" target=\"_blank\">Vylor, Franco-Nevada On Deck Wednesday As New Coverage, Gold Prices Face Test</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Benzinga</font>",
@@ -2044,23 +1922,6 @@
       "source_feed": "gnews_gold_prices",
       "source_url": "https://news.google.com/rss/articles/CBMivAFBVV95cUxQMTloQ3pQWlpQM1NJMThqZXp4NUd2bUxiUmZZY045ZEpWTmh2Q0NfRVc1MW1pd0NCZGdyRkw1UDdZREc2YXFpaWtoN3Zhd0ZXbnF4WFZrNFUtUnl6Si1UUkZvS3dtbXUtcWN1aTJYVWNhcjFZVi1iVl9fZENPaUtyako5V3lXVUd1OHFYdEFjWDhJaTBrdG15b0tkSktLcnRNcUcwb1hQUUV3Y01pWnRPbjc2eTFoZ2FDNDhkRA?oc=5",
       "publisher": "Benzinga",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "68371383aad716dc",
-      "title": "Nvidia shares down as Huang affair scandal deepens",
-      "summary": "What happens when a tech giant becomes a security concern?",
-      "time_published_utc": "2026-11-10 21:00:00+00:00",
-      "overall_sentiment_score": 0.1779,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "financial_markets"
-      ],
-      "url": "https://www.ft.com/content/798a6321-41e3-407b-9b6d-e4521111208d?syn-25a6b1a6=1",
-      "source_feed": "ft_markets",
-      "source_url": "https://www.ft.com/content/798a6321-41e3-407b-9b6d-e4521111208d?syn-25a6b1a6=1",
-      "publisher": "",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -2720,6 +2581,24 @@
       "related_event": null
     },
     {
+      "id": "6aff89dd69dbe62f",
+      "title": "Gold challenges the Fed's hawkish rate outlook - Saxo",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMiqAFBVV95cUxPWXJKME5YVndXbWhYTkJVTWpYWDRqWlFrV0wtdFJFcU1qSWIzWmpvdC1IWHUzTVdtaFVDd0hOejB4alc4QlFFSld3bmdxckltQXppWGZFWUZ0OHc3c3lmUVkwNHdXQWFqcS1KNDBha2E5WjFFZUpMMGVQenpnNW1Gb0dQMC1yTlBTYXhVU1lsOG82emI1WnN1N0lEaUdUVjU2MU5ZWWtwS3I?oc=5\" target=\"_blank\">Gold challenges the Fed's hawkish rate outlook</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Saxo</font>",
+      "time_published_utc": "2026-11-11 10:00:00+00:00",
+      "overall_sentiment_score": 0.1531,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "economy_monetary",
+        "commodities"
+      ],
+      "url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxPWXJKME5YVndXbWhYTkJVTWpYWDRqWlFrV0wtdFJFcU1qSWIzWmpvdC1IWHUzTVdtaFVDd0hOejB4alc4QlFFSld3bmdxckltQXppWGZFWUZ0OHc3c3lmUVkwNHdXQWFqcS1KNDBha2E5WjFFZUpMMGVQenpnNW1Gb0dQMC1yTlBTYXhVU1lsOG82emI1WnN1N0lEaUdUVjU2MU5ZWWtwS3I?oc=5",
+      "source_feed": "gnews_gold",
+      "source_url": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxPWXJKME5YVndXbWhYTkJVTWpYWDRqWlFrV0wtdFJFcU1qSWIzWmpvdC1IWHUzTVdtaFVDd0hOejB4alc4QlFFSld3bmdxckltQXppWGZFWUZ0OHc3c3lmUVkwNHdXQWFqcS1KNDBha2E5WjFFZUpMMGVQenpnNW1Gb0dQMC1yTlBTYXhVU1lsOG82emI1WnN1N0lEaUdUVjU2MU5ZWWtwS3I?oc=5",
+      "publisher": "Saxo",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
       "id": "7f9d7cdfe8f92283",
       "title": "How Much Does a Hawkish Fed Hurt Gold? - Robin J Brooks | Substack",
       "summary": "<a href=\"https://news.google.com/rss/articles/CBMid0FVX3lxTE5FSTB2TF81a1EzdU5ET3BjdmgxeVcyVUNXb0JvQkZpZGE5RTVjZmQzeFN1bmhyYlhodWNOZVJ3S24zY1hpcEZBVmNQT1hVd3p1QzFoVmd3YTlOdjcySmRJS2RjZzYzWHlELTJ3aGpFY0VadUY2NHlr?oc=5\" target=\"_blank\">How Much Does a Hawkish Fed Hurt Gold?</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Robin J Brooks | Substack</font>",
@@ -2757,10 +2636,10 @@
       "related_event": null
     },
     {
-      "id": "51e5cbb8f011a38a",
+      "id": "5d393830a6e63395",
       "title": "Gold Dec 26 (GC=F) stock price, news, quote and history - Yahoo Finance UK",
       "summary": "<a href=\"https://news.google.com/rss/articles/CBMiVEFVX3lxTE1makZJRjg2ZzBXd0JVYVdJbWE1amR1ampYcnVBamtVWUtSWlRRQ28zdHB0VFBDTjhyT0g2bWRKT29Ya2hhS2xET093eTdkUW5ObzRzVg?oc=5\" target=\"_blank\">Gold Dec 26 (GC=F) stock price, news, quote and history</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Yahoo Finance UK</font>",
-      "time_published_utc": "2026-11-11 10:21:51+00:00",
+      "time_published_utc": "2026-11-11 10:21:48+00:00",
       "overall_sentiment_score": 0.0,
       "overall_sentiment_label": "Neutral",
       "topics": [
@@ -2888,7 +2767,7 @@
         "commodities"
       ],
       "url": "https://news.google.com/rss/articles/CBMigAJBVV95cUxPa2ZWdnE1NlJaSFUzNWdvMnF5NXpwQzlKUFZ5MUczdFU1ZTNGZkRlRzNoUTFweTZ1aEVRVzR1cHEwWjJ4VS10R2dQYWJiaXk4a2F5UDZFLU1PX2JINGh0dnNBQ0Z1a1I4WXRiTTV5dFhPRWZaR1YxYWxJYzdoVTNCS0dWQ3pjZmJfMmlyX0ZFMk1rNXZEeGxRdWVXWlZmelR0RDA1WGtrbjZRU1FJMmMzaTI3cnJYaXBDVjF5cHJwNjZtTTY2dkpoLWprT2dOb1RENGhld3RBSjE4TU95YWNReGczOWZmYmxYLUc5cWlNQVVmOE9DRXJHRWJIbnpUa3Et?oc=5",
-      "source_feed": "gnews_gold",
+      "source_feed": "gnews_gold_prices",
       "source_url": "https://news.google.com/rss/articles/CBMigAJBVV95cUxPa2ZWdnE1NlJaSFUzNWdvMnF5NXpwQzlKUFZ5MUczdFU1ZTNGZkRlRzNoUTFweTZ1aEVRVzR1cHEwWjJ4VS10R2dQYWJiaXk4a2F5UDZFLU1PX2JINGh0dnNBQ0Z1a1I4WXRiTTV5dFhPRWZaR1YxYWxJYzdoVTNCS0dWQ3pjZmJfMmlyX0ZFMk1rNXZEeGxRdWVXWlZmelR0RDA1WGtrbjZRU1FJMmMzaTI3cnJYaXBDVjF5cHJwNjZtTTY2dkpoLWprT2dOb1RENGhld3RBSjE4TU95YWNReGczOWZmYmxYLUc5cWlNQVVmOE9DRXJHRWJIbnpUa3Et?oc=5",
       "publisher": "Yahoo Finance",
       "sentiment_method": "vader",
@@ -3960,10 +3839,10 @@
     },
     {
       "id": "f7f4418b10b67080",
-      "title": "Stock Rally Falters on Nvidia Concerns, Oil Drops: Markets Wrap",
-      "summary": "A rally in global stocks stalled as investors weighed the broader market impact of a leadership crisis at Nvidia Corp., the chipmaker at the heart of the artificial-intelligence boom.",
+      "title": "Nvidia Troubles Drag Stocks Lower, Oil Declines: Markets Wrap",
+      "summary": "Global stocks retreated as investors weighed the broader market impact of a leadership crisis at Nvidia Corp., the chipmaker at the heart of the artificial-intelligence boom.",
       "time_published_utc": "2026-11-11 22:08:05+00:00",
-      "overall_sentiment_score": -0.7096,
+      "overall_sentiment_score": -0.8807,
       "overall_sentiment_label": "Bearish",
       "topics": [
         "financial_markets",
@@ -4149,6 +4028,42 @@
       "related_event": null
     },
     {
+      "id": "864415849827c4cf",
+      "title": "Indonesia Bonds Draw Global Funds as Yields Hit Six-Year High",
+      "summary": "Indonesian government bonds are drawing bargain-hunters after the benchmark yields\u2019 surge last week to the highest since 2020.",
+      "time_published_utc": "2026-11-12 00:05:36+00:00",
+      "overall_sentiment_score": 0.0,
+      "overall_sentiment_label": "Neutral",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://www.bloomberg.com/news/articles/2026-11-12/indonesia-bonds-lure-global-funds-as-yields-hit-six-year-high",
+      "source_feed": "bloomberg_markets",
+      "source_url": "https://www.bloomberg.com/news/articles/2026-11-12/indonesia-bonds-lure-global-funds-as-yields-hit-six-year-high",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "7ee38fb1bf2ee3c4",
+      "title": "Gold Holds Below $4,000 as Market Looks Ahead to Fed Rate Hike",
+      "summary": "Gold fell for a third day, holding a drop below $4,000 an ounce as persistent US inflation and hawkish remarks from Federal Reserve officials fueled expectations for an interest-rate hike next month.",
+      "time_published_utc": "2026-11-12 00:12:52+00:00",
+      "overall_sentiment_score": -0.2732,
+      "overall_sentiment_label": "Bearish",
+      "topics": [
+        "economy_monetary",
+        "economy_macro",
+        "commodities"
+      ],
+      "url": "https://www.bloomberg.com/news/articles/2026-11-12/gold-holds-below-4-000-as-market-looks-ahead-to-fed-rate-hike",
+      "source_feed": "bloomberg_markets",
+      "source_url": "https://www.bloomberg.com/news/articles/2026-11-12/gold-holds-below-4-000-as-market-looks-ahead-to-fed-rate-hike",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
       "id": "def64e891c52e23a",
       "title": "Nikkei Falls 0.2%, Dragged by Electronics Stocks",
       "summary": "Japan\u2019s Nikkei Stock Average was down 0.2% as declines in electronics makers offset gains in chemical companies and trading houses.",
@@ -4254,24 +4169,6 @@
       "related_event": null
     },
     {
-      "id": "c4eef37bd6d5a35b",
-      "title": "Gold Holds Below $4,000 as Market Looks Ahead to Fed Rate Hike - Bloomberg.com",
-      "summary": "<a href=\"https://news.google.com/rss/articles/CBMisgFBVV95cUxNMTJybnByRUZtMk5uajdEUVROVDJnSmZlQVRsazNHSmZaY0FKMVM0d0tvVnhDdlozdUhuMkx4ZkJZV0IyUDRCMmxtSzF0U3RmWWkxckVJVVVUV1pZczI2dmZfN29TYmN0YkVWMml2X2NJY1liZk1WeWFVdXNHbFpqdHBVWmhMTE4zTHozN2l5ZGFOWVBxWVBzTVB6V3dLeTR5UmlYYTVtN0xJQW5MMTVRdUJn?oc=5\" target=\"_blank\">Gold Holds Below $4,000 as Market Looks Ahead to Fed Rate Hike</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Bloomberg.com</font>",
-      "time_published_utc": "2026-11-12 01:24:00+00:00",
-      "overall_sentiment_score": 0.0,
-      "overall_sentiment_label": "Neutral",
-      "topics": [
-        "economy_monetary",
-        "commodities"
-      ],
-      "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNMTJybnByRUZtMk5uajdEUVROVDJnSmZlQVRsazNHSmZaY0FKMVM0d0tvVnhDdlozdUhuMkx4ZkJZV0IyUDRCMmxtSzF0U3RmWWkxckVJVVVUV1pZczI2dmZfN29TYmN0YkVWMml2X2NJY1liZk1WeWFVdXNHbFpqdHBVWmhMTE4zTHozN2l5ZGFOWVBxWVBzTVB6V3dLeTR5UmlYYTVtN0xJQW5MMTVRdUJn?oc=5",
-      "source_feed": "gnews_gold",
-      "source_url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNMTJybnByRUZtMk5uajdEUVROVDJnSmZlQVRsazNHSmZaY0FKMVM0d0tvVnhDdlozdUhuMkx4ZkJZV0IyUDRCMmxtSzF0U3RmWWkxckVJVVVUV1pZczI2dmZfN29TYmN0YkVWMml2X2NJY1liZk1WeWFVdXNHbFpqdHBVWmhMTE4zTHozN2l5ZGFOWVBxWVBzTVB6V3dLeTR5UmlYYTVtN0xJQW5MMTVRdUJn?oc=5",
-      "publisher": "Bloomberg.com",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
       "id": "46f59aa76c2f78b3",
       "title": "How much Jensen Huang is worth to Nvidia\u2019s stock",
       "summary": "Analysts say that shares could drop by 20% or more if Huang leaves the company.",
@@ -4307,19 +4204,20 @@
       "related_event": null
     },
     {
-      "id": "b6c12e1df913a49d",
-      "title": "Mexican Steel Imports from Asia Fall as More US Supplies Sought",
-      "summary": "Mexico\u2019s crackdown on Asian imports is creating an opening to buy more US-made steel, a top economic official said, a shift that could help advance trade negotiations with the Trump administration.",
-      "time_published_utc": "2026-11-12 01:42:20+00:00",
-      "overall_sentiment_score": 0.7152,
-      "overall_sentiment_label": "Bullish",
+      "id": "382201c417adf522",
+      "title": "Gold under the pump as dollar sensitivity surges - FOREX.com",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMimwFBVV95cUxObEZ6N0hRVlQ4cXA1ai10YmtfSlZfSzJNMFhpY2pZMERZbTBwcmFveHVJQVoyS3YzNXBNSGF0cDVTcG9yd2lSNmpkYkR1LV9OSTFoTFgtQXlQUVNodUdEVmlVMDNxQ1U5OTFScExpOHNtYVQ5bnJ3ckVpUDNtZXhjSzQ5YUgzR0VoRzduQk9SSjhGNjFEbUp0Qjcxc9IBpwFBVV95cUxOZ2tJN2lLM2hQd0RTNjdqZjZvNERJRXJGVnJNb051OFdPY1JycWNndlpYVHZsV3E3eExPMHNmajcxTURyNWNVMElHMjhoR0ducUZzWDU5ekM0RFpoUDZydnotN25nbVNVZW1MMlAyeU9lcktMeHJfWDM4ZEszNVdteGNxSlU0RnNKS2ljSDQwbFZnY3BwSUduRVBVMXdkSkVfdXlHREVPZw?oc=5\" target=\"_blank\">Gold under the pump as dollar sensitivity surges</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">FOREX.com</font>",
+      "time_published_utc": "2026-11-12 01:49:20+00:00",
+      "overall_sentiment_score": 0.0,
+      "overall_sentiment_label": "Neutral",
       "topics": [
-        "financial_markets"
+        "commodities",
+        "forex"
       ],
-      "url": "https://www.bloomberg.com/news/articles/2026-11-12/mexican-steel-imports-from-asia-fall-as-more-us-supplies-sought",
-      "source_feed": "bloomberg_markets",
-      "source_url": "https://www.bloomberg.com/news/articles/2026-11-12/mexican-steel-imports-from-asia-fall-as-more-us-supplies-sought",
-      "publisher": "",
+      "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxObEZ6N0hRVlQ4cXA1ai10YmtfSlZfSzJNMFhpY2pZMERZbTBwcmFveHVJQVoyS3YzNXBNSGF0cDVTcG9yd2lSNmpkYkR1LV9OSTFoTFgtQXlQUVNodUdEVmlVMDNxQ1U5OTFScExpOHNtYVQ5bnJ3ckVpUDNtZXhjSzQ5YUgzR0VoRzduQk9SSjhGNjFEbUp0Qjcxc9IBpwFBVV95cUxOZ2tJN2lLM2hQd0RTNjdqZjZvNERJRXJGVnJNb051OFdPY1JycWNndlpYVHZsV3E3eExPMHNmajcxTURyNWNVMElHMjhoR0ducUZzWDU5ekM0RFpoUDZydnotN25nbVNVZW1MMlAyeU9lcktMeHJfWDM4ZEszNVdteGNxSlU0RnNKS2ljSDQwbFZnY3BwSUduRVBVMXdkSkVfdXlHREVPZw?oc=5",
+      "source_feed": "gnews_gold",
+      "source_url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxObEZ6N0hRVlQ4cXA1ai10YmtfSlZfSzJNMFhpY2pZMERZbTBwcmFveHVJQVoyS3YzNXBNSGF0cDVTcG9yd2lSNmpkYkR1LV9OSTFoTFgtQXlQUVNodUdEVmlVMDNxQ1U5OTFScExpOHNtYVQ5bnJ3ckVpUDNtZXhjSzQ5YUgzR0VoRzduQk9SSjhGNjFEbUp0Qjcxc9IBpwFBVV95cUxOZ2tJN2lLM2hQd0RTNjdqZjZvNERJRXJGVnJNb051OFdPY1JycWNndlpYVHZsV3E3eExPMHNmajcxTURyNWNVMElHMjhoR0ducUZzWDU5ekM0RFpoUDZydnotN25nbVNVZW1MMlAyeU9lcktMeHJfWDM4ZEszNVdteGNxSlU0RnNKS2ljSDQwbFZnY3BwSUduRVBVMXdkSkVfdXlHREVPZw?oc=5",
+      "publisher": "FOREX.com",
       "sentiment_method": "vader",
       "related_event": null
     },
@@ -4360,40 +4258,6 @@
       "related_event": null
     },
     {
-      "id": "35ff2ae7c8fd484a",
-      "title": "How Chevron Is Maintaining Prominence in the Permian Basin",
-      "summary": "With nearly 2 million acres and an interest in one out of every five wells in the Permian Basin, Chevron has recently reached a production plateau and turned its focus to increasing reliability and efficiency in its West Texas operations. On Bloomberg Chief Future Officer, CFO Eimear Bonner shows Annmarie Hordern some of the facilities and technologies that contribute to the company's competitive advantage in the region. (Source: Bloomberg)",
-      "time_published_utc": "2026-11-12 02:30:29+00:00",
-      "overall_sentiment_score": 0.8625,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "economy_monetary"
-      ],
-      "url": "https://www.bloomberg.com/news/videos/2026-11-12/how-chevron-is-maintaining-prominence-in-the-permian-video",
-      "source_feed": "bloomberg_markets",
-      "source_url": "https://www.bloomberg.com/news/videos/2026-11-12/how-chevron-is-maintaining-prominence-in-the-permian-video",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "6ef83efbbd496bb3",
-      "title": "India Reclaims Spot Among World\u2019s Five Biggest Stock Markets as Rally Extends",
-      "summary": "Market value climbs to $5.4 trillion, overtaking Taiwan.",
-      "time_published_utc": "2026-11-12 02:30:33+00:00",
-      "overall_sentiment_score": 0.4404,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "financial_markets"
-      ],
-      "url": "https://www.bloomberg.com/news/newsletters/2026-11-12/india-reclaims-spot-among-world-s-five-biggest-stock-markets-as-rally-extends",
-      "source_feed": "bloomberg_markets",
-      "source_url": "https://www.bloomberg.com/news/newsletters/2026-11-12/india-reclaims-spot-among-world-s-five-biggest-stock-markets-as-rally-extends",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
       "id": "fbfef3a7dc8b8100",
       "title": "I\u2019m 63 and spending $95,000 on a roof deck for my $500,000 home. Am I being extravagant?",
       "summary": "\u201cI have a net worth of $2.3 million and my only debt is a 15-year mortgage.\u201d",
@@ -4423,41 +4287,6 @@
       "url": "https://www.investing.com/news/commodities-news/us-russia-and-ukraine-start-second-day-of-abu-dhabi-peace-talks-5018210",
       "source_feed": "investing_com",
       "source_url": "https://www.investing.com/news/commodities-news/us-russia-and-ukraine-start-second-day-of-abu-dhabi-peace-talks-5018210",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "ad8a2922ac7b21bb",
-      "title": "Chief Future Officer: Eimear Bonner, Chevron | Patience Sustains Progress",
-      "summary": "Chief Financial Officers now play a critical role in shaping corporate strategy and positioning organizations to meet future challenges. This episode profiles Chevron CFO Eimear Bonner, who has helped lead the US energy giant to several of the most profitable quarters in its history -- and has taken steps to help the company remain resilient even if oil prices fall. (Source: Bloomberg)",
-      "time_published_utc": "2026-11-12 02:36:30+00:00",
-      "overall_sentiment_score": 0.8805,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "economy_monetary",
-        "commodities"
-      ],
-      "url": "https://www.bloomberg.com/news/videos/2026-11-12/chief-future-officer-eimear-bonner-chevron-video",
-      "source_feed": "bloomberg_markets",
-      "source_url": "https://www.bloomberg.com/news/videos/2026-11-12/chief-future-officer-eimear-bonner-chevron-video",
-      "publisher": "",
-      "sentiment_method": "vader",
-      "related_event": null
-    },
-    {
-      "id": "3e06912a4f89c0b0",
-      "title": "Taiwan Drafts Plans for Wealth Fund, Aims for Bill by Year-End",
-      "summary": "Taiwan is drafting legislation to establish a new sovereign wealth fund with initial capital of about NT$30 billion ($912 million), pushing ahead with the government\u2019s plan to make strategic investments overseas.",
-      "time_published_utc": "2026-11-12 02:40:18+00:00",
-      "overall_sentiment_score": 0.7506,
-      "overall_sentiment_label": "Bullish",
-      "topics": [
-        "economy_monetary"
-      ],
-      "url": "https://www.bloomberg.com/news/articles/2026-11-12/taiwan-drafts-plans-for-wealth-fund-aims-for-bill-by-year-end",
-      "source_feed": "bloomberg_markets",
-      "source_url": "https://www.bloomberg.com/news/articles/2026-11-12/taiwan-drafts-plans-for-wealth-fund-aims-for-bill-by-year-end",
       "publisher": "",
       "sentiment_method": "vader",
       "related_event": null
@@ -4755,6 +4584,23 @@
       "related_event": null
     },
     {
+      "id": "3995ab33c70d8745",
+      "title": "Indian shares bounce back as investors seek AI shelter",
+      "summary": "Nifty 50 is world\u2019s best-performing major market so far this quarter",
+      "time_published_utc": "2026-11-12 04:43:55+00:00",
+      "overall_sentiment_score": 0.5994,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://www.ft.com/content/99a27744-23bd-4cb9-92e4-7712dd658920?syn-25a6b1a6=1",
+      "source_feed": "ft_markets",
+      "source_url": "https://www.ft.com/content/99a27744-23bd-4cb9-92e4-7712dd658920?syn-25a6b1a6=1",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
       "id": "f8f338d281abcae4",
       "title": "Najib Barred From Politics, Media Appearances Under House Arrest",
       "summary": "Former Malaysian Prime Minister Najib Razak is barred from any political activities, media appearances and from receiving visitors without permission under his house arrest conditions, Home Affairs Minister Saifuddin Nasution Ismail said Thursday.",
@@ -4806,6 +4652,108 @@
       "related_event": null
     },
     {
+      "id": "43237cd5951f7d38",
+      "title": "How Switzerland\u2019s rescue of a Russian bank went spectacularly wrong",
+      "summary": "A four-year saga of unpaid debts, feuding owners and legal battles",
+      "time_published_utc": "2026-11-12 05:00:03+00:00",
+      "overall_sentiment_score": -0.5423,
+      "overall_sentiment_label": "Bearish",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://www.ft.com/content/8d5aaf6c-e8b6-47ac-a111-a5827fce2175?syn-25a6b1a6=1",
+      "source_feed": "ft_markets",
+      "source_url": "https://www.ft.com/content/8d5aaf6c-e8b6-47ac-a111-a5827fce2175?syn-25a6b1a6=1",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "ef4e1503a0267cb4",
+      "title": "Chinese carmakers offer lifeline to Europe\u2019s struggling steel industry",
+      "summary": "Chief of major auto supplier Voestalpine says BYD and others will boost sector even as factories close",
+      "time_published_utc": "2026-11-12 05:00:03+00:00",
+      "overall_sentiment_score": -0.0258,
+      "overall_sentiment_label": "Neutral",
+      "topics": [
+        "forex"
+      ],
+      "url": "https://www.ft.com/content/5f4e00d0-1ffd-4b3e-a510-d684eab64ac4?syn-25a6b1a6=1",
+      "source_feed": "ft_markets",
+      "source_url": "https://www.ft.com/content/5f4e00d0-1ffd-4b3e-a510-d684eab64ac4?syn-25a6b1a6=1",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "6f90f0222f3d55ae",
+      "title": "The blue wave should target red tape",
+      "summary": "You don\u2019t have to be a libertarian nut job to acknowledge the costs imposed by the US administrative state",
+      "time_published_utc": "2026-11-12 05:00:12+00:00",
+      "overall_sentiment_score": 0.1531,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://www.ft.com/content/af63512c-56ce-4a8b-9a0a-70a6b9c2424e?syn-25a6b1a6=1",
+      "source_feed": "ft_markets",
+      "source_url": "https://www.ft.com/content/af63512c-56ce-4a8b-9a0a-70a6b9c2424e?syn-25a6b1a6=1",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "e900e2342843d92c",
+      "title": "Growth investing or gambling?",
+      "summary": "The current extreme risk-taking in equity markets might present a once-in-a-career investment opportunity",
+      "time_published_utc": "2026-11-12 05:00:12+00:00",
+      "overall_sentiment_score": 0.6597,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://www.ft.com/content/92eb0eca-aee8-45af-b336-7a9a20da0a64?syn-25a6b1a6=1",
+      "source_feed": "ft_markets",
+      "source_url": "https://www.ft.com/content/92eb0eca-aee8-45af-b336-7a9a20da0a64?syn-25a6b1a6=1",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "cd5e676a0cbae52d",
+      "title": "Russian diesel exports double after Trump lifts sanctions, but US gets none",
+      "summary": "Boost in shipments expected to be shortlived after Ukraine resumes attacks on refineries",
+      "time_published_utc": "2026-11-12 05:00:21+00:00",
+      "overall_sentiment_score": -0.7742,
+      "overall_sentiment_label": "Bearish",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://www.ft.com/content/525b53ee-4817-4eb6-8292-b6ee0ac45b47?syn-25a6b1a6=1",
+      "source_feed": "ft_markets",
+      "source_url": "https://www.ft.com/content/525b53ee-4817-4eb6-8292-b6ee0ac45b47?syn-25a6b1a6=1",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "5df275239b48bd8d",
+      "title": "Can anything derail Anthropic\u2019s IPO?",
+      "summary": "The start-up is forging ahead with its listing in the face of adversity for the broader AI trade",
+      "time_published_utc": "2026-11-12 05:00:22+00:00",
+      "overall_sentiment_score": -0.6124,
+      "overall_sentiment_label": "Bearish",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://www.ft.com/content/b9ad2b19-4f2a-4f26-89b6-940985a0b9d4?syn-25a6b1a6=1",
+      "source_feed": "ft_markets",
+      "source_url": "https://www.ft.com/content/b9ad2b19-4f2a-4f26-89b6-940985a0b9d4?syn-25a6b1a6=1",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
       "id": "55af725708f82708",
       "title": "Singapore Central Bank Rolls Out Gold-Vaulting Services to Boost Trading Hub - WSJ",
       "summary": "<a href=\"https://news.google.com/rss/articles/CBMilwFBVV95cUxOeXJQTmVQMFVuWV82THhmdjRMLUpwZmpwS1NhZnJZZk50LVJzVElOTE1rMnhLNTQtWVptT2xreFowX1hnd1FRclN1YndWLWN4MEpFRG1uSU9RMDVudWJFdGxXbDdqM2N4bjR5M2R3aGZIWnBmNHVYejhNNk1wU0hoNXB4bzV4RHNvN2wzbnFrTi16V2pKSllR?oc=5\" target=\"_blank\">Singapore Central Bank Rolls Out Gold-Vaulting Services to Boost Trading Hub</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">WSJ</font>",
@@ -4836,6 +4784,93 @@
       "url": "https://www.investing.com/news/commodities-news/gold-clings-below-4000-as-inflation-fears-fuel-bets-on-bigger-fed-hikes-5020139",
       "source_feed": "investing_com",
       "source_url": "https://www.investing.com/news/commodities-news/gold-clings-below-4000-as-inflation-fears-fuel-bets-on-bigger-fed-hikes-5020139",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "8dda4eaa78c2e009",
+      "title": "Nvidia Weighs Replacing Huang. But It Won\u2019t Be Easy",
+      "summary": "Nvidia\u2019s board is working to identify a potential replacement for its CEO, Jensen Huang, after reports of another alleged affair.\n\nBut replacing the man who\u2019s become synonymous with Nvidia and its success won\u2019t be easy, as Minmin Low explains. (Source: Bloomberg)",
+      "time_published_utc": "2026-11-12 05:45:02+00:00",
+      "overall_sentiment_score": 0.9022,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://www.bloomberg.com/news/videos/2026-11-12/nvidia-weighs-replacing-huang-but-it-won-t-be-easy-video",
+      "source_feed": "bloomberg_markets",
+      "source_url": "https://www.bloomberg.com/news/videos/2026-11-12/nvidia-weighs-replacing-huang-but-it-won-t-be-easy-video",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "5fd7a08696f9fdf5",
+      "title": "Key Modi Ally on India Youth Anger and AI Push",
+      "summary": "Prime Minister Narendra Modi\u2019s most influential ally said India\u2019s growth isn\u2019t translating into visible gains for young people. Andhra Pradesh Chief Minister N. Chandrababu Naidu told Bloomberg\u2019s Ruchi Bhatia that while economic growth is visible on the ground, it isn\u2019t enough to meet rising expectations\u2014adding that the government is doing its best to meet that demand. In the same interview, Naidu also discussed Google\u2019s $15 billion investment to develop India\u2019s first artificial intelligence hub and data center campus in the southern state. He said there is \u201cno going back\u201d on the project, adding that he won\u2019t compromise the public interest or Google. (Source: Bloomberg)",
+      "time_published_utc": "2026-11-12 05:45:18+00:00",
+      "overall_sentiment_score": 0.9422,
+      "overall_sentiment_label": "Bullish",
+      "topics": [
+        "economy_monetary"
+      ],
+      "url": "https://www.bloomberg.com/news/videos/2026-11-12/key-modi-ally-on-india-youth-anger-and-ai-push-video",
+      "source_feed": "bloomberg_markets",
+      "source_url": "https://www.bloomberg.com/news/videos/2026-11-12/key-modi-ally-on-india-youth-anger-and-ai-push-video",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "56db6adae0b69f09",
+      "title": "Gold Holds Below $4,000 as Market Looks Ahead to Fed Rate Hike - Bloomberg.com",
+      "summary": "<a href=\"https://news.google.com/rss/articles/CBMisgFBVV95cUxNMTJybnByRUZtMk5uajdEUVROVDJnSmZlQVRsazNHSmZaY0FKMVM0d0tvVnhDdlozdUhuMkx4ZkJZV0IyUDRCMmxtSzF0U3RmWWkxckVJVVVUV1pZczI2dmZfN29TYmN0YkVWMml2X2NJY1liZk1WeWFVdXNHbFpqdHBVWmhMTE4zTHozN2l5ZGFOWVBxWVBzTVB6V3dLeTR5UmlYYTVtN0xJQW5MMTVRdUJn?oc=5\" target=\"_blank\">Gold Holds Below $4,000 as Market Looks Ahead to Fed Rate Hike</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Bloomberg.com</font>",
+      "time_published_utc": "2026-11-12 05:46:00+00:00",
+      "overall_sentiment_score": 0.0,
+      "overall_sentiment_label": "Neutral",
+      "topics": [
+        "economy_monetary",
+        "commodities"
+      ],
+      "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNMTJybnByRUZtMk5uajdEUVROVDJnSmZlQVRsazNHSmZaY0FKMVM0d0tvVnhDdlozdUhuMkx4ZkJZV0IyUDRCMmxtSzF0U3RmWWkxckVJVVVUV1pZczI2dmZfN29TYmN0YkVWMml2X2NJY1liZk1WeWFVdXNHbFpqdHBVWmhMTE4zTHozN2l5ZGFOWVBxWVBzTVB6V3dLeTR5UmlYYTVtN0xJQW5MMTVRdUJn?oc=5",
+      "source_feed": "gnews_gold",
+      "source_url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNMTJybnByRUZtMk5uajdEUVROVDJnSmZlQVRsazNHSmZaY0FKMVM0d0tvVnhDdlozdUhuMkx4ZkJZV0IyUDRCMmxtSzF0U3RmWWkxckVJVVVUV1pZczI2dmZfN29TYmN0YkVWMml2X2NJY1liZk1WeWFVdXNHbFpqdHBVWmhMTE4zTHozN2l5ZGFOWVBxWVBzTVB6V3dLeTR5UmlYYTVtN0xJQW5MMTVRdUJn?oc=5",
+      "publisher": "Bloomberg.com",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "c35fba73e76bf027",
+      "title": "Aussie Falls to Lowest Since January on RBA Slowdown, AI Fears",
+      "summary": "Australia\u2019s dollar dropped to its lowest level in more than nine months as risk sentiment waned and the interest-rate outlook with the US diverged.",
+      "time_published_utc": "2026-11-12 05:57:01+00:00",
+      "overall_sentiment_score": -0.8442,
+      "overall_sentiment_label": "Bearish",
+      "topics": [
+        "economy_monetary",
+        "forex"
+      ],
+      "url": "https://www.bloomberg.com/news/articles/2026-11-12/aussie-falls-to-lowest-since-january-on-rba-slowdown-ai-fears",
+      "source_feed": "bloomberg_markets",
+      "source_url": "https://www.bloomberg.com/news/articles/2026-11-12/aussie-falls-to-lowest-since-january-on-rba-slowdown-ai-fears",
+      "publisher": "",
+      "sentiment_method": "vader",
+      "related_event": null
+    },
+    {
+      "id": "c682d614de3c4ae3",
+      "title": "The AI megatrade\u2019s mounting portfolio concentration risk problem",
+      "summary": "There aren\u2019t enough baskets to safely cope with this many massive eggs",
+      "time_published_utc": "2026-11-12 06:00:02+00:00",
+      "overall_sentiment_score": -0.1531,
+      "overall_sentiment_label": "Bearish",
+      "topics": [
+        "financial_markets"
+      ],
+      "url": "https://www.ft.com/content/2f4d39dd-dee8-4620-996d-3fe978b7522b",
+      "source_feed": "ft_markets",
+      "source_url": "https://www.ft.com/content/2f4d39dd-dee8-4620-996d-3fe978b7522b",
       "publisher": "",
       "sentiment_method": "vader",
       "related_event": null

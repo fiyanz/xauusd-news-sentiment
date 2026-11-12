@@ -39,6 +39,7 @@ src/pipeline/sync.py
 | `src/acquire/news.py` | RSS (feedparser) + sentimen VADER |
 | `src/acquire/corpus.py` | Korpus berita persisten (append-only, dedupe URL) |
 | `src/acquire/gdelt.py` | GDELT Doc API historis (keyless, rate-limited) |
+| `src/acquire/hf_news.py` | HuggingFace financial news (keyless, snapshot 2010-2020) |
 | `src/acquire/price.py` | H1 history + intraday GC=F 5m/15m |
 | `src/acquire/macro.py` | US10Y, DXY, Oil (PIT lag) |
 | `src/process/harmonize.py` | merge_asof backward, return/label |
@@ -101,6 +102,10 @@ uv run python -m src.evaluate.significance
   `enabled`, `query`, `start_date`, `end_date`, `max_records_per_window`,
   `window_days`, `max_windows`, `delay_seconds`. Bila API memblokir (429),
   pipeline tetap jalan dengan korpus RSS.
+- `news.hf_news` — HuggingFace `ashraq/financial-news` (keyless, snapshot statis
+  2010-2020). Di-filter jadi ~12.5k headline emas unik; mengisi periode training
+  yang tidak bisa dijangkau RSS. `cache` menyimpan hasil filter (raw 142MB
+  dihapus setelah difilter).
 - `macro.tickers`, `macro.start_date`, `macro.end_date` (`null` = hari ini),
   `macro.lag_days`.
 - `split.train/val/test`, `split.embargo_hours`, `split.walk_forward_folds`.
@@ -118,7 +123,7 @@ uv run python -m src.evaluate.significance
 | `data/processed/bucketed_features.parquet` | matriks fitur 4H |
 | `data/processed/provenance.json` | manifest provenance |
 | `models/champion_fair_model.joblib` | bundle model (champion by CV) |
-| `reports/significance.json` | kontrak signifikansi |
+| `reports/significance.json` | kontrak signifikansi + uji delta vs baseline (paired bootstrap) |
 | `reports/full_metrics_evaluation.json` | metrik semua model |
 | `reports/reformed_evaluation.md` | laporan markdown |
 

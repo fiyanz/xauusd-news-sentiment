@@ -3,8 +3,8 @@
     "data/raw/price/xauusd_h1_complete.csv": {
       "artifact": "data/raw/price/xauusd_h1_complete.csv",
       "source": "local H1 CSV + yfinance GC=F (keyless)",
-      "rows": 97694,
-      "as_of": "2026-11-12 05:00:00+00:00",
+      "rows": 97695,
+      "as_of": "2026-11-12 06:00:00+00:00",
       "is_simulated": false
     },
     "data/raw/price/xauusd_m5.csv": {
@@ -28,8 +28,8 @@
     "data/raw/calendar/economic_calendar_enriched.csv": {
       "artifact": "data/raw/calendar/economic_calendar_enriched.csv",
       "source": "bls_api_v2 + fred_csv (keyless)",
-      "generated_at": "2026-11-12 05:39:43+00:00",
-      "as_of": "2026-11-12 05:39:43+00:00",
+      "generated_at": "2026-11-12 06:30:27+00:00",
+      "as_of": "2026-11-12 06:30:27+00:00",
       "is_simulated": false,
       "rows": 748,
       "rows_real": 737,
@@ -64,11 +64,11 @@
     "data/raw/news/news_sentiment_feed.json": {
       "artifact": "data/raw/news/news_sentiment_feed.json",
       "source": "rss_feeds (keyless)",
-      "generated_at": "2026-11-12 05:39:50+00:00",
-      "as_of": "2026-11-12 05:39:50+00:00",
+      "generated_at": "2026-11-12 06:31:32+00:00",
+      "as_of": "2026-11-12 06:31:32+00:00",
       "is_simulated": false,
       "status": "ok",
-      "article_count": 278,
+      "article_count": 280,
       "sentiment_method": "vader",
       "feeds": {
         "cnbc_markets": "ok:30",
@@ -85,28 +85,28 @@
     "data/processed/bucketed_features.parquet": {
       "artifact": "data/processed/bucketed_features.parquet",
       "source": "rss_feeds+vader | bls_api_v2+fred_csv | yfinance GC=F | yfinance ^TNX/DX-Y.NYB/CL=F",
-      "generated_at": "2026-11-12 05:40:11+00:00",
+      "generated_at": "2026-11-12 06:32:18+00:00",
       "as_of": null,
       "is_simulated": false
     },
     "models/champion_fair_model.joblib": {
       "artifact": "models/champion_fair_model.joblib",
       "source": "retrain pipeline (src.models.train, champion by CV)",
-      "generated_at": "2026-11-12 05:45:23+00:00",
+      "generated_at": "2026-11-12 06:34:08+00:00",
       "is_simulated": false,
-      "champion_name": "XGBoost"
+      "champion_name": "Ridge_Linear"
     },
     "reports/significance.json": {
       "artifact": "reports/significance.json",
       "source": "retrain pipeline (src.evaluate.significance)",
-      "generated_at": "2026-11-12 05:45:23+00:00",
+      "generated_at": "2026-11-12 06:34:08+00:00",
       "is_simulated": false,
-      "rank_ic": 0.0343,
-      "rank_ic_pvalue": 0.01349,
-      "sentiment_adds_value": false
+      "rank_ic": 0.0336,
+      "rank_ic_pvalue": 0.01549,
+      "sentiment_adds_value": true
     }
   },
-  "generated_at": "2026-11-12 05:45:23+00:00",
+  "generated_at": "2026-11-12 06:34:08+00:00",
   "is_simulated": false,
   "has_simulated_rows": true
 }

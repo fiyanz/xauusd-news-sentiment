@@ -42,6 +42,11 @@ news:
     window_days: 31
     max_windows: 12         # batas jumlah jendela (rate limit)
     delay_seconds: 6.5
+  # HuggingFace financial news (keyless, snapshot statis 2010-2020).
+  # Mengisi periode training dengan headline emas; di-filter jadi ~33k.
+  hf_news:
+    enabled: true
+    cache: "data/raw/news/hf_gold_news.parquet"
 
 data:
   # Sumber eksternal (opsional). null -> pakai artifact yang sudah ada di repo,

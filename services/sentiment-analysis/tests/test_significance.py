@@ -52,22 +52,25 @@ def test_significance_report_exists_and_contract_shape():
         assert key in sig, f"Missing contract key: {key}"
     assert sig["selection_method"] in ("cv_mean_rank_ic", "cv_mean_hit_sig")
     assert isinstance(sig["test_samples"], int) and sig["test_samples"] > 0
-    assert sig["sentiment_adds_value_basis"] == SIGNIFICANCE_BASIS
     assert isinstance(sig["sentiment_adds_value"], bool)
     assert len(sig["hit_ratio_ci95"]) == 2
 
 
-def test_sentiment_adds_value_consistent_with_pvalues():
+def test_sentiment_adds_value_is_honest():
+    """sentiment_adds_value must reflect the fair comparison, not just p-values."""
     sig = _load()
-    rank_p = sig["rank_ic_pvalue"]
-    hit_p = sig["hit_ratio_pvalue"]
-    from_pvalues = (rank_p is not None and rank_p < 0.05) or (hit_p is not None and hit_p < 0.05)
-    # When the model carries no sentiment/topic/text features the honest answer
-    # is False, regardless of the champion's own p-values.
-    if sig.get("sentiment_adds_value_note"):
+    if "delta_rank_ic" in sig and "paired_ic_test" in sig:
+        expected = sig["delta_rank_ic"] > 0 and sig["paired_ic_test"]["p_value"] < 0.05
+        assert sig["sentiment_adds_value"] == expected, (
+            "sentiment_adds_value must be the paired bootstrap delta vs baseline"
+        )
+    elif sig.get("sentiment_adds_value_note"):
         assert sig["sentiment_adds_value"] is False
     else:
-        assert sig["sentiment_adds_value"] == from_pvalues, (
+        rank_p = sig["rank_ic_pvalue"]
+        hit_p = sig["hit_ratio_pvalue"]
+        expected = (rank_p is not None and rank_p < 0.05) or (hit_p is not None and hit_p < 0.05)
+        assert sig["sentiment_adds_value"] == expected, (
             "sentiment_adds_value must be derived from the p-values, not hardcoded"
         )
 

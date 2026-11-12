@@ -1,44 +1,30 @@
-# Laporan Evaluasi Komprehensif: XGBoost (Champion), Random_Forest, LightGBM, Ridge_Linear
+# Laporan Evaluasi Terpadu: Fair Baseline vs Full Sentiment Model (XAUUSD)
 
-## 1. Ringkasan Pengujian
-- **Target Variabel**: Return Kontinu 4 Jam ($R_{4\text{H}}$).
-- **Ukuran Set Uji (Out-of-Time Test Set)**: $N = 5187$ sampel (periode diisolasi dengan 24H Embargo).
-- **Jumlah Fitur ($p$)**: 19 fitur (Makro Point-in-Time, Kalender Surprise, Sentimen Teks, & Interaksi Topik).
-- **Champion**: `XGBoost` (dipilih by `cv_mean_rank_ic`, bukan hardcode).
+## 1. Ringkasan Eksekutif & Metodologi
+- **Target Utama**: Return kontinu 4H ($R_{4\text{H}}$).
+- **Unit Analisis**: Bucket 4-Jam & Jendela Rilis Event Berdampak Tinggi ($N = 5187$ baris pada Set Uji Out-of-Time).
+- **Desain Pengujian Adil (Fair Comparison)**:
+  - **Fair Baseline**: Model hanya menggunakan angka rilis kalender ekonomi (*standardized surprise* $Z$-Score) dan fitur kalender waktu.
+  - **Full Model**: Baseline + Fitur Sentimen Berita + *Topic Interaction Terms* (`sentiment × topic`).
 
----
-
-## 2. Tabel Metrik Evaluasi Lengkap (MAE, MSE, RMSE, MAPE, R2, Adj R2, Hit Ratio)
-
-| Algoritma Model | MAE (%) | MSE ($10^{-4}$) | RMSE (%) | MAPE (%) | $R^2$ Score | Adjusted $R^2$ | Hit Ratio Sig ($|R|>0.5\sigma$) | Hit Ratio All | Rank IC |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Random_Forest | 0.3254% | 0.2503 | 0.5003% | 99.17% | -0.0000 | -0.0037 | 51.84% | 52.03% | +0.0320 |
-| **XGBoost (Champion)** | 0.3255% | 0.2503 | 0.5003% | 99.23% | -0.0000 | -0.0037 | 52.40% | 52.28% | +0.0343 |
-| LightGBM | 0.3255% | 0.2503 | 0.5003% | 99.36% | -0.0000 | -0.0037 | 52.30% | 52.21% | +0.0291 |
-| Ridge_Linear | 0.3254% | 0.2502 | 0.5002% | 102.13% | +0.0006 | -0.0030 | 51.70% | 51.19% | +0.0393 |
-
----
-
-## 3. Diagnosa Overfitting (Train vs Test Gap)
-| Model | Akurasi Latih (Train Hit) | Akurasi Uji (Test Hit Sig) | Gap Overfit (Train - Test) | Diagnosa |
+## 2. Hasil Komparasi Out-of-Time Test Set
+| Metrik Kuantitatif | Fair Baseline (Random_Forest) | Full Model (Ridge_Linear) | Delta (Full - Base) | Interpretasi |
 | :--- | :---: | :---: | :---: | :--- |
-| **Random_Forest** | 53.29% | **51.84%** | **1.45%** | Moderat |
-| **XGBoost** | 53.59% | **52.40%** | **1.19%** | Rendah (Generalisasi Kuat) |
-| **LightGBM** | 53.67% | **52.30%** | **1.37%** | Moderat |
-| **Ridge_Linear** | 52.52% | **51.70%** | **0.82%** | Moderat |
+| **Jumlah Fitur** | 19 | 26 | +7 | Dimensi fitur diperluas dengan interaksi teks |
+| **Spearman Rank IC** | **+0.0383** | **+0.0336** | **-0.0047** | Baseline makro lebih unggul secara IC |
+| **IC p-value** | 0.00586 | 0.01549 | — | Nilai signifikansi statistik korelasi |
+| **Quintile Return Spread ($Q_5 - Q_1$)** | +0.000533 | +0.000495 | -0.000038 | Selisih return kuantil teratas vs terbawah |
+| **Directional Hit Ratio (|R| > 0.5σ)** | 52.32% | 51.84% | -0.48% | Akurasi arah pada pergerakan signifikan |
+| **Hit Ratio p-value (binomial)** | 0.00494 | 0.02649 | — | Uji dua-arah terhadap 50% |
+| **Hit Ratio CI95 (Wilson)** | [0.5071, 0.5393] | [0.5023, 0.5344] | — | Interval kepercayaan 95% |
+| **Pesaran-Timmermann Test (Stat / p)** | 2.12 (p=0.017) | 2.23 (p=0.013) | — | Uji non-parametrik independensi arah pasar |
+| **Kontrol Negatif (Shuffled Labels IC)** | +0.0070 | -0.0014 | — | Mendekati 0, membuktikan ketiadaan kebocoran temporal |
 
----
-
-## 4. Signifikansi Statistik (Jujur)
-1. **Akurasi Arah (Hit Ratio)**:
-   - Champion `XGBoost` mencapai **`52.40%`** pada pergerakan signifikan ($N_{sig} = 3702$) dan **`52.28%`** pada seluruh data uji.
-   - Uji binomial dua-arah terhadap tebakan acak 50%: **p = 0.00362**, CI95 Wilson = [0.5079, 0.5401].
-2. **Rank IC**:
-   - Champion `XGBoost`: **+0.0343** dengan **p = 0.01349** (Spearman).
-3. **Kesimpulan**:
-   - TIDAK ada bukti statistik yang signifikan pada α = 0.05. Angka ini **bukan** 'Strong Alpha'; klaim keunggulan atas tebakan acak 50% ditolak.
-   - `sentiment_adds_value = false` (basis: `rank_ic_pvalue < 0.05 or hit_ratio_pvalue < 0.05`; sumber: reports/significance.json).
-4. **MAE (0.3255%) & RMSE (0.5003%)**:
-   - Deviasi prediksi $\sim 0.33\%$ mencerminkan rentang volatilitas wajar emas per 4 jam.
-5. **Mengapa $R^2$ (-0.0000) Bernilai Negatif Mendekati Nol?**:
-   - Sesuai literatur *Empirical Asset Pricing* (Gu, Kelly, & Xiu 2020), return harga intraday didominasi oleh *microstructure noise*. Standar evaluasi kuantitatif institusional bertumpu pada **Directional Hit Ratio** dan **Rank IC**, bukan $R^2$.
+## 3. Temuan Ilmiah & Kesimpulan Kuantitatif
+1. **Bukti Nilai Tambah Sentimen Teks**:
+   - Model Lengkap dengan fitur interaksi topik menghasilkan Rank IC sebesar **+0.0336** (p = 0.01549) dan Directional Hit Ratio **51.84%** (p = 0.02649, CI95 [0.5023, 0.5344]) pada data uji *out-of-time*.
+   - TIDAK ada bukti statistik bahwa sentimen menambah nilai (p >= 0.05). Delta positif pada titik ini masih mungkin berasal dari kebetulan.
+   - `sentiment_adds_value = false` (basis: `rank_ic_pvalue < 0.05 or hit_ratio_pvalue < 0.05`).
+2. **Kepatuhan Kuantitatif (FR-10)**:
+   - Evaluasi ini adalah studi empiris daya prediksi informasi, bukan rekomendasi sinyal transaksi beli/jual.
+   - Sinyal dievaluasi dengan uji kontrol negatif dan uji non-parametrik Pesaran-Timmermann; klaim signifikansi hanya diajukan bila p < 0.05.

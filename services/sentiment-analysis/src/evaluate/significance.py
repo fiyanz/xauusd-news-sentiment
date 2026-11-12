@@ -112,6 +112,39 @@ def sentiment_adds_value_from_pvalues(rank_ic_pvalue, hit_ratio_pvalue, alpha: f
     return bool(rank_sig or hit_sig)
 
 
+def paired_ic_test(y_true, pred_full, pred_base, n_boot: int = 1000, seed: int = 42) -> dict:
+    """One-sided bootstrap test: does the full model beat the baseline?
+
+    Resamples the test rows with replacement and recomputes both Spearman ICs;
+    the p-value is the share of resamples where the full model does NOT beat the
+    baseline. This is the honest test for "does sentiment add value" -- the full
+    model must beat the macro-only baseline, not merely be significant on its own.
+    """
+    y = np.asarray(y_true, dtype=float)
+    pf = np.asarray(pred_full, dtype=float)
+    pb = np.asarray(pred_base, dtype=float)
+    n = len(y)
+    if n == 0:
+        return {"delta_mean": 0.0, "p_value": 1.0, "n_boot": 0}
+    rng = np.random.default_rng(seed)
+    diffs = []
+    for _ in range(n_boot):
+        idx = rng.integers(0, n, n)
+        ic_f, _ = spearmanr(pf[idx], y[idx])
+        ic_b, _ = spearmanr(pb[idx], y[idx])
+        if np.isnan(ic_f) or np.isnan(ic_b):
+            continue
+        diffs.append(float(ic_f - ic_b))
+    if not diffs:
+        return {"delta_mean": 0.0, "p_value": 1.0, "n_boot": 0}
+    diffs = np.asarray(diffs)
+    return {
+        "delta_mean": round(float(diffs.mean()), 5),
+        "p_value": round(float(np.mean(diffs <= 0.0)), 5),
+        "n_boot": int(len(diffs)),
+    }
+
+
 # --------------------------------------------------------------------------- #
 # Champion selection (mirrors ``src.models.train.select_champion``)
 # --------------------------------------------------------------------------- #
@@ -410,6 +443,33 @@ def build_significance_report(
         seed=seed,
         has_sentiment_features=sentiment_features_present(feature_cols),
     )
+
+    # Honest "sentiment adds value": the full model must beat the macro-only
+    # baseline on the same test rows (paired bootstrap on the IC difference).
+    # A significant full model on its own is not evidence that sentiment helps.
+    baseline_model = bundle.get("baseline_model")
+    baseline_cols = bundle.get("baseline_feature_cols") or []
+    baseline_pred = None
+    if baseline_model is not None and len(baseline_cols) > 0:
+        try:
+            X_base = apply_bundle_features(bundle, test_df)[baseline_cols].to_numpy(dtype=float)
+            baseline_pred = baseline_model.predict(X_base)
+        except Exception:  # noqa: BLE001 - keep the p-value fallback
+            baseline_pred = None
+
+    if baseline_pred is not None:
+        base_ic, base_p = spearman_rank_ic(y_test, baseline_pred)
+        paired = paired_ic_test(y_test, preds, baseline_pred, seed=seed)
+        delta_ic = round(float(report["rank_ic"] - base_ic), 5)
+        report["baseline_rank_ic"] = round(float(base_ic), 4)
+        report["baseline_rank_ic_pvalue"] = round(float(base_p), 5)
+        report["delta_rank_ic"] = delta_ic
+        report["paired_ic_test"] = paired
+        report["sentiment_adds_value"] = bool(delta_ic > 0 and paired["p_value"] < 0.05)
+        report["sentiment_adds_value_basis"] = (
+            "full model rank IC > baseline rank IC, paired bootstrap p < 0.05"
+        )
+        report["sentiment_adds_value_note"] = None
 
     artifact = check_artifact(features_parquet, provenance_path)
     report["artifact_status"] = artifact["artifact_status"]

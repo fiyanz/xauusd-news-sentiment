@@ -123,6 +123,25 @@ def run_full_sync(write_prediction: bool = True) -> dict:
     else:
         print("[PipelineSync] GDELT disabled; korpus hanya dari RSS.")
 
+    # 5c. HuggingFace historical gold headlines (keyless, static snapshot).
+    #     Sifatnya arsip 2010-2020; mengisi periode training yang tidak bisa
+    #     dijangkau RSS (~14 hari).
+    hf_cfg = news_cfg.get("hf_news", {})
+    if hf_cfg.get("enabled", True):
+        print("\n--- Step 5c/8: HuggingFace Gold News Sync ---")
+        try:
+            from src.acquire.hf_news import fetch_hf_gold_news
+
+            added = fetch_hf_gold_news(
+                corpus_path=corpus_path,
+                cache_path=hf_cfg.get("cache", "data/raw/news/hf_gold_news.parquet"),
+            )
+            print(f"[PipelineSync] HF gold news: +{added} artikel baru.")
+        except Exception as exc:  # noqa: BLE001 - network/dataset; jangan crash
+            print(f"[PipelineSync] HF news dilewati: {type(exc).__name__}: {exc}")
+    else:
+        print("[PipelineSync] HF news disabled.")
+
     # 6. Harmonization (korpus berita + price -> returns/labels)
     print("\n--- Step 6/8: Harmonization ---")
     harmonize_dataset(

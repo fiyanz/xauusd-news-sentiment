@@ -16,6 +16,7 @@ from src.evaluate.significance import (
     pesaran_timmermann_test,  # re-exported for backwards compatibility
     sentiment_adds_value_from_pvalues,
     sentiment_features_present,
+    paired_ic_test,
     wilson_ci,
 )
 from src.features.reduce import apply_bundle_features
@@ -58,11 +59,13 @@ def evaluate_fair_test(
     ]
 
     X_all = apply_bundle_features(bundle, test_df)
+    preds_by_key: dict[str, np.ndarray] = {}
 
     for model_key, name, model, cols in models_to_test:
 
         X_test = X_all[cols].to_numpy(dtype=float)
         preds = model.predict(X_test)
+        preds_by_key[model_key] = preds
 
         # 1. Spearman Rank IC
         ic, pval = spearmanr(preds, y_test)
@@ -132,26 +135,35 @@ def evaluate_fair_test(
     hit_delta = round(full_hit - base_hit, 4)
 
     # `sentiment_adds_value` only means something if the full model actually
-    # carries sentiment/topic/text features. When those blocks are skipped
-    # (zero variance in training) the full model equals the baseline and no
-    # sentiment value can be claimed.
+    # carries sentiment/topic/text features AND beats the baseline. A
+    # significant full model on its own is not evidence that sentiment helps.
     has_sentiment = sentiment_features_present(bundle.get("champion_feature_cols"))
-    sentiment_adds_value = (
-        sentiment_adds_value_from_pvalues(full_res["ic_pvalue"], full_res["hit_ratio_pvalue"])
-        if has_sentiment
-        else False
-    )
+    paired = None
+    if has_sentiment and "baseline" in preds_by_key and "full" in preds_by_key:
+        paired = paired_ic_test(y_test, preds_by_key["full"], preds_by_key["baseline"], seed=seed)
+        sentiment_adds_value = bool(ic_delta > 0 and paired["p_value"] < 0.05)
+    elif not has_sentiment:
+        sentiment_adds_value = False
+    else:
+        sentiment_adds_value = sentiment_adds_value_from_pvalues(
+            full_res["ic_pvalue"], full_res["hit_ratio_pvalue"]
+        )
 
     eval_results["delta_alpha"] = {
         "rank_ic_improvement": ic_delta,
         "hit_ratio_improvement": hit_delta,
         "sentiment_adds_value": bool(sentiment_adds_value),
-        "sentiment_adds_value_basis": SIGNIFICANCE_BASIS,
+        "sentiment_adds_value_basis": (
+            "full model rank IC > baseline rank IC, paired bootstrap p < 0.05"
+            if paired is not None
+            else SIGNIFICANCE_BASIS
+        ),
         "sentiment_adds_value_note": (
             None
             if has_sentiment
             else "fitur sentimen/topik/teks tidak ada di model (blok nol-varians di training)"
         ),
+        "paired_ic_test": paired,
         "rank_ic_pvalue": full_res["ic_pvalue"],
         "hit_ratio_pvalue": full_res["hit_ratio_pvalue"],
         "hit_ratio_ci95": full_res["hit_ratio_ci95"],

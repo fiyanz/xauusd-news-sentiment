@@ -1,103 +1,111 @@
 {
-  "champion_name": "XGBoost",
+  "champion_name": "Ridge_Linear",
   "selection_method": "cv_mean_rank_ic",
   "test_samples": 5187,
-  "hit_ratio_sig": 0.524,
+  "hit_ratio_sig": 0.5184,
   "hit_ratio_ci95": [
-    0.5079,
-    0.5401
+    0.5023,
+    0.5344
   ],
-  "hit_ratio_pvalue": 0.00362,
-  "rank_ic": 0.0343,
-  "rank_ic_pvalue": 0.01349,
-  "pesaran_timmermann_stat": 2.3324,
-  "pesaran_timmermann_pvalue": 0.00984,
-  "negative_control_ic": 0.0047,
+  "hit_ratio_pvalue": 0.02649,
+  "rank_ic": 0.0336,
+  "rank_ic_pvalue": 0.01549,
+  "pesaran_timmermann_stat": 2.2259,
+  "pesaran_timmermann_pvalue": 0.01301,
+  "negative_control_ic": -0.0014,
   "sentiment_adds_value": false,
-  "sentiment_adds_value_basis": "rank_ic_pvalue < 0.05 or hit_ratio_pvalue < 0.05",
-  "sentiment_adds_value_note": "fitur sentimen/topik/teks tidak ada di model (blok nol-varians di training)",
+  "sentiment_adds_value_basis": "full model rank IC > baseline rank IC, paired bootstrap p < 0.05",
+  "sentiment_adds_value_note": null,
   "hit_ratio_sig_n": 3702,
-  "hit_ratio_sig_hits": 1940,
+  "hit_ratio_sig_hits": 1919,
   "alpha": 0.05,
+  "baseline_rank_ic": 0.0383,
+  "baseline_rank_ic_pvalue": 0.00586,
+  "delta_rank_ic": -0.00466,
+  "paired_ic_test": {
+    "delta_mean": -0.00445,
+    "p_value": 0.683,
+    "n_boot": 1000
+  },
   "artifact_status": "verified",
   "is_simulated": false,
   "artifact_reason": "provenance.json ditemukan, generated_at baru, dan kolom data_source/generated_at ada.",
-  "bundle_champion_name": "XGBoost",
+  "bundle_champion_name": "Ridge_Linear",
   "cv_summary": {
     "Random_Forest": {
-      "mae_pct": 0.2424,
-      "rmse_pct": 0.372,
-      "r2": -0.0012,
-      "adj_r2": -0.0067,
-      "hit_ratio_sig": 51.5,
-      "rank_ic": 0.0291
+      "mae_pct": 0.2428,
+      "rmse_pct": 0.3729,
+      "r2": -0.0061,
+      "adj_r2": -0.0137,
+      "hit_ratio_sig": 51.03,
+      "rank_ic": 0.023
     },
     "XGBoost": {
-      "mae_pct": 0.2422,
-      "rmse_pct": 0.3718,
-      "r2": -0.0001,
-      "adj_r2": -0.0056,
-      "hit_ratio_sig": 51.37,
-      "rank_ic": 0.0297
+      "mae_pct": 0.2446,
+      "rmse_pct": 0.3764,
+      "r2": -0.0247,
+      "adj_r2": -0.0324,
+      "hit_ratio_sig": 51.35,
+      "rank_ic": 0.0215
     },
     "LightGBM": {
-      "mae_pct": 0.2425,
-      "rmse_pct": 0.3722,
-      "r2": -0.0024,
-      "adj_r2": -0.008,
-      "hit_ratio_sig": 51.64,
-      "rank_ic": 0.0235
+      "mae_pct": 0.2431,
+      "rmse_pct": 0.3734,
+      "r2": -0.0087,
+      "adj_r2": -0.0163,
+      "hit_ratio_sig": 51.31,
+      "rank_ic": 0.0182
     },
     "Ridge_Linear": {
-      "mae_pct": 0.2437,
-      "rmse_pct": 0.3728,
-      "r2": -0.0054,
-      "adj_r2": -0.011,
-      "hit_ratio_sig": 51.11,
-      "rank_ic": 0.0233
+      "mae_pct": 0.2444,
+      "rmse_pct": 0.3742,
+      "r2": -0.0129,
+      "adj_r2": -0.0206,
+      "hit_ratio_sig": 51.27,
+      "rank_ic": 0.0251
     }
   },
-  "generated_at": "2026-11-12T05:45:21Z",
+  "generated_at": "2026-11-12T06:38:26Z",
   "models": {
     "Random_Forest": {
-      "rank_ic": 0.032,
-      "rank_ic_pvalue": 0.02105,
+      "rank_ic": 0.0343,
+      "rank_ic_pvalue": 0.01354,
+      "hit_ratio_sig": 0.5292,
+      "hit_ratio_ci95": [
+        0.5131,
+        0.5452
+      ],
+      "hit_ratio_pvalue": 0.00041
+    },
+    "XGBoost": {
+      "rank_ic": 0.0334,
+      "rank_ic_pvalue": 0.01613,
+      "hit_ratio_sig": 0.5243,
+      "hit_ratio_ci95": [
+        0.5082,
+        0.5404
+      ],
+      "hit_ratio_pvalue": 0.00326
+    },
+    "LightGBM": {
+      "rank_ic": 0.0382,
+      "rank_ic_pvalue": 0.0059,
+      "hit_ratio_sig": 0.5281,
+      "hit_ratio_ci95": [
+        0.512,
+        0.5441
+      ],
+      "hit_ratio_pvalue": 0.00067
+    },
+    "Ridge_Linear": {
+      "rank_ic": 0.0336,
+      "rank_ic_pvalue": 0.01549,
       "hit_ratio_sig": 0.5184,
       "hit_ratio_ci95": [
         0.5023,
         0.5344
       ],
       "hit_ratio_pvalue": 0.02649
-    },
-    "XGBoost": {
-      "rank_ic": 0.0343,
-      "rank_ic_pvalue": 0.01349,
-      "hit_ratio_sig": 0.524,
-      "hit_ratio_ci95": [
-        0.5079,
-        0.5401
-      ],
-      "hit_ratio_pvalue": 0.00362
-    },
-    "LightGBM": {
-      "rank_ic": 0.0291,
-      "rank_ic_pvalue": 0.03616,
-      "hit_ratio_sig": 0.523,
-      "hit_ratio_ci95": [
-        0.5069,
-        0.539
-      ],
-      "hit_ratio_pvalue": 0.00547
-    },
-    "Ridge_Linear": {
-      "rank_ic": 0.0393,
-      "rank_ic_pvalue": 0.0046,
-      "hit_ratio_sig": 0.517,
-      "hit_ratio_ci95": [
-        0.5009,
-        0.5331
-      ],
-      "hit_ratio_pvalue": 0.03992
     }
   }
 }

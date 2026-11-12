@@ -96,11 +96,16 @@ price → intraday → macro → calendar → news → harmonize
   topik, interaksi sentimen, TF-IDF) dikompresi PCA yang difit pada data
   training saja; waktu di-encode siklikal; TF-IDF ikut dipakai.
 - **Korpus berita persisten** (`src/acquire/corpus.py`) + **GDELT historis**
-  (`src/acquire/gdelt.py`, keyless, rate-limited) menambah volume sampel; RSS
-  hanya memberi ~14 hari.
+  (`src/acquire/gdelt.py`, keyless, rate-limited) + **HuggingFace financial
+  news** (`src/acquire/hf_news.py`, keyless, snapshot 2010-2020, ~12.5k headline
+  emas) menambah volume sampel; RSS hanya memberi ~14 hari.
 - **Surprise carry-forward** (`src/process/bucket_harmonize.py`): fitur makro
   tidak lagi NaN di bucket tanpa rilis — diisi surprise rilis terakhir yang
   sudah terbit + `surprise_age_hours` (point-in-time safe).
+- **Uji sentimen jujur** (`src/evaluate/significance.py`): `sentiment_adds_value`
+  diuji dengan *paired bootstrap* (1.000 resampling) apakah model penuh
+  mengungguli baseline makro — bukan sekadar p-value model penuh. Laporan
+  memuat `baseline_rank_ic`, `delta_rank_ic`, dan `paired_ic_test`.
 - Guard: bila sampel < 20 bucket, training dilewati dan model lama dipertahankan
   (tidak ada hasil yang difabrikasi).
 - `data/processed/provenance.json` mencatat sumber, `generated_at`, dan status
