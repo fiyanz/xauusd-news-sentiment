@@ -344,6 +344,17 @@ def build_price_history_buckets(
         buckets["surprise_age_hours"] = np.nan
         buckets["has_event"] = 0
 
+    # 3b. Interaksi sentimen × surprise makro.
+    # Temuan: sentimen hanya membawa sinyal saat surprise makro POSITIF
+    # (z > 0.5): return berita positif +0,0408% vs negatif -0,1788% (p=0,005).
+    # Saat surprise negatif, sentimen tidak ada sinyal (p=0,955) — jadi
+    # interaksi ini memisahkan "sentimen yang relevan" dari "sentimen yang
+    # tidak relevan", bukan mencampur keduanya.
+    z = buckets["z_score"].fillna(0.0)
+    sent = buckets["sentiment_score"].fillna(0.0)
+    buckets["sentiment_x_surprise_pos"] = sent * (z > 0.5).astype(float)
+    buckets["sentiment_x_surprise_neg"] = sent * (z < -0.5).astype(float)
+
     # 4. Temporal / session --------------------------------------------------
     buckets["hour_utc"] = buckets["time_bucket"].dt.hour
     buckets["dayofweek"] = buckets["time_bucket"].dt.day_of_week

@@ -40,6 +40,8 @@ BASE_FEATURES = [
     "sentiment_max",
     "overall_sentiment_score",
     "article_count",
+    "sentiment_x_surprise_pos",
+    "sentiment_x_surprise_neg",
 ]
 
 CYCLICAL = ["hour_sin", "hour_cos", "dow_sin", "dow_cos"]
