@@ -83,6 +83,10 @@ label:
   price_tolerance_minutes: 60
 
 split:
+  # "chronological" (default): split by posisi di seluruh history harga.
+  # "news_era": split berdasarkan era berita, sehingga test period punya berita
+  #   (tetap out-of-time). Fallback otomatis ke chronological bila berita minim.
+  mode: "chronological"
   train: 0.6
   val: 0.2
   test: 0.2

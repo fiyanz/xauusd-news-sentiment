@@ -27,6 +27,8 @@ from src.process.bucket_harmonize import TOPIC_PATTERNS
 
 SESSIONS = ["session_Asia", "session_London", "session_NewYork"]
 
+VALID_SPLIT_MODES = ("chronological", "news_era")
+
 
 def _assign_session(h: int) -> str:
     if 0 <= h < 7:
@@ -34,6 +36,117 @@ def _assign_session(h: int) -> str:
     if 7 <= h < 13:
         return "London"
     return "NewYork"
+
+
+def _news_era_boundaries(
+    news_period: tuple[pd.Timestamp, pd.Timestamp] | None,
+    buckets: pd.DataFrame,
+    train_ratio: float,
+    val_ratio: float,
+    embargo_delta: pd.Timedelta,
+) -> tuple[pd.Timestamp, pd.Timestamp]:
+    """Return (t_train_end, t_val_end) for the news-era split.
+
+    The news corpus is divided by *news mass* (article count): train gets the
+    first ``train_ratio`` of articles, val the next ``val_ratio``, test the rest.
+    Boundaries are then snapped to bucket edges and the embargo is applied, so
+    the split stays strictly out-of-time. A pure time-proportional split is used
+    as a starting estimate, then corrected by news mass.
+
+    Falls back to a chronological split when the news corpus is missing or too
+    thin to give the test period any articles.
+    """
+    n_total = len(buckets)
+    fallback_train = int(n_total * train_ratio)
+    fallback_val = min(int(n_total * val_ratio), n_total - fallback_train)
+
+    def _chronological() -> tuple[pd.Timestamp, pd.Timestamp]:
+        return (
+            buckets.iloc[fallback_train]["time_bucket"],
+            buckets.iloc[fallback_train + fallback_val]["time_bucket"],
+        )
+
+    if news_period is None:
+        print("[PriceBuckets] news_era: korpus berita tidak ada; fallback chronological.")
+        return _chronological()
+
+    news_start, news_end = news_period
+    span = news_end - news_start
+    if span <= pd.Timedelta(0):
+        print("[PriceBuckets] news_era: rentang berita nol; fallback chronological.")
+        return _chronological()
+
+    times = buckets["time_bucket"]
+    counts = buckets["article_count"]
+    total_articles = float(counts.sum())
+    if total_articles <= 0:
+        print("[PriceBuckets] news_era: tidak ada artikel; fallback chronological.")
+        return _chronological()
+
+    # News-mass split: train gets the first ``train_ratio`` of articles, val the
+    # next ``val_ratio``, test the rest. Cumulative share is monotonic in time,
+    # so the resulting boundaries are strictly out-of-time.
+    cum = counts.cumsum() / total_articles
+
+    def _first_bucket_reaching(target: float) -> pd.Timestamp:
+        reached = buckets[cum >= target]
+        if reached.empty:
+            return times.iloc[-1]
+        return reached["time_bucket"].iloc[0]
+
+    t_train_end = _first_bucket_reaching(train_ratio)
+    t_val_end = _first_bucket_reaching(train_ratio + val_ratio)
+
+    # Time-proportional sanity guard: a news-mass split can push the test period
+    # into the 2026 tail (only ~40 news buckets) when the corpus has a long gap.
+    # If the test period would start after the time-proportional val end, prefer
+    # the time-proportional boundary so test keeps a usable span.
+    def _snap(t: pd.Timestamp) -> pd.Timestamp:
+        """First bucket strictly after ``t`` (keeps test out-of-time)."""
+        idx = int(times.searchsorted(t, side="right"))
+        idx = min(idx, n_total - 1)
+        return times.iloc[idx]
+
+    raw_val_end = news_start + span * (train_ratio + val_ratio)
+    if t_val_end > _snap(raw_val_end):
+        t_val_end = _snap(raw_val_end)
+        # Re-derive train end from news mass but never past the val end.
+        train_candidates = buckets[(cum >= train_ratio) & (times < t_val_end)]
+        if not train_candidates.empty:
+            t_train_end = train_candidates["time_bucket"].iloc[0]
+
+    # Guard: test period must actually contain news.
+    test_mask = times >= t_val_end
+    if not (counts.loc[test_mask] > 0).any():
+        print("[PriceBuckets] news_era: test period tidak berisi berita; fallback chronological.")
+        return _chronological()
+
+    # Guard: train strictly before val, val strictly before test.
+    if not (t_train_end < t_val_end):
+        print("[PriceBuckets] news_era: batas train/val tidak valid; fallback chronological.")
+        return _chronological()
+
+    return t_train_end, t_val_end
+
+
+def report_split_coverage(df: pd.DataFrame) -> dict:
+    """Per-split coverage: bucket count, bucket count with news, start/end.
+
+    Returns ``{split: {"n_buckets": int, "n_buckets_with_news": int,
+    "start": str|None, "end": str|None}}`` for every split present in ``df``.
+    """
+    out: dict[str, dict] = {}
+    for split, grp in df.groupby("split"):
+        has_news = grp["article_count"] > 0 if "article_count" in grp.columns else False
+        start = grp["time_bucket"].min() if "time_bucket" in grp.columns else None
+        end = grp["time_bucket"].max() if "time_bucket" in grp.columns else None
+        out[str(split)] = {
+            "n_buckets": int(len(grp)),
+            "n_buckets_with_news": int(has_news.sum()) if hasattr(has_news, "sum") else 0,
+            "start": start.isoformat() if start is not None and pd.notna(start) else None,
+            "end": end.isoformat() if end is not None and pd.notna(end) else None,
+        }
+    return out
 
 
 def build_price_history_buckets(
@@ -49,9 +162,20 @@ def build_price_history_buckets(
     tfidf_max_features: int = 50,
     vol_lookback_days: int = 20,
     sentiment_col: str = "overall_sentiment_score",
+    split_mode: str = "chronological",
+    topic_weighting: bool = False,
 ) -> pd.DataFrame:
-    """Create 4H buckets covering the whole price history, with sparse news."""
-    print(f"[PriceBuckets] Building 4H buckets from {price_csv}...")
+    """Create 4H buckets covering the whole price history, with sparse news.
+
+    ``split_mode``:
+    - ``"chronological"`` (default): split by position in the full price
+      history (old behaviour).
+    - ``"news_era"``: split by the era covered by the news corpus, so the test
+      period actually contains articles. Still strictly out-of-time.
+    """
+    if split_mode not in VALID_SPLIT_MODES:
+        raise ValueError(f"split_mode must be one of {VALID_SPLIT_MODES}, got {split_mode!r}")
+    print(f"[PriceBuckets] Building 4H buckets from {price_csv} (split_mode={split_mode})...")
 
     # 1. Price -> 4H buckets -------------------------------------------------
     df_price = pd.read_csv(price_csv)
@@ -90,9 +214,15 @@ def build_price_history_buckets(
     print(f"[PriceBuckets] {len(buckets)} buckets ({buckets['time_bucket'].min()} .. {buckets['time_bucket'].max()}).")
 
     # 2. News aggregated per bucket (sparse: neutral 0 when no article) -------
+    news_period: tuple[pd.Timestamp, pd.Timestamp] | None = None
     if os.path.exists(article_parquet):
         df_art = pd.read_parquet(article_parquet)
         df_art["time_published_utc"] = pd.to_datetime(df_art["time_published_utc"], utc=True)
+        if not df_art.empty:
+            news_period = (
+                df_art["time_published_utc"].min(),
+                df_art["time_published_utc"].max(),
+            )
         df_art["time_bucket"] = df_art["time_published_utc"].dt.floor(bucket_freq)
         text_corpus = (
             df_art["title"].fillna("") + " " + df_art["summary"].fillna("") + " " + df_art["related_event"].fillna("")
@@ -234,15 +364,25 @@ def build_price_history_buckets(
             direction="backward",
         ).drop(columns=["date_key", "date"])
 
-    # 6. Chronological split with embargo -----------------------------------
+    # 6. Split (chronological by default, or news-era) -----------------------
     buckets = buckets.sort_values("time_bucket").reset_index(drop=True)
     n_total = len(buckets)
-    n_train = int(n_total * train_ratio)
-    n_val = int(n_total * val_ratio)
-    n_val = min(n_val, n_total - n_train)
-    t_train_end = buckets.iloc[n_train]["time_bucket"]
-    t_val_end = buckets.iloc[n_train + n_val]["time_bucket"]
     embargo_delta = pd.Timedelta(hours=embargo_hours)
+
+    if split_mode == "news_era":
+        t_train_end, t_val_end = _news_era_boundaries(
+            news_period=news_period,
+            buckets=buckets,
+            train_ratio=train_ratio,
+            val_ratio=val_ratio,
+            embargo_delta=embargo_delta,
+        )
+    else:
+        n_train = int(n_total * train_ratio)
+        n_val = int(n_total * val_ratio)
+        n_val = min(n_val, n_total - n_train)
+        t_train_end = buckets.iloc[n_train]["time_bucket"]
+        t_val_end = buckets.iloc[n_train + n_val]["time_bucket"]
 
     splits = []
     for _, row in buckets.iterrows():
@@ -258,6 +398,23 @@ def build_price_history_buckets(
         else:
             splits.append("test")
     buckets["split"] = splits
+
+    if split_mode == "news_era":
+        coverage = report_split_coverage(buckets)
+        print(f"[PriceBuckets] news_era coverage: {coverage}")
+
+    # 6b. Topic weighting (anti look-ahead: fit on train only) ---------------
+    if topic_weighting:
+        from src.features.topic_weights import apply_topic_weights, fit_and_save_topic_weights
+
+        weights_path = os.path.join(
+            os.path.dirname(output_parquet) or ".", "topic_weights.json"
+        )
+        topic_weights = fit_and_save_topic_weights(buckets, weights_path)
+        buckets = apply_topic_weights(buckets, topic_weights)
+        # overall_sentiment_score mirrors sentiment_score -> keep them in sync.
+        buckets["overall_sentiment_score"] = buckets["sentiment_score"]
+        print(f"[PriceBuckets] Topic weights applied: {topic_weights}")
 
     # 7. TF-IDF fitted strictly on train ------------------------------------
     buckets["text_full"] = buckets["title"].fillna("") + " " + buckets["summary"].fillna("")

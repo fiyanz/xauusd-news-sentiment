@@ -1,0 +1,488 @@
+{
+  "generated_at": "2026-11-14T04:10:50Z",
+  "dataset_path": "data/processed/dataset_article.parquet",
+  "metadata": {
+    "n_articles": 11700,
+    "pos_thr": 0.05,
+    "neg_thr": -0.05,
+    "n_boot": 2000,
+    "seed": 42,
+    "sentiment_columns": [
+      "overall_sentiment_score",
+      "sentiment_lm"
+    ],
+    "time_range": [
+      "2010-02-16 12:00:00+00:00",
+      "2026-11-12 06:00:02+00:00"
+    ],
+    "note": "Analisis TANPA split waktu. ret_4h dihitung dari harga setelah artikel terbit (anti look-ahead). Kelompok kosong -> n=0 dan null."
+  },
+  "lexicons": {
+    "vader": {
+      "sentiment_col": "overall_sentiment_score",
+      "overall": {
+        "sentiment_col": "overall_sentiment_score",
+        "pos_thr": 0.05,
+        "neg_thr": -0.05,
+        "n_articles": 11700,
+        "groups": {
+          "positif": {
+            "n": 4224,
+            "mean_ret_4h": 0.000111,
+            "ci95_low": -5.6e-05,
+            "ci95_high": 0.000284,
+            "std": 0.005772
+          },
+          "netral": {
+            "n": 5675,
+            "mean_ret_4h": -2.4e-05,
+            "ci95_low": -0.000174,
+            "ci95_high": 0.000128,
+            "std": 0.005619
+          },
+          "negatif": {
+            "n": 1801,
+            "mean_ret_4h": -0.000355,
+            "ci95_low": -0.000648,
+            "ci95_high": -6e-05,
+            "std": 0.006258
+          }
+        },
+        "pos_vs_neg_test": {
+          "delta_mean": 0.000464,
+          "p_value": 0.007,
+          "n_boot": 2000,
+          "n_pos": 4224,
+          "n_neg": 1801
+        },
+        "n_boot": 2000,
+        "seed": 42
+      },
+      "by_topic": {
+        "commodities": {
+          "sentiment_col": "overall_sentiment_score",
+          "pos_thr": 0.05,
+          "neg_thr": -0.05,
+          "n_articles": 10604,
+          "groups": {
+            "positif": {
+              "n": 3238,
+              "mean_ret_4h": 0.000255,
+              "ci95_low": 5.9e-05,
+              "ci95_high": 0.000456,
+              "std": 0.005818
+            },
+            "netral": {
+              "n": 5648,
+              "mean_ret_4h": -1.1e-05,
+              "ci95_low": -0.000155,
+              "ci95_high": 0.00013,
+              "std": 0.005619
+            },
+            "negatif": {
+              "n": 1718,
+              "mean_ret_4h": -0.000327,
+              "ci95_low": -0.000626,
+              "ci95_high": -2.9e-05,
+              "std": 0.006278
+            }
+          },
+          "pos_vs_neg_test": {
+            "delta_mean": 0.000586,
+            "p_value": 0.001,
+            "n_boot": 2000,
+            "n_pos": 3238,
+            "n_neg": 1718
+          },
+          "n_boot": 2000,
+          "seed": 42
+        },
+        "economy_macro": {
+          "sentiment_col": "overall_sentiment_score",
+          "pos_thr": 0.05,
+          "neg_thr": -0.05,
+          "n_articles": 223,
+          "groups": {
+            "positif": {
+              "n": 86,
+              "mean_ret_4h": -0.000961,
+              "ci95_low": -0.00239,
+              "ci95_high": 0.000426,
+              "std": 0.006839
+            },
+            "netral": {
+              "n": 67,
+              "mean_ret_4h": -0.000611,
+              "ci95_low": -0.002278,
+              "ci95_high": 0.001021,
+              "std": 0.007033
+            },
+            "negatif": {
+              "n": 70,
+              "mean_ret_4h": -0.0003,
+              "ci95_low": -0.001431,
+              "ci95_high": 0.000927,
+              "std": 0.004991
+            }
+          },
+          "pos_vs_neg_test": {
+            "delta_mean": -0.000674,
+            "p_value": 0.463,
+            "n_boot": 2000,
+            "n_pos": 86,
+            "n_neg": 70
+          },
+          "n_boot": 2000,
+          "seed": 42
+        },
+        "economy_monetary": {
+          "sentiment_col": "overall_sentiment_score",
+          "pos_thr": 0.05,
+          "neg_thr": -0.05,
+          "n_articles": 521,
+          "groups": {
+            "positif": {
+              "n": 231,
+              "mean_ret_4h": 9.1e-05,
+              "ci95_low": -0.000627,
+              "ci95_high": 0.000812,
+              "std": 0.005748
+            },
+            "netral": {
+              "n": 196,
+              "mean_ret_4h": 0.000571,
+              "ci95_low": -0.000244,
+              "ci95_high": 0.001413,
+              "std": 0.005925
+            },
+            "negatif": {
+              "n": 94,
+              "mean_ret_4h": -0.000621,
+              "ci95_low": -0.001973,
+              "ci95_high": 0.000599,
+              "std": 0.006472
+            }
+          },
+          "pos_vs_neg_test": {
+            "delta_mean": 0.000724,
+            "p_value": 0.342,
+            "n_boot": 2000,
+            "n_pos": 231,
+            "n_neg": 94
+          },
+          "n_boot": 2000,
+          "seed": 42
+        },
+        "financial_markets": {
+          "sentiment_col": "overall_sentiment_score",
+          "pos_thr": 0.05,
+          "neg_thr": -0.05,
+          "n_articles": 1818,
+          "groups": {
+            "positif": {
+              "n": 1218,
+              "mean_ret_4h": -0.000166,
+              "ci95_low": -0.000484,
+              "ci95_high": 0.000148,
+              "std": 0.005744
+            },
+            "netral": {
+              "n": 397,
+              "mean_ret_4h": -0.000139,
+              "ci95_low": -0.000805,
+              "ci95_high": 0.000502,
+              "std": 0.006452
+            },
+            "negatif": {
+              "n": 203,
+              "mean_ret_4h": -0.000122,
+              "ci95_low": -0.001084,
+              "ci95_high": 0.000824,
+              "std": 0.006823
+            }
+          },
+          "pos_vs_neg_test": {
+            "delta_mean": -6.5e-05,
+            "p_value": 0.875,
+            "n_boot": 2000,
+            "n_pos": 1218,
+            "n_neg": 203
+          },
+          "n_boot": 2000,
+          "seed": 42
+        },
+        "forex": {
+          "sentiment_col": "overall_sentiment_score",
+          "pos_thr": 0.05,
+          "neg_thr": -0.05,
+          "n_articles": 488,
+          "groups": {
+            "positif": {
+              "n": 147,
+              "mean_ret_4h": 0.000509,
+              "ci95_low": -0.000413,
+              "ci95_high": 0.001402,
+              "std": 0.005595
+            },
+            "netral": {
+              "n": 197,
+              "mean_ret_4h": 0.000728,
+              "ci95_low": -0.000116,
+              "ci95_high": 0.001524,
+              "std": 0.005731
+            },
+            "negatif": {
+              "n": 144,
+              "mean_ret_4h": 1.1e-05,
+              "ci95_low": -0.000925,
+              "ci95_high": 0.000907,
+              "std": 0.005738
+            }
+          },
+          "pos_vs_neg_test": {
+            "delta_mean": 0.000494,
+            "p_value": 0.459,
+            "n_boot": 2000,
+            "n_pos": 147,
+            "n_neg": 144
+          },
+          "n_boot": 2000,
+          "seed": 42
+        }
+      }
+    },
+    "loughran_mcdonald": {
+      "sentiment_col": "sentiment_lm",
+      "overall": {
+        "sentiment_col": "sentiment_lm",
+        "pos_thr": 0.05,
+        "neg_thr": -0.05,
+        "n_articles": 11700,
+        "groups": {
+          "positif": {
+            "n": 1173,
+            "mean_ret_4h": 9.6e-05,
+            "ci95_low": -0.000219,
+            "ci95_high": 0.000423,
+            "std": 0.005725
+          },
+          "netral": {
+            "n": 9094,
+            "mean_ret_4h": -1.2e-05,
+            "ci95_low": -0.000133,
+            "ci95_high": 0.000101,
+            "std": 0.005735
+          },
+          "negatif": {
+            "n": 1433,
+            "mean_ret_4h": -0.000216,
+            "ci95_low": -0.000513,
+            "ci95_high": 9.2e-05,
+            "std": 0.006089
+          }
+        },
+        "pos_vs_neg_test": {
+          "delta_mean": 0.000305,
+          "p_value": 0.176,
+          "n_boot": 2000,
+          "n_pos": 1173,
+          "n_neg": 1433
+        },
+        "n_boot": 2000,
+        "seed": 42
+      },
+      "by_topic": {
+        "commodities": {
+          "sentiment_col": "sentiment_lm",
+          "pos_thr": 0.05,
+          "neg_thr": -0.05,
+          "n_articles": 10604,
+          "groups": {
+            "positif": {
+              "n": 1090,
+              "mean_ret_4h": 0.000128,
+              "ci95_low": -0.000217,
+              "ci95_high": 0.000462,
+              "std": 0.005782
+            },
+            "netral": {
+              "n": 8218,
+              "mean_ret_4h": 2.2e-05,
+              "ci95_low": -0.000101,
+              "ci95_high": 0.000152,
+              "std": 0.005755
+            },
+            "negatif": {
+              "n": 1296,
+              "mean_ret_4h": -9e-05,
+              "ci95_low": -0.000417,
+              "ci95_high": 0.000236,
+              "std": 0.006047
+            }
+          },
+          "pos_vs_neg_test": {
+            "delta_mean": 0.000218,
+            "p_value": 0.378,
+            "n_boot": 2000,
+            "n_pos": 1090,
+            "n_neg": 1296
+          },
+          "n_boot": 2000,
+          "seed": 42
+        },
+        "economy_macro": {
+          "sentiment_col": "sentiment_lm",
+          "pos_thr": 0.05,
+          "neg_thr": -0.05,
+          "n_articles": 223,
+          "groups": {
+            "positif": {
+              "n": 18,
+              "mean_ret_4h": -0.004268,
+              "ci95_low": -0.007645,
+              "ci95_high": -0.000821,
+              "std": 0.00768
+            },
+            "netral": {
+              "n": 149,
+              "mean_ret_4h": -0.000783,
+              "ci95_low": -0.001876,
+              "ci95_high": 0.000301,
+              "std": 0.006541
+            },
+            "negatif": {
+              "n": 56,
+              "mean_ret_4h": 0.000871,
+              "ci95_low": -0.000395,
+              "ci95_high": 0.002056,
+              "std": 0.004811
+            }
+          },
+          "pos_vs_neg_test": {
+            "delta_mean": -0.005126,
+            "p_value": 0.008,
+            "n_boot": 2000,
+            "n_pos": 18,
+            "n_neg": 56
+          },
+          "n_boot": 2000,
+          "seed": 42
+        },
+        "economy_monetary": {
+          "sentiment_col": "sentiment_lm",
+          "pos_thr": 0.05,
+          "neg_thr": -0.05,
+          "n_articles": 521,
+          "groups": {
+            "positif": {
+              "n": 43,
+              "mean_ret_4h": 0.000479,
+              "ci95_low": -0.001209,
+              "ci95_high": 0.00242,
+              "std": 0.00621
+            },
+            "netral": {
+              "n": 391,
+              "mean_ret_4h": 0.000238,
+              "ci95_low": -0.0003,
+              "ci95_high": 0.000803,
+              "std": 0.005697
+            },
+            "negatif": {
+              "n": 87,
+              "mean_ret_4h": -0.00045,
+              "ci95_low": -0.001885,
+              "ci95_high": 0.000928,
+              "std": 0.006917
+            }
+          },
+          "pos_vs_neg_test": {
+            "delta_mean": 0.000935,
+            "p_value": 0.446,
+            "n_boot": 2000,
+            "n_pos": 43,
+            "n_neg": 87
+          },
+          "n_boot": 2000,
+          "seed": 42
+        },
+        "financial_markets": {
+          "sentiment_col": "sentiment_lm",
+          "pos_thr": 0.05,
+          "neg_thr": -0.05,
+          "n_articles": 1818,
+          "groups": {
+            "positif": {
+              "n": 168,
+              "mean_ret_4h": -6.6e-05,
+              "ci95_low": -0.000974,
+              "ci95_high": 0.000849,
+              "std": 0.006013
+            },
+            "netral": {
+              "n": 1432,
+              "mean_ret_4h": -0.000127,
+              "ci95_low": -0.000443,
+              "ci95_high": 0.000178,
+              "std": 0.006027
+            },
+            "negatif": {
+              "n": 218,
+              "mean_ret_4h": -0.000411,
+              "ci95_low": -0.001276,
+              "ci95_high": 0.000423,
+              "std": 0.006076
+            }
+          },
+          "pos_vs_neg_test": {
+            "delta_mean": 0.000356,
+            "p_value": 0.573,
+            "n_boot": 2000,
+            "n_pos": 168,
+            "n_neg": 218
+          },
+          "n_boot": 2000,
+          "seed": 42
+        },
+        "forex": {
+          "sentiment_col": "sentiment_lm",
+          "pos_thr": 0.05,
+          "neg_thr": -0.05,
+          "n_articles": 488,
+          "groups": {
+            "positif": {
+              "n": 91,
+              "mean_ret_4h": 0.000523,
+              "ci95_low": -0.000772,
+              "ci95_high": 0.001738,
+              "std": 0.005922
+            },
+            "netral": {
+              "n": 302,
+              "mean_ret_4h": 0.000642,
+              "ci95_low": 4.4e-05,
+              "ci95_high": 0.001241,
+              "std": 0.00565
+            },
+            "negatif": {
+              "n": 95,
+              "mean_ret_4h": -0.000228,
+              "ci95_low": -0.001336,
+              "ci95_high": 0.000811,
+              "std": 0.005593
+            }
+          },
+          "pos_vs_neg_test": {
+            "delta_mean": 0.000714,
+            "p_value": 0.387,
+            "n_boot": 2000,
+            "n_pos": 91,
+            "n_neg": 95
+          },
+          "n_boot": 2000,
+          "seed": 42
+        }
+      }
+    }
+  }
+}
