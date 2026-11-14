@@ -1,20 +1,20 @@
 {
   "weights": {
     "topic_cpi": 1.0,
-    "topic_fomc": 1.2786913033341905,
+    "topic_fomc": 1.3117482842214416,
     "topic_yield": 1.0,
     "topic_payrolls": 2.0,
     "topic_inflation": 1.0,
-    "topic_dollar": 1.7793434818476719,
+    "topic_dollar": 1.9018096865358283,
     "topic_safehaven": 1.0
   },
   "signals": {
     "topic_cpi": null,
-    "topic_fomc": 0.08360739100025712,
+    "topic_fomc": 0.09352448526643245,
     "topic_yield": null,
-    "topic_payrolls": 0.4851234343848802,
+    "topic_payrolls": 0.48226803374862043,
     "topic_inflation": null,
-    "topic_dollar": 0.2338030445543016,
+    "topic_dollar": 0.2705429059607484,
     "topic_safehaven": null
   },
   "meta": {
@@ -29,60 +29,60 @@
     "train_label": "train",
     "target_col": "ret_4h",
     "sentiment_col": "sentiment_score",
-    "n_train_buckets_with_news": 2242,
+    "n_train_buckets_with_news": 1806,
     "topics": {
       "topic_cpi": {
-        "n": 3,
-        "n_pos": 1,
+        "n": 2,
+        "n_pos": 0,
         "n_neg": 0,
         "signal": null,
         "weight": 1.0,
         "reason": "insufficient_data"
       },
       "topic_fomc": {
-        "n": 179,
-        "n_pos": 116,
-        "n_neg": 23,
-        "signal": 0.083607,
-        "weight": 1.278691,
+        "n": 115,
+        "n_pos": 62,
+        "n_neg": 20,
+        "signal": 0.093524,
+        "weight": 1.311748,
         "reason": "ok"
       },
       "topic_yield": {
-        "n": 61,
-        "n_pos": 45,
+        "n": 30,
+        "n_pos": 19,
         "n_neg": 2,
         "signal": null,
         "weight": 1.0,
         "reason": "insufficient_data"
       },
       "topic_payrolls": {
-        "n": 78,
-        "n_pos": 47,
-        "n_neg": 14,
-        "signal": 0.485123,
+        "n": 47,
+        "n_pos": 23,
+        "n_neg": 10,
+        "signal": 0.482268,
         "weight": 2.0,
         "reason": "ok"
       },
       "topic_inflation": {
-        "n": 51,
-        "n_pos": 29,
-        "n_neg": 7,
+        "n": 36,
+        "n_pos": 18,
+        "n_neg": 6,
         "signal": null,
         "weight": 1.0,
         "reason": "insufficient_data"
       },
       "topic_dollar": {
-        "n": 241,
-        "n_pos": 151,
-        "n_neg": 35,
-        "signal": 0.233803,
-        "weight": 1.779343,
+        "n": 161,
+        "n_pos": 84,
+        "n_neg": 29,
+        "signal": 0.270543,
+        "weight": 1.90181,
         "reason": "ok"
       },
       "topic_safehaven": {
-        "n": 66,
-        "n_pos": 53,
-        "n_neg": 5,
+        "n": 33,
+        "n_pos": 23,
+        "n_neg": 4,
         "signal": null,
         "weight": 1.0,
         "reason": "insufficient_data"

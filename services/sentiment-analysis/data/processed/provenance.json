@@ -92,21 +92,21 @@
     "models/champion_fair_model.joblib": {
       "artifact": "models/champion_fair_model.joblib",
       "source": "retrain pipeline (src.models.train, champion by CV)",
-      "generated_at": "2026-11-12 08:36:56+00:00",
+      "generated_at": "2026-11-14 04:35:51+00:00",
       "is_simulated": false,
       "champion_name": "Ridge_Linear"
     },
     "reports/significance.json": {
       "artifact": "reports/significance.json",
       "source": "retrain pipeline (src.evaluate.significance)",
-      "generated_at": "2026-11-12 08:36:56+00:00",
+      "generated_at": "2026-11-14 04:35:51+00:00",
       "is_simulated": false,
       "rank_ic": 0.0336,
       "rank_ic_pvalue": 0.01549,
       "sentiment_adds_value": false
     }
   },
-  "generated_at": "2026-11-12 08:36:56+00:00",
+  "generated_at": "2026-11-14 04:35:51+00:00",
   "is_simulated": false,
   "has_simulated_rows": true
 }

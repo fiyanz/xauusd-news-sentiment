@@ -150,7 +150,24 @@ cd services/sentiment-analysis
 .venv/bin/python -m pytest -q
 ```
 
-## 8. Known Limitations
+## 8. Cara Kerja Analisis Sentimen (penjelasan sederhana)
+
+Lihat `docs/CARA_KERJA_SENTIMEN.md` untuk penjelasan lengkap dengan bahasa
+sederhana: bagaimana berita diubah jadi fitur, kenapa topik sama bisa
+berdampak berlawanan, kenapa split waktu vs isi berita penting, dan hasil
+analisis dampak sentimen per kelompok/topik.
+
+Ringkas:
+- Berita diskor sentimen (VADER / Loughran-McDonald) dan dipasangkan dengan
+  return 4 jam **setelah** terbit (anti look-ahead).
+- Analisis dampak: berita negatif → return 4h rata-rata −0,0355% (signifikan);
+  berita positif → +0,0111% (belum signifikan).
+- Per topik: berita **komoditas/emas** punya sinyal kuat (p=0,0005); topik
+  umum (financial_markets) tidak ada sinyal.
+- Model ML diuji dengan paired bootstrap: model penuh vs baseline makro.
+  Belum terbukti sentimen menambah nilai secara signifikan.
+
+## 9. Known Limitations
 
 - **Sampel kecil.** RSS keyless hanya menyediakan berita ~14 hari terakhir,
   menghasilkan 20–40 bucket 4H. CV/evaluasi pada sampel sekecil itu sangat
