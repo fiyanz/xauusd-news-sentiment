@@ -65,7 +65,7 @@
       "rank_ic": 0.0251
     }
   },
-  "generated_at": "2026-11-14T04:35:43Z",
+  "generated_at": "2026-11-14T05:04:32Z",
   "models": {
     "Random_Forest": {
       "rank_ic": 0.0343,

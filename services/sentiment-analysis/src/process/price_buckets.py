@@ -164,6 +164,7 @@ def build_price_history_buckets(
     sentiment_col: str = "overall_sentiment_score",
     split_mode: str = "chronological",
     topic_weighting: bool = False,
+    gold_weighting: bool = False,
 ) -> pd.DataFrame:
     """Create 4H buckets covering the whole price history, with sparse news.
 
@@ -230,6 +231,15 @@ def build_price_history_buckets(
         if sentiment_col not in df_art.columns:
             print(f"[PriceBuckets] kolom sentimen {sentiment_col!r} tidak ada; memakai overall_sentiment_score.")
             sentiment_col = "overall_sentiment_score"
+        # Relevansi emas: berita yang benar-benar soal emas dibobot penuh,
+        # berita umum dikurangi (floor) supaya tidak "mengotori" fitur sentimen.
+        if gold_weighting:
+            from src.features.gold_relevance import add_gold_relevance, apply_relevance_to_sentiment
+
+            df_art = add_gold_relevance(df_art)
+            df_art = apply_relevance_to_sentiment(df_art, sentiment_col=sentiment_col)
+            sentiment_col = f"{sentiment_col}_weighted"
+            print(f"[PriceBuckets] Gold relevance weighting aktif (kolom {sentiment_col!r}).")
         for topic_col, pattern in TOPIC_PATTERNS.items():
             df_art[topic_col] = text_corpus.str.contains(pattern, regex=True).astype(float)
             short = topic_col.replace("topic_", "")

@@ -201,6 +201,7 @@ def run_full_sync(write_prediction: bool = True) -> dict:
             vol_lookback_days=cfg.get("label", {}).get("vol_lookback_days", 20),
             sentiment_col=news_cfg.get("sentiment_column", "overall_sentiment_score"),
             split_mode=cfg.get("split", {}).get("mode", "chronological"),
+            gold_weighting=news_cfg.get("gold_weighting", False),
         )
     else:
         harmonize_buckets(

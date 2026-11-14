@@ -50,6 +50,8 @@ news:
   # Kolom sentimen yang dipakai fitur: "overall_sentiment_score" (VADER)
   # atau "sentiment_lm" (Loughran-McDonald). Keduanya selalu disimpan di korpus.
   sentiment_column: "overall_sentiment_score"
+  # Bobot relevansi emas: berita emas penuh, berita umum dikurangi (floor 0.25).
+  gold_weighting: false
   lm_lexicon:
     enabled: true
     dictionary_cache: "data/raw/news/loughran_mcdonald.csv"
