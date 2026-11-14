@@ -1,0 +1,99 @@
+{
+  "3_class": {
+    "pra": {
+      "model": "A_pra_event",
+      "n_train": 7159,
+      "n_test": 2388,
+      "test_label_dist": {
+        "1": 1346,
+        "-1": 978,
+        "0": 64
+      },
+      "accuracy": 0.5616,
+      "baseline_accuracy": 0.5637,
+      "f1_macro": 0.3675,
+      "delta_accuracy": -0.0021,
+      "p_value": 0.573,
+      "beats_baseline": false
+    },
+    "pasca": {
+      "model": "B_pasca_event",
+      "n_train": 3559,
+      "n_test": 1187,
+      "test_label_dist": {
+        "1": 581,
+        "-1": 456,
+        "0": 150
+      },
+      "accuracy": 0.4322,
+      "baseline_accuracy": 0.4895,
+      "f1_macro": 0.3058,
+      "delta_accuracy": -0.0573,
+      "p_value": 0.998,
+      "beats_baseline": false
+    },
+    "all": {
+      "model": "all_news",
+      "n_train": 17009,
+      "n_test": 5671,
+      "test_label_dist": {
+        "1": 2742,
+        "-1": 2217,
+        "0": 712
+      },
+      "accuracy": 0.484,
+      "baseline_accuracy": 0.4835,
+      "f1_macro": 0.4941,
+      "delta_accuracy": 0.0005,
+      "p_value": 0.493,
+      "beats_baseline": false
+    }
+  },
+  "2_class": {
+    "pra": {
+      "model": "A_pra_event_2cls",
+      "n_train": 5903,
+      "n_test": 1969,
+      "test_label_dist": {
+        "1": 1217,
+        "0": 752
+      },
+      "accuracy": 0.5922,
+      "baseline_accuracy": 0.6181,
+      "f1_macro": 0.568,
+      "delta_accuracy": -0.0259,
+      "p_value": 0.98,
+      "beats_baseline": false
+    },
+    "pasca": {
+      "model": "B_pasca_event_2cls",
+      "n_train": 2916,
+      "n_test": 972,
+      "test_label_dist": {
+        "1": 516,
+        "0": 456
+      },
+      "accuracy": 0.43,
+      "baseline_accuracy": 0.5309,
+      "f1_macro": 0.43,
+      "delta_accuracy": -0.1008,
+      "p_value": 1.0,
+      "beats_baseline": false
+    },
+    "all": {
+      "model": "all_news_2cls",
+      "n_train": 13905,
+      "n_test": 4636,
+      "test_label_dist": {
+        "1": 2419,
+        "0": 2217
+      },
+      "accuracy": 0.5239,
+      "baseline_accuracy": 0.5218,
+      "f1_macro": 0.5232,
+      "delta_accuracy": 0.0022,
+      "p_value": 0.436,
+      "beats_baseline": false
+    }
+  }
+}
