@@ -1,29 +1,29 @@
 {
   "status": "success",
-  "timestamp_utc": "2026-11-14 05:30:13 UTC",
-  "bucket_time_utc": "2026-11-11 04:00:00+00:00",
+  "timestamp_utc": "2026-11-14 07:12:18 UTC",
+  "bucket_time_utc": "2026-11-12 20:00:00+00:00",
   "model_champion": "Ridge_Linear",
-  "current_price": 4054.0,
+  "current_price": 3879.5,
   "prediction_horizon": "4 Jam (4H)",
-  "predicted_return_pct": 0.2267,
-  "predicted_target_price": 4063.19,
-  "predicted_pips_delta": "+91.9 pips",
-  "signal": "BULLISH",
-  "sentiment_label": "Menguat (Bullish)",
-  "confidence_pct": 54.3,
+  "predicted_return_pct": 0.0797,
+  "predicted_target_price": 3882.59,
+  "predicted_pips_delta": "+30.9 pips",
+  "signal": "NEUTRAL",
+  "sentiment_label": "Datar (Netral)",
+  "confidence_pct": 18.6,
   "confidence_method": "abs(predicted_return_4h) / (1.5 * vol_pre), capped at 95%; no artificial floor",
-  "threshold": 0.001391,
-  "threshold_pct": 0.1391,
-  "vol_pre": 0.002783,
+  "threshold": 0.001432,
+  "threshold_pct": 0.1432,
+  "vol_pre": 0.002864,
   "macro_drivers": [
     {
       "driver": "US Dollar Index (DXY \u03941D)",
-      "value": "+0.58",
+      "value": "+0.68",
       "impact_on_gold": "Bearish Emas"
     },
     {
       "driver": "US 10Y Yield",
-      "value": "4.98%",
+      "value": "5.00%",
       "impact_on_gold": "Opportunity cost tinggi"
     },
     {
