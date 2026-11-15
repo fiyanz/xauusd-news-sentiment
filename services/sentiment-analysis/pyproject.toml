@@ -3,8 +3,9 @@ name = "sentiment-analysis"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
+license = "Apache-2.0"
 authors = [
-    { name = "Fiyanz", email = "bagusalfiyanyusuf@gmail.com" }
+    { name = "Fiyanz" }
 ]
 requires-python = ">=3.12"
 dependencies = [
