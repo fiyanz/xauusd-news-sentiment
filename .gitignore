@@ -42,3 +42,8 @@ services/sentiment-analysis/data/cache/
 # TypeScript build info
 *.tsbuildinfo
 
+
+# Cache berita besar (diunduh ulang oleh pipeline)
+services/sentiment-analysis/data/raw/news/hf_articles_cache/
+services/sentiment-analysis/data/raw/news/gdelt_news_cache/
+services/sentiment-analysis/data/raw/news/*.full.parquet
