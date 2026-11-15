@@ -1,9 +1,0 @@
-{
-  "status": "ok",
-  "cycle": 1,
-  "started_at": "2026-11-15 05:05:07 UTC",
-  "finished_at": "2026-11-15 05:07:53 UTC",
-  "prediction_status": "success",
-  "signal": "NEUTRAL",
-  "predicted_target_price": 3884.58
-}

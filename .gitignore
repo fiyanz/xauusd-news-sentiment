@@ -47,3 +47,6 @@ services/sentiment-analysis/data/cache/
 services/sentiment-analysis/data/raw/news/hf_articles_cache/
 services/sentiment-analysis/data/raw/news/gdelt_news_cache/
 services/sentiment-analysis/data/raw/news/*.full.parquet
+
+# Data olahan disimpan di Kaggle (kyoushin/xauusd-news-sentiment-data)
+services/sentiment-analysis/data/
