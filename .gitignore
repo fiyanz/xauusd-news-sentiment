@@ -50,3 +50,7 @@ services/sentiment-analysis/data/raw/news/*.full.parquet
 
 # Data olahan disimpan di Kaggle (kyoushin/xauusd-news-sentiment-data)
 services/sentiment-analysis/data/
+
+# Agent lokal: pakai .agents/skills saja (Claude Code membacanya dari sana)
+.claude/
+.hermes/
