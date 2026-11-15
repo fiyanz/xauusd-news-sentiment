@@ -4,6 +4,9 @@ Sistem informasi pasar emas (XAUUSD) dan analisis dampak rilis berita makro.
 Monorepo **Bun + TypeScript** (Next.js, Fastify) dengan service **Python (uv)**
 untuk pipeline data dan ML.
 
+- **Repo:** https://github.com/fiyanz/xauusd-news-sentiment
+- **Data:** https://www.kaggle.com/datasets/kyoushin/xauusd-news-sentiment-data
+
 > **Integritas data:** seluruh angka analisis bersumber dari data nyata
 > (BLS, FRED, yfinance, RSS, CFTC) dan setiap artifact membawa metadata
 > *provenance*. Bila sumber tidak tersedia, sistem mengembalikan
@@ -234,13 +237,28 @@ Ringkas:
 Data olahan (korpus, fitur, bucket, harga, makro) disimpan di Kaggle, bukan di
 repo. Repo hanya berisi kode.
 
+- **Repo kode:** https://github.com/fiyanz/xauusd-news-sentiment
+- **Dataset:** https://www.kaggle.com/datasets/kyoushin/xauusd-news-sentiment-data
+
 Dataset: `kyoushin/xauusd-news-sentiment-data`
-https://www.kaggle.com/datasets/kyoushin/xauusd-news-sentiment-data
 
 ```bash
 # Unduh semua file dataset
 kaggle datasets download -d kyoushin/xauusd-news-sentiment-data -p /tmp/kaggle_data --unzip
 ```
+
+Isi dataset:
+
+| Path | Isi |
+|---|---|
+| `processed/news_corpus.jsonl` | 35.100 artikel berita (korpus) |
+| `processed/features.parquet` | fitur mentah |
+| `processed/bucketed_features.parquet` | bucket 4H + label |
+| `processed/dataset_article.parquet` | dataset level artikel |
+| `price/xauusd_h1_complete.csv` | harga H1 2010–2026 |
+| `price/xauusd_m5.csv`, `xauusd_m15.csv` | intraday |
+| `macro/macro_context.csv` | konteks makro |
+| `loughran_mcdonald.csv` | kamus sentimen keuangan |
 
 ## 11. Keamanan & Operasi
 

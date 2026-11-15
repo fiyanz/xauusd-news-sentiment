@@ -4,6 +4,9 @@ Pipeline Python untuk sistem informasi pasar emas: pengambilan data nyata
 (keyless), harmonisasi, feature engineering, pelatihan model, evaluasi, dan
 prediksi 4 jam.
 
+- **Repo:** https://github.com/fiyanz/xauusd-news-sentiment
+- **Data:** https://www.kaggle.com/datasets/kyoushin/xauusd-news-sentiment-data
+
 > Semua input bersumber dari data nyata (BLS, FRED, yfinance, RSS, CFTC).
 > Bila sumber gagal, pipeline menghasilkan `unavailable`/NaN dan menandainya di
 > `data/processed/provenance.json` — tidak ada data karangan.

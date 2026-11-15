@@ -210,8 +210,10 @@ graph TB
 - **Repo GitHub** (`fiyanz/xauusd-news-sentiment`) hanya berisi **kode**.
   Data dan cache di-gitignore; riwayat pernah di-rewrite dengan
   `git-filter-repo` untuk menghapus cache parquet >100 MB.
+  https://github.com/fiyanz/xauusd-news-sentiment
 - **Kaggle** menyimpan data olahan:
   `kyoushin/xauusd-news-sentiment-data` (korpus, fitur, bucket, harga, makro).
+  https://www.kaggle.com/datasets/kyoushin/xauusd-news-sentiment-data
 - **Skill agent** dipusatkan di `.agents/skills/`; `.claude/` dan `.hermes/`
   di-gitignore.
 
