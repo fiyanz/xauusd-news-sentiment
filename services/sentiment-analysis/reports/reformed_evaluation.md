@@ -12,33 +12,33 @@
 
 | Algoritma Model | MAE (%) | MSE ($10^{-4}$) | RMSE (%) | MAPE (%) | $R^2$ Score | Adjusted $R^2$ | Hit Ratio Sig ($|R|>0.5\sigma$) | Hit Ratio All | Rank IC |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Random_Forest | 0.3262% | 0.2512 | 0.5012% | 98.42% | -0.0002 | -0.0057 | 52.70% | 52.57% | +0.0337 |
-| XGBoost | 0.3261% | 0.2512 | 0.5012% | 98.38% | -0.0001 | -0.0056 | 52.51% | 52.21% | +0.0422 |
-| LightGBM | 0.3261% | 0.2512 | 0.5012% | 98.49% | +0.0000 | -0.0054 | 52.64% | 52.42% | +0.0392 |
-| **Ridge_Linear (Champion)** | 0.3269% | 0.2527 | 0.5027% | 103.74% | -0.0059 | -0.0114 | 52.16% | 51.55% | +0.0371 |
+| Random_Forest | 0.3262% | 0.2512 | 0.5012% | 98.38% | -0.0001 | -0.0055 | 52.51% | 52.44% | +0.0320 |
+| XGBoost | 0.3261% | 0.2511 | 0.5011% | 98.67% | +0.0002 | -0.0052 | 52.62% | 52.40% | +0.0434 |
+| LightGBM | 0.3261% | 0.2511 | 0.5011% | 98.64% | +0.0003 | -0.0051 | 52.37% | 52.09% | +0.0323 |
+| **Ridge_Linear (Champion)** | 0.3263% | 0.2512 | 0.5012% | 103.05% | -0.0000 | -0.0055 | 51.73% | 51.24% | +0.0344 |
 
 ---
 
 ## 3. Diagnosa Overfitting (Train vs Test Gap)
 | Model | Akurasi Latih (Train Hit) | Akurasi Uji (Test Hit Sig) | Gap Overfit (Train - Test) | Diagnosa |
 | :--- | :---: | :---: | :---: | :--- |
-| **Random_Forest** | 53.51% | **52.70%** | **0.81%** | Moderat |
-| **XGBoost** | 53.95% | **52.51%** | **1.44%** | Moderat |
-| **LightGBM** | 54.27% | **52.64%** | **1.63%** | Moderat |
-| **Ridge_Linear** | 53.13% | **52.16%** | **0.97%** | Rendah (Generalisasi Kuat) |
+| **Random_Forest** | 53.24% | **52.51%** | **0.73%** | Moderat |
+| **XGBoost** | 53.85% | **52.62%** | **1.23%** | Moderat |
+| **LightGBM** | 54.36% | **52.37%** | **1.99%** | Moderat |
+| **Ridge_Linear** | 53.05% | **51.73%** | **1.32%** | Rendah (Generalisasi Kuat) |
 
 ---
 
 ## 4. Signifikansi Statistik (Jujur)
 1. **Akurasi Arah (Hit Ratio)**:
-   - Champion `Ridge_Linear` mencapai **`52.16%`** pada pergerakan signifikan ($N_{sig} = 3706$) dan **`51.55%`** pada seluruh data uji.
-   - Uji binomial dua-arah terhadap tebakan acak 50%: **p = 0.00900**, CI95 Wilson = [0.5055, 0.5376].
+   - Champion `Ridge_Linear` mencapai **`51.73%`** pada pergerakan signifikan ($N_{sig} = 3706$) dan **`51.24%`** pada seluruh data uji.
+   - Uji binomial dua-arah terhadap tebakan acak 50%: **p = 0.03695**, CI95 Wilson = [0.5012, 0.5333].
 2. **Rank IC**:
-   - Champion `Ridge_Linear`: **+0.0371** dengan **p = 0.00750** (Spearman).
+   - Champion `Ridge_Linear`: **+0.0344** dengan **p = 0.01324** (Spearman).
 3. **Kesimpulan**:
    - TIDAK ada bukti statistik yang signifikan pada α = 0.05. Angka ini **bukan** 'Strong Alpha'; klaim keunggulan atas tebakan acak 50% ditolak.
    - `sentiment_adds_value = false` (basis: `rank_ic_pvalue < 0.05 or hit_ratio_pvalue < 0.05`; sumber: reports/significance.json).
-4. **MAE (0.3269%) & RMSE (0.5027%)**:
+4. **MAE (0.3263%) & RMSE (0.5012%)**:
    - Deviasi prediksi $\sim 0.33\%$ mencerminkan rentang volatilitas wajar emas per 4 jam.
-5. **Mengapa $R^2$ (-0.0059) Bernilai Negatif Mendekati Nol?**:
+5. **Mengapa $R^2$ (-0.0000) Bernilai Negatif Mendekati Nol?**:
    - Sesuai literatur *Empirical Asset Pricing* (Gu, Kelly, & Xiu 2020), return harga intraday didominasi oleh *microstructure noise*. Standar evaluasi kuantitatif institusional bertumpu pada **Directional Hit Ratio** dan **Rank IC**, bukan $R^2$.

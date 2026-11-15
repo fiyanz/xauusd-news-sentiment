@@ -55,6 +55,17 @@ news:
   lm_lexicon:
     enabled: true
     dictionary_cache: "data/raw/news/loughran_mcdonald.csv"
+  # Berita berisi dari API (newsapi.org + GNews). Key dibaca dari .env.
+  api_news:
+    enabled: true
+    newsapi_pages: 1
+    gnews_pages: 1
+    queries:
+      - "gold XAUUSD"
+      - "US dollar index DXY"
+      - "Federal Reserve interest rate decision"
+      - "US inflation CPI"
+      - "US Treasury yield"
     # Uji perbandingan VADER vs Loughran-McDonald:
     #   set news.sentiment_column ke "sentiment_lm" dan jalankan ulang
     #   harmonize -> bucket -> retrain; bandingkan delta_rank_ic + paired_ic_test.

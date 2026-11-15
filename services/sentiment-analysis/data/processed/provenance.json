@@ -10,26 +10,26 @@
     "data/raw/price/xauusd_m5.csv": {
       "artifact": "data/raw/price/xauusd_m5.csv",
       "source": "yfinance GC=F (keyless)",
-      "generated_at": "2026-11-12 03:26:10+00:00",
-      "as_of": "2026-11-12 03:15:00+00:00",
+      "generated_at": "2026-11-15 04:55:14+00:00",
+      "as_of": "2026-11-13 21:55:00+00:00",
       "is_simulated": false,
-      "rows": 6870,
+      "rows": 6890,
       "is_real": 1
     },
     "data/raw/price/xauusd_m15.csv": {
       "artifact": "data/raw/price/xauusd_m15.csv",
       "source": "yfinance GC=F (keyless)",
-      "generated_at": "2026-11-12 03:26:11+00:00",
-      "as_of": "2026-11-12 03:15:00+00:00",
+      "generated_at": "2026-11-15 04:55:15+00:00",
+      "as_of": "2026-11-13 21:45:00+00:00",
       "is_simulated": false,
-      "rows": 2296,
+      "rows": 2302,
       "is_real": 1
     },
     "data/raw/calendar/economic_calendar_enriched.csv": {
       "artifact": "data/raw/calendar/economic_calendar_enriched.csv",
       "source": "bls_api_v2 + fred_csv (keyless)",
-      "generated_at": "2026-11-14 07:11:02+00:00",
-      "as_of": "2026-11-14 07:11:02+00:00",
+      "generated_at": "2026-11-15 05:05:12+00:00",
+      "as_of": "2026-11-15 05:05:12+00:00",
       "is_simulated": false,
       "rows": 748,
       "rows_real": 737,
@@ -64,11 +64,11 @@
     "data/raw/news/news_sentiment_feed.json": {
       "artifact": "data/raw/news/news_sentiment_feed.json",
       "source": "rss_feeds (keyless)",
-      "generated_at": "2026-11-14 07:11:09+00:00",
-      "as_of": "2026-11-14 07:11:09+00:00",
+      "generated_at": "2026-11-15 05:05:19+00:00",
+      "as_of": "2026-11-15 05:05:19+00:00",
       "is_simulated": false,
       "status": "ok",
-      "article_count": 294,
+      "article_count": 295,
       "sentiment_method": "vader",
       "feeds": {
         "cnbc_markets": "ok:30",
@@ -85,28 +85,28 @@
     "data/processed/bucketed_features.parquet": {
       "artifact": "data/processed/bucketed_features.parquet",
       "source": "rss_feeds+vader | bls_api_v2+fred_csv | yfinance GC=F | yfinance ^TNX/DX-Y.NYB/CL=F",
-      "generated_at": "2026-11-14 07:11:46+00:00",
+      "generated_at": "2026-11-15 05:06:38+00:00",
       "as_of": null,
       "is_simulated": false
     },
     "models/champion_fair_model.joblib": {
       "artifact": "models/champion_fair_model.joblib",
       "source": "retrain pipeline (src.models.train, champion by CV)",
-      "generated_at": "2026-11-14 07:12:18+00:00",
+      "generated_at": "2026-11-15 05:07:53+00:00",
       "is_simulated": false,
       "champion_name": "Ridge_Linear"
     },
     "reports/significance.json": {
       "artifact": "reports/significance.json",
       "source": "retrain pipeline (src.evaluate.significance)",
-      "generated_at": "2026-11-14 07:12:18+00:00",
+      "generated_at": "2026-11-15 05:07:53+00:00",
       "is_simulated": false,
-      "rank_ic": 0.0371,
-      "rank_ic_pvalue": 0.0075,
+      "rank_ic": 0.0344,
+      "rank_ic_pvalue": 0.01324,
       "sentiment_adds_value": false
     }
   },
-  "generated_at": "2026-11-14 07:12:18+00:00",
+  "generated_at": "2026-11-15 05:07:53+00:00",
   "is_simulated": false,
   "has_simulated_rows": true
 }

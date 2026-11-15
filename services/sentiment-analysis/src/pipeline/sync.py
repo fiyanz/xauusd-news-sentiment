@@ -155,6 +155,42 @@ def run_full_sync(write_prediction: bool = True) -> dict:
     else:
         print("[PipelineSync] LM lexicon disabled.")
 
+    # 5e. Berita berisi dari API (newsapi.org + GNews) -> korpus yang sama.
+    #     Menambah berita TERKINI dengan isi penuh (bukan cuma judul).
+    api_cfg = news_cfg.get("api_news", {})
+    if api_cfg.get("enabled", True):
+        print("\n--- Step 5e/8: News API (newsapi.org + GNews) ---")
+        try:
+            from src.acquire.news_api import fetch_gnews, fetch_newsapi_org
+
+            queries = api_cfg.get(
+                "queries",
+                [
+                    "gold XAUUSD",
+                    "US dollar index DXY",
+                    "Federal Reserve interest rate decision",
+                    "US inflation CPI",
+                    "US Treasury yield",
+                ],
+            )
+            total = 0
+            for q in queries:
+                total += fetch_newsapi_org(
+                    corpus_path=corpus_path,
+                    query=q,
+                    max_pages=api_cfg.get("newsapi_pages", 1),
+                )
+                total += fetch_gnews(
+                    corpus_path=corpus_path,
+                    query=q,
+                    max_pages=api_cfg.get("gnews_pages", 1),
+                )
+            print(f"[PipelineSync] News API: +{total} artikel berisi baru.")
+        except Exception as exc:  # noqa: BLE001 - API gagal; jangan crash
+            print(f"[PipelineSync] News API dilewati: {type(exc).__name__}: {exc}")
+    else:
+        print("[PipelineSync] News API disabled.")
+
     # 6. Harmonization (korpus berita + price -> returns/labels)
     print("\n--- Step 6/8: Harmonization ---")
     harmonize_dataset(

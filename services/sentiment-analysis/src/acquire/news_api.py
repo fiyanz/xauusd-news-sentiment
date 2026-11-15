@@ -14,6 +14,8 @@ import time
 import urllib.parse
 import urllib.request
 
+import pandas as pd
+
 from src.acquire.corpus import append_articles
 from src.acquire.news import classify_topics, score_sentiment
 
@@ -42,12 +44,20 @@ def _to_article(title: str, body: str, url: str, published: str, feed: str) -> d
     score, label, method = score_sentiment(f"{title} {body}")
     import hashlib
 
-    article_id = feed + ":" + hashlib.sha1(f"{title}|{published}".encode("utf-8")).hexdigest()[:16]
+    # Normalisasi waktu ke format korpus "%Y-%m-%d %H:%M:%S+00:00".
+    # API mengirim ISO8601 (mis. 2026-10-14T10:48:22Z); ubah ke format korpus.
+    ts = published
+    try:
+        ts = pd.to_datetime(published, utc=True).strftime("%Y-%m-%d %H:%M:%S+00:00")
+    except Exception:
+        return None
+
+    article_id = feed + ":" + hashlib.sha1(f"{title}|{ts}".encode("utf-8")).hexdigest()[:16]
     return {
         "id": article_id,
         "title": title,
         "summary": body or "",
-        "time_published_utc": published,
+        "time_published_utc": ts,
         "overall_sentiment_score": score,
         "overall_sentiment_label": label,
         "topics": classify_topics(f"{title} {body}") or ["financial_markets"],
