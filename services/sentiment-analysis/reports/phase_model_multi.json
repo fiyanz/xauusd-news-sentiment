@@ -1,0 +1,113 @@
+{
+  "A_pra_event": {
+    "n_test": 2388,
+    "baseline": 0.5637,
+    "models": {
+      "LogisticRegression": {
+        "accuracy": 0.6047,
+        "delta": 0.041,
+        "f1_macro": 0.4946,
+        "p_value": 0.0,
+        "beats": true
+      },
+      "SVM": {
+        "accuracy": 0.6093,
+        "delta": 0.0456,
+        "f1_macro": 0.4169,
+        "p_value": 0.0,
+        "beats": true
+      },
+      "XGBoost": {
+        "error": "ValueError: Invalid classes inferred from unique values of `y`.  Expected: [0 1 2], got [-1  0  1]"
+      },
+      "RandomForest": {
+        "accuracy": 0.0268,
+        "delta": -0.5369,
+        "f1_macro": 0.0215,
+        "p_value": 1.0,
+        "beats": false
+      },
+      "LightGBM": {
+        "accuracy": 0.0276,
+        "delta": -0.536,
+        "f1_macro": 0.0215,
+        "p_value": 1.0,
+        "beats": false
+      }
+    }
+  },
+  "B_pasca_event": {
+    "n_test": 1187,
+    "baseline": 0.4895,
+    "models": {
+      "LogisticRegression": {
+        "accuracy": 0.6125,
+        "delta": 0.123,
+        "f1_macro": 0.4138,
+        "p_value": 0.0,
+        "beats": true
+      },
+      "SVM": {
+        "accuracy": 0.5855,
+        "delta": 0.096,
+        "f1_macro": 0.4207,
+        "p_value": 0.0,
+        "beats": true
+      },
+      "XGBoost": {
+        "error": "ValueError: Invalid classes inferred from unique values of `y`.  Expected: [0 1 2], got [-1  0  1]"
+      },
+      "RandomForest": {
+        "accuracy": 0.3833,
+        "delta": -0.1061,
+        "f1_macro": 0.1847,
+        "p_value": 1.0,
+        "beats": false
+      },
+      "LightGBM": {
+        "accuracy": 0.588,
+        "delta": 0.0986,
+        "f1_macro": 0.4183,
+        "p_value": 0.0,
+        "beats": true
+      }
+    }
+  },
+  "all_news": {
+    "n_test": 5671,
+    "baseline": 0.4835,
+    "models": {
+      "LogisticRegression": {
+        "accuracy": 0.4837,
+        "delta": 0.0002,
+        "f1_macro": 0.5055,
+        "p_value": 0.486,
+        "beats": false
+      },
+      "SVM": {
+        "accuracy": 0.4814,
+        "delta": -0.0021,
+        "f1_macro": 0.3959,
+        "p_value": 0.624,
+        "beats": false
+      },
+      "XGBoost": {
+        "error": "ValueError: Invalid classes inferred from unique values of `y`.  Expected: [0 1 2], got [-1  0  1]"
+      },
+      "RandomForest": {
+        "accuracy": 0.4465,
+        "delta": -0.037,
+        "f1_macro": 0.4689,
+        "p_value": 1.0,
+        "beats": false
+      },
+      "LightGBM": {
+        "accuracy": 0.4606,
+        "delta": -0.0229,
+        "f1_macro": 0.4621,
+        "p_value": 0.984,
+        "beats": false
+      }
+    }
+  }
+}
