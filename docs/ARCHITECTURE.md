@@ -21,7 +21,7 @@ sistem-informasi-market-xauusd/
 ├── services/
 │   └── sentiment-analysis/ # Pipeline Python (uv): acquire → process → ML
 ├── docs/                   # PRD, arsitektur, diagram
-├── .hermes/plans/          # Rencana perbaikan
+├── .agents/skills/         # Skill agent (Claude Code / Hermes)
 ├── turbo.json
 └── package.json
 ```
@@ -30,33 +30,72 @@ sistem-informasi-market-xauusd/
 
 ## 2. Alur Data & ML (services/sentiment-analysis)
 
+```mermaid
+flowchart TB
+    subgraph ACQ[Acquire — keyless / API]
+        BLS[BLS API v2]
+        FRED[FRED CSV]
+        YF[yfinance GC=F]
+        CAL[Calendar]
+        RSS[RSS 9 feed + VADER]
+        HF[HuggingFace news]
+        GD[GDELT 2022]
+        API[newsapi.org + GNews]
+    end
+
+    subgraph CORPUS[Korpus berita]
+        NC[(news_corpus.jsonl<br/>35.100 artikel)]
+    end
+
+    subgraph RAW[Data mentah]
+        DR[(data/raw<br/>price, macro, news)]
+    end
+
+    BLS --> DR
+    FRED --> DR
+    YF --> DR
+    CAL --> DR
+    RSS --> NC
+    HF --> NC
+    GD --> NC
+    API --> NC
+
+    DR --> H[harmonize<br/>merge_asof backward]
+    NC --> H
+    H --> F[features<br/>TF-IDF + embedding + PCA]
+    F --> B[bucket 4H<br/>topic weights + surprise]
+    B --> R[retrain]
+    R --> S[significance<br/>paired bootstrap]
+    R --> E[eval fair]
+    R --> P[predict 4H]
+    R --> O[reports + provenance]
+    R --> M[(models/joblib)]
+```
+
 ```text
-┌──────────────────── ACQUIRE (keyless) ────────────────────┐
-│  BLS API v2   : CPI, core CPI, NFP                         │
-│  FRED CSV     : core PCE, FOMC target range                │
-│  yfinance GC=F: H1 history + intraday 5m/15m               │
-│  RSS (9 feed) : berita + sentimen VADER                    │
-│  CFTC         : COT report                                 │
-└───────────────────────────┬───────────────────────────────┘
-                            ▼
-┌──────────────────── PROCESS / FEATURES ────────────────────┐
-│  harmonize  : merge_asof backward (anti look-ahead)        │
-│  features   : TF-IDF, session, temporal, split + embargo   │
-│  buckets    : 4H bucket, topic interactions, PIT macro     │
-└───────────────────────────┬───────────────────────────────┘
-                            ▼
-┌──────────────────── RETRAIN & EVALUATE ────────────────────┐
-│  train         : champion dipilih by CV (bukan hardcode)   │
-│  significance  : p-value, Wilson CI, Pesaran-Timmermann    │
-│  eval fair     : baseline makro vs full (sentimen)         │
-│  predict       : prediksi 4H terbaru                       │
-│  provenance    : manifest sumber & status simulasi          │
-└────────────────────────────────────────────────────────────┘
+price → intraday → macro → calendar → news → harmonize
+      → features → buckets → retrain → evaluate → predict → provenance
 ```
 
 Semua artifact membawa metadata *provenance* (`source`, `generated_at`,
 `is_simulated`). Bila sumber gagal, nilai yang dikembalikan adalah
 `unavailable`/NaN — bukan pengganti karangan.
+
+### 2.1 Pilihan representasi teks
+
+| Tahap | Modul | Keterangan |
+|---|---|---|
+| Tokenisasi + stemming | `features/text_preprocess.py` | Porter stemmer, stop words, TF-IDF n-gram (1,2) 300 fitur |
+| Embedding kalimat | `features/embeddings.py` | sentence-transformers `all-MiniLM-L6-v2` (384 dim), PCA fit on train |
+| Reduksi blok | `features/reduce.py` | PCA per blok (macro/topic/interaction/tfidf), 90% varians |
+| Bobot topik | `features/topic_weights.py` | SMD return train, clip 0,25–2,0 |
+
+### 2.2 Pipeline realtime
+
+`src/pipeline/realtime.py` menjalankan siklus sync penuh berulang dengan jeda
+`--interval` (default 30 menit). Status tercatat di
+`data/processed/realtime_status.json`; loop berhenti anggun saat Ctrl+C dan
+kegagalan satu siklus tidak menghentikan loop.
 
 ---
 
@@ -106,14 +145,18 @@ graph TB
     subgraph Storage
         Postgres[("PostgreSQL<br/>Drizzle migration")]
         Files[("data/ + reports/<br/>CSV, parquet, joblib, JSON")]
+        Kaggle[("Kaggle dataset<br/>kyoushin/xauusd-news-sentiment-data")]
     end
 
-    subgraph External["Sumber Eksternal (keyless)"]
+    subgraph External["Sumber Eksternal (keyless / API)"]
         BLS["BLS API v2"]
         FRED["FRED CSV"]
         YF["yfinance GC=F"]
         RSS["RSS feeds"]
         CFTC["CFTC COT"]
+        HF["HuggingFace"]
+        GD["GDELT"]
+        NEWS["newsapi.org / GNews"]
     end
 
     Browser -->|HTTPS| Web
@@ -126,8 +169,12 @@ graph TB
     Python --> FRED
     Python --> YF
     Python --> RSS
+    Python --> HF
+    Python --> GD
+    Python --> NEWS
     API --> CFTC
     Python --> Files
+    Files -.->|arsip data| Kaggle
 ```
 
 ---
@@ -157,3 +204,21 @@ graph TB
   jujur (`sentiment_adds_value: false`), bukan dipaksa terlihat sebagai *alpha*.
 - Regression tests menjaga: anti look-ahead (merge `backward`), provenance,
   signifikansi, dan skema fitur.
+
+## 7. Repositori & Penyimpanan Data
+
+- **Repo GitHub** (`fiyanz/xauusd-news-sentiment`) hanya berisi **kode**.
+  Data dan cache di-gitignore; riwayat pernah di-rewrite dengan
+  `git-filter-repo` untuk menghapus cache parquet >100 MB.
+- **Kaggle** menyimpan data olahan:
+  `kyoushin/xauusd-news-sentiment-data` (korpus, fitur, bucket, harga, makro).
+- **Skill agent** dipusatkan di `.agents/skills/`; `.claude/` dan `.hermes/`
+  di-gitignore.
+
+```mermaid
+flowchart LR
+    Kode["Repo GitHub<br/>kode + skill"] -->|pipeline menghasilkan| Data["Data olahan"]
+    Data -->|unggah| Kaggle["Kaggle dataset"]
+    Kaggle -->|unduh| Lokal["data/ lokal<br/>(gitignored)"]
+    Lokal --> Kode
+```

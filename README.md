@@ -27,7 +27,7 @@ sistem-informasi-market-xauusd/
 ├── services/
 │   └── sentiment-analysis/ # Pipeline Python: acquire → process → features → ML
 ├── docs/                   # PRD, arsitektur, diagram
-├── .hermes/plans/          # Rencana perbaikan (F1–F4)
+├── .agents/skills/         # Skill agent (Claude Code / Hermes)
 └── .env.example
 ```
 
@@ -65,9 +65,24 @@ bun run dev
 | Actual CPI / core CPI / NFP | BLS API v2 | Tanpa key (batas 25 query/hari, di-cache) |
 | Core PCE, FOMC target rate | FRED CSV publik | `fredgraph.csv?id=...` |
 | H1 history + intraday 5m/15m | yfinance `GC=F` | Intraday maks ~60 hari |
-| Berita & sentimen | 9 RSS feed + VADER (nltk) | URL artikel asli |
+| Berita & sentimen | RSS + VADER, HuggingFace, GDELT, newsapi.org, GNews | Lihat §3.1 |
 | COT | CFTC `deafut.txt` | Non-commercial long/short emas |
 | Forecast konsensus | — | Tidak ada sumber keyless; surprise = actual − previous |
+
+### 3.1 Sumber berita (korpus 35.100 artikel)
+
+| Sumber | Isi | Volume | Catatan |
+|---|---|---|---|
+| HuggingFace `ashraq/financial-news` | judul | 12.471 | Snapshot 2010–2020, keyless |
+| GDELT News Headlines 2022 | judul | 20.629 | Keyless, dataset HF |
+| HuggingFace `ashraq/financial-news-articles` | **isi** | 563 | 2018 |
+| HuggingFace `openalphalab/gdelt-news` | **isi** | 430 | 2020 |
+| newsapi.org (`NEWS_API_KEY`) | **isi** | ~363 | Berita terkini, 1 halaman/query |
+| GNews (`GNEWS_API_KEY`) | **isi** | ~40 | Berita terkini |
+| RSS (9 feed) | judul + ringkasan | ~465 | ~14 hari terakhir |
+
+Key dibaca dari `.env` (repo root). Hanya ~5,6% artikel yang punya isi penuh;
+sisanya judul saja. API gratis hanya untuk berita **terkini**, bukan historis.
 
 `config.yaml` (`services/sentiment-analysis`) memegang daftar feed, ticker makro,
 dan *lookback* berita. Path dataset eksternal (`price_file_raw`,
@@ -83,22 +98,54 @@ price → intraday → macro → calendar → news → harmonize
       → features → buckets → retrain → evaluate → predict → provenance
 ```
 
+```mermaid
+flowchart LR
+    subgraph ACQ[Acquire]
+        BLS[BLS API v2] --> P[(data/raw)]
+        FRED[FRED CSV] --> P
+        YF[yfinance GC=F] --> P
+        CAL[Calendar] --> P
+        RSS[RSS + VADER] --> C[(news_corpus.jsonl)]
+        HF[HuggingFace news] --> C
+        GD[GDELT 2022] --> C
+        API[newsapi.org + GNews] --> C
+    end
+    P --> H[harmonize]
+    C --> H
+    H --> F[features + TF-IDF + embedding]
+    F --> B[bucket 4H]
+    B --> R[retrain + eval + predict]
+    R --> O[reports + latest_prediction]
+    R --> M[(models)]
+```
+
 - **Bucket full-history** (`src/process/price_buckets.py`, `data.bucket_mode:
   price_history`): bucket dibuat untuk **seluruh history harga** (2010–2026,
   ~26k bucket 4H), fitur berita netral (0) bila tidak ada artikel. Ukuran sampel
   tidak lagi dibatasi cakupan berita, sehingga evaluasi benar-benar bermakna.
   Mode `news_only` (bucket hanya saat ada artikel) masih tersedia.
+  `split_mode: chronological | news_era` memilih cara pembagian train/test.
 
 - **Retrain stage** (`src/pipeline/retrain.py`) menjalankan `train → significance
   → eval fair → eval models → predict` di atas artifact terbaru, sehingga model
   dan laporan tidak tertinggal dari data.
+- **Pipeline realtime** (`src/pipeline/realtime.py`): loop berulang yang menjalankan
+  sync penuh dengan jeda `--interval` (default 30 menit), status tercatat di
+  `data/processed/realtime_status.json`, berhenti anggun saat Ctrl+C, dan kegagalan
+  satu siklus tidak menghentikan loop.
 - **Preprocessing fitur** (`src/features/reduce.py`): blok berkorelasi (makro,
   topik, interaksi sentimen, TF-IDF) dikompresi PCA yang difit pada data
   training saja; waktu di-encode siklikal; TF-IDF ikut dipakai.
-- **Korpus berita persisten** (`src/acquire/corpus.py`) + **GDELT historis**
-  (`src/acquire/gdelt.py`, keyless, rate-limited) + **HuggingFace financial
-  news** (`src/acquire/hf_news.py`, keyless, snapshot 2010-2020, ~12.5k headline
-  emas) menambah volume sampel; RSS hanya memberi ~14 hari.
+- **Embedding kalimat** (`src/features/embeddings.py`): sentence-transformers
+  `all-MiniLM-L6-v2` (384 dimensi) untuk judul + isi berita; PCA difit pada
+  training saja; embedding mentah di-cache di `models/embeddings/`.
+- **Preprocessing teks** (`src/features/text_preprocess.py`): stemming Porter +
+  stop words + TF-IDF n-gram (1,2) 300 fitur.
+- **Bobot topik** (`src/features/topic_weights.py`): bobot dari data training
+  saja (SMD return positif vs negatif, dipotong 0,25–2,0).
+- **Korpus berita persisten** (`src/acquire/corpus.py`, append-only, dedupe URL)
+  + **GDELT historis** + **HuggingFace financial news** + **API berita berisi**
+  (`src/acquire/news_api.py`, `src/acquire/news_body.py`).
 - **Surprise carry-forward** (`src/process/bucket_harmonize.py`): fitur makro
   tidak lagi NaN di bucket tanpa rilis — diisi surprise rilis terakhir yang
   sudah terbit + `surprise_age_hours` (point-in-time safe).
@@ -169,10 +216,11 @@ Ringkas:
 
 ## 9. Known Limitations
 
-- **Sampel kecil.** RSS keyless hanya menyediakan berita ~14 hari terakhir,
-  menghasilkan 20–40 bucket 4H. CV/evaluasi pada sampel sekecil itu sangat
-  *noise* dan hampir pasti tidak signifikan — sistem melaporkannya apa adanya
-  (`sentiment_adds_value: false`), bukan menyembunyikannya.
+- **Isi berita terbatas.** Hanya ~5,6% artikel yang punya isi penuh; sisanya
+  judul saja. API gratis (newsapi.org/GNews) hanya berita terkini, jadi tidak
+  menambah data historis.
+- **Gap 2021–2025.** Periode ini tidak punya berita (kecuali 2022 dari GDELT),
+  sehingga model tidak dapat diuji di sana.
 - **Surprise makro seringkali kosong.** Bila tidak ada rilis makro dengan
   *actual* yang overlap jendela berita (mis. rilis belum masuk BLS), fitur
   `surprise_val`/`z_score` bernilai NaN dan diimputasi 0 dengan `has_event = 0`;
@@ -181,7 +229,20 @@ Ringkas:
 - **Dataset eksternal lama** (`expert-advisor-trade`) opsional; regenerasi
   historis penuh butuh path tersebut di `config.yaml`.
 
-## 9. Keamanan & Operasi
+## 10. Data di Kaggle
+
+Data olahan (korpus, fitur, bucket, harga, makro) disimpan di Kaggle, bukan di
+repo. Repo hanya berisi kode.
+
+Dataset: `kyoushin/xauusd-news-sentiment-data`
+https://www.kaggle.com/datasets/kyoushin/xauusd-news-sentiment-data
+
+```bash
+# Unduh semua file dataset
+kaggle datasets download -d kyoushin/xauusd-news-sentiment-data -p /tmp/kaggle_data --unzip
+```
+
+## 11. Keamanan & Operasi
 
 - `PIPELINE_SYNC_TOKEN` wajib untuk trigger pipeline via API; token belum diset
   → `503`, token salah → `401`. Pipeline dibatasi timeout 15 menit.
