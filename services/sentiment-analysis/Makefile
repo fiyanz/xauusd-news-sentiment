@@ -18,6 +18,8 @@ train:
 	uv run python -m src.models.train
 
 eval:
+	uv run python -m src.evaluate.significance
+	uv run python -m src.evaluate.evaluate_fair
 	uv run python -m src.evaluate.evaluate_models
 
 clean:

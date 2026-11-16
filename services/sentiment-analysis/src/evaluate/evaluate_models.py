@@ -20,8 +20,10 @@ from scipy.stats import spearmanr
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import yaml
 
+from src.evaluate.evaluate_fair import build_fair_comparison
 from src.evaluate.significance import (
     SIGNIFICANCE_BASIS,
+    baseline_descriptor,
     binomtest_pvalue,
     load_significance_report,
     select_champion_from_cv,
@@ -115,15 +117,19 @@ def _champion_significance(champ_metrics: dict, sig_report: dict, champ_name: st
         ci = sig_report.get("hit_ratio_ci95", ci)
         adds_value = sig_report.get("sentiment_adds_value")
         adds_note = sig_report.get("sentiment_adds_value_note")
+        # Pakai basis yang sebenarnya dipakai significance.json (paired vs
+        # baseline), jangan BASIS_PVALUE kalau sumbernya lapangan paired.
+        basis = sig_report.get("sentiment_adds_value_basis", SIGNIFICANCE_BASIS)
         source = "reports/significance.json"
     else:
         adds_value = sentiment_adds_value_from_pvalues(rank_p, hit_p)
         adds_note = None
+        basis = SIGNIFICANCE_BASIS
         source = "computed from champion test predictions"
 
     return {
         "sentiment_adds_value": adds_value,
-        "sentiment_adds_value_basis": SIGNIFICANCE_BASIS,
+        "sentiment_adds_value_basis": basis,
         "sentiment_adds_value_note": adds_note,
         "sentiment_adds_value_source": source,
         "rank_ic_pvalue": rank_p,
@@ -135,7 +141,7 @@ def _champion_significance(champ_metrics: dict, sig_report: dict, champ_name: st
 def evaluate_models(
     features_parquet: str = "data/processed/bucketed_features.parquet",
     model_bundle_path: str = "models/champion_fair_model.joblib",
-    output_report_md: str = "reports/reformed_evaluation.md",
+    output_report_md: str = "reports/full_metrics_evaluation.md",
     output_json_path: str = "reports/full_metrics_evaluation.json",
     output_plot_path: str = "reports/model_comparison_curves.png",
 ) -> dict:
@@ -170,6 +176,7 @@ def evaluate_models(
         "target": target_col,
         "champion_name": bundle_champion,
         "selection_method": selection_method,
+        "baseline": baseline_descriptor(bundle, model_bundle_path),
         "models": {},
     }
 
@@ -222,45 +229,25 @@ def evaluate_models(
     with open(output_json_path, "w") as f:
         json.dump(eval_results, f, indent=2)
 
-    # Backward compatibility file for tests
+    # Backward-compatible fair-comparison file for tests.  It is built by the
+    # SAME builder as ``evaluate_fair_test`` so the baseline definition, the
+    # rank-IC delta and ``sentiment_adds_value`` are identical whichever module
+    # runs last.  (Previously this block scored ``trained_models['LightGBM']``
+    # on the 28 champion features and called it "baseline", which produced a
+    # +0.0021 delta that contradicted ``significance.json``.)
     fair_compat_path = "reports/fair_comparison_results.json"
-    baseline_name = bundle.get("baseline_name")
-    if baseline_name not in eval_results["models"] or baseline_name == champ_name:
-        candidates = [m for m in eval_results["models"] if m != champ_name]
-        baseline_name = (
-            max(candidates, key=lambda m: eval_results["models"][m]["spearman_rank_ic"])
-            if candidates
-            else champ_name
-        )
-    base_res = eval_results["models"][baseline_name]
-    champ_res = eval_results["models"][champ_name]
+    fair = build_fair_comparison(
+        bundle,
+        test_df,
+        y_test,
+        vol_test,
+        seed=42,
+        model_bundle_path=model_bundle_path,
+        champion_name=champ_name,
+        champion_model=trained_models[champ_name],
+    )
     with open(fair_compat_path, "w") as f:
-        compat_dict = {
-            "test_samples": len(test_df),
-            "target": target_col,
-            "champion_name": champ_name,
-            "selection_method": selection_method,
-            "models": {
-                "baseline": base_res,
-                "full": champ_res,
-            },
-            "delta_alpha": {
-                "rank_ic_improvement": round(
-                    champ_res["spearman_rank_ic"] - base_res["spearman_rank_ic"], 4
-                ),
-                "hit_ratio_improvement": round(
-                    (champ_res["hit_ratio_sig"] or 0.0) - (base_res["hit_ratio_sig"] or 0.0), 2
-                ),
-                "sentiment_adds_value": champ_significance["sentiment_adds_value"],
-                "sentiment_adds_value_basis": champ_significance["sentiment_adds_value_basis"],
-                "rank_ic_pvalue": champ_significance["rank_ic_pvalue"],
-                "hit_ratio_pvalue": champ_significance["hit_ratio_pvalue"],
-                "hit_ratio_ci95": champ_significance["hit_ratio_ci95"],
-            },
-            "artifact_status": sig_report.get("artifact_status") if sig_report else None,
-            "disclaimer": sig_report.get("disclaimer") if sig_report else None,
-        }
-        json.dump(compat_dict, f, indent=2)
+        json.dump(fair, f, indent=2)
 
     # Generate 4-panel diagnostic chart
     fig, axs = plt.subplots(2, 2, figsize=(14, 10))
@@ -366,12 +353,12 @@ def evaluate_models(
 
     artifact_banner = ""
     if sig_report and sig_report.get("artifact_status") not in (None, "verified"):
-        artifact_banner = (
-            "> **STATUS: Artifact legacy (data sintetis).** "
-            f"(`artifact_status={sig_report.get('artifact_status')}`) "
-            "Retrain ditunda ke tahap integrasi (F1). Angka di bawah adalah diagnostik legacy, "
-            "bukan hasil akhir.\n\n"
-        )
+        # Banner harus sesuai jenis artifact: "stale" = data nyata berumur
+        # >24 jam, bukan data sintetis.  Ambil kalimat dari significance.json
+        # (satu sumber kebenaran) supaya label tidak pernah bertabrakan.
+        _status = sig_report.get("artifact_status")
+        _detail = sig_report.get("disclaimer") or "Angka di bawah DIAGNOSTIK, bukan hasil akhir."
+        artifact_banner = f"> **STATUS: artifact_status={_status}.** {_detail}\n\n"
 
     report_md = f"""# Laporan Evaluasi Komprehensif: {title_models}
 
@@ -406,7 +393,7 @@ def evaluate_models(
    - Champion `{champ_name}`: **{champ_res['spearman_rank_ic']:+.4f}** dengan **p = {rank_p:.5f}** (Spearman).
 3. **Kesimpulan**:
    - {conclusion}
-   - `sentiment_adds_value = {str(is_significant).lower()}` (basis: `{SIGNIFICANCE_BASIS}`; sumber: {champ_significance['sentiment_adds_value_source']}).
+   - `sentiment_adds_value = {str(is_significant).lower()}` (basis: `{champ_significance['sentiment_adds_value_basis']}`; sumber: {champ_significance['sentiment_adds_value_source']}).
 4. **MAE ({champ_res['mae_pct']:.4f}%) & RMSE ({champ_res['rmse_pct']:.4f}%)**:
    - Deviasi prediksi $\\sim {champ_res['mae_pct']:.2f}\\%$ mencerminkan rentang volatilitas wajar emas per 4 jam.
 5. **Mengapa $R^2$ ({champ_res['r2']:+.4f}) Bernilai Negatif Mendekati Nol?**:

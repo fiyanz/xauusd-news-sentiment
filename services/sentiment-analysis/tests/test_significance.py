@@ -179,10 +179,23 @@ def test_evaluate_models_does_not_hardcode_sentiment_adds_value():
 
 
 def test_legacy_artifact_is_labelled(tmp_path):
-    """When the artifact is not provenance-verified the report must say so."""
+    """When the artifact is not provenance-verified the report must say so.
+
+    ``stale`` means real data older than 24h (``is_simulated=False``), while
+    ``legacy_synthetic`` means the artifact came from simulated data.  Both
+    must be labelled, but they are not the same claim.
+    """
     sig = _load()
-    if sig.get("artifact_status") == "verified":
+    status = sig.get("artifact_status")
+    if status == "verified":
         pytest.skip("artifact is verified; legacy labelling not applicable")
-    assert sig.get("is_simulated") is True
+
+    assert status in ("legacy_synthetic", "stale", "unverified", "inconsistent")
     assert "disclaimer" in sig
-    assert "legacy" in sig["artifact_status"] or "stale" in sig["artifact_status"]
+    if status == "legacy_synthetic":
+        assert sig.get("is_simulated") is True
+    elif status == "stale":
+        assert sig.get("is_simulated") is False
+    else:
+        # unverified / inconsistent: simulated-ness is unknown, never claimed True
+        assert sig.get("is_simulated") is not True

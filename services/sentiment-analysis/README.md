@@ -73,7 +73,11 @@ src/pipeline/sync.py
   surprise rilis terakhir yang sudah terbit + `surprise_age_hours`
   (point-in-time safe, `merge_asof backward` tanpa tolerance).
 - Hasil: 26 fitur dari 85 mentah; `block_explained_variance` tersimpan di bundle.
-- Baseline pembanding memakai fitur event + komponen makro saja.
+- **Baseline pembanding** didefinisikan sekali di bundle
+  (`models/champion_fair_model.joblib` → `baseline_model` + `baseline_feature_cols`,
+  21 fitur: event/makro + skor sentimen mentah, tanpa blok topik/TF-IDF/interaksi).
+  Semua laporan membaca baseline yang sama lewat `baseline_descriptor()` di
+  `src/evaluate/significance.py` — bukan "model terlatih yang bukan champion".
 
 ```bash
 uv sync
@@ -128,8 +132,10 @@ uv run python -m src.evaluate.significance
 | `data/processed/provenance.json` | manifest provenance |
 | `models/champion_fair_model.joblib` | bundle model (champion by CV) |
 | `reports/significance.json` | kontrak signifikansi + uji delta vs baseline (paired bootstrap) |
+| `reports/fair_comparison_results.json` | fair baseline vs full model (dibangun oleh `evaluate_fair`, dipakai ulang oleh `evaluate_models`) |
+| `reports/reformed_evaluation.md` | laporan markdown fair baseline vs full model |
 | `reports/full_metrics_evaluation.json` | metrik semua model |
-| `reports/reformed_evaluation.md` | laporan markdown |
+| `reports/full_metrics_evaluation.md` | laporan markdown metrik semua model |
 
 ## 6. Testing
 

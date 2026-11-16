@@ -27,8 +27,19 @@ from scipy.stats import binomtest, norm, spearmanr
 from src.features.reduce import apply_bundle_features
 
 SIGNIFICANCE_BASIS = "rank_ic_pvalue < 0.05 or hit_ratio_pvalue < 0.05"
+PAIRED_BASIS = "full model rank IC > baseline rank IC, paired bootstrap p < 0.05"
 DEFAULT_PROVENANCE_PATH = "data/processed/provenance.json"
 DEFAULT_OUTPUT_PATH = "reports/significance.json"
+DEFAULT_MODEL_BUNDLE_PATH = "models/champion_fair_model.joblib"
+# The fair baseline is the bundle's macro/event-only model.  It is *not* "any
+# trained model that is not the champion": scoring a full-feature model (e.g.
+# ``trained_models['LightGBM']`` on 28 champion features) and labelling it
+# "baseline" is what produced the -0.0021 vs +0.0021 contradiction between
+# ``significance.json`` and ``fair_comparison_results.json``.
+BASELINE_BASIS = (
+    "bundle baseline: models/champion_fair_model.joblib -> "
+    "baseline_model + baseline_feature_cols"
+)
 
 
 # --------------------------------------------------------------------------- #
@@ -142,6 +153,69 @@ def paired_ic_test(y_true, pred_full, pred_base, n_boot: int = 1000, seed: int =
         "delta_mean": round(float(diffs.mean()), 5),
         "p_value": round(float(np.mean(diffs <= 0.0)), 5),
         "n_boot": int(len(diffs)),
+    }
+
+
+# --------------------------------------------------------------------------- #
+# Fair baseline: single source of truth shared by every report
+# --------------------------------------------------------------------------- #
+def baseline_descriptor(bundle: dict, model_bundle_path: str = DEFAULT_MODEL_BUNDLE_PATH) -> dict:
+    """Canonical identity of the fair baseline.
+
+    The baseline is the bundle's macro/event-only model: ``baseline_model``
+    applied to ``baseline_feature_cols``.  Reports must embed this descriptor
+    so a reader can see *which* model and *which* columns produced the baseline
+    IC, instead of inferring it from a bare number.
+    """
+    model = bundle.get("baseline_model")
+    cols = list(bundle.get("baseline_feature_cols") or [])
+    return {
+        "baseline_name": bundle.get("baseline_name"),
+        "baseline_model_type": type(model).__name__ if model is not None else None,
+        "baseline_feature_count": len(cols),
+        "baseline_feature_cols": cols,
+        "baseline_model_source": model_bundle_path,
+        "baseline_definition": BASELINE_BASIS,
+    }
+
+
+def predict_baseline(bundle: dict, df: pd.DataFrame) -> "np.ndarray | None":
+    """Predict with the bundle's fair baseline; ``None`` when unavailable."""
+    model = bundle.get("baseline_model")
+    cols = list(bundle.get("baseline_feature_cols") or [])
+    if model is None or not cols:
+        return None
+    try:
+        X = apply_bundle_features(bundle, df)[cols].to_numpy(dtype=float)
+        return np.asarray(model.predict(X), dtype=float)
+    except Exception:  # noqa: BLE001 - caller records the gap as a note
+        return None
+
+
+def compare_to_baseline(
+    y_true: np.ndarray,
+    pred_full: np.ndarray,
+    pred_base: np.ndarray,
+    seed: int = 42,
+) -> dict:
+    """Canonical full-vs-baseline comparison used by every report.
+
+    ``significance.json`` and ``fair_comparison_results.json`` both read the
+    delta and ``sentiment_adds_value`` from here, so the two reports cannot
+    drift apart again.  The delta is rounded to 4 decimals, matching the
+    precision of the rank ICs it is built from.
+    """
+    base_ic, base_p = spearman_rank_ic(y_true, pred_base)
+    full_ic, _ = spearman_rank_ic(y_true, pred_full)
+    paired = paired_ic_test(y_true, pred_full, pred_base, seed=seed)
+    delta = round(float(full_ic - base_ic), 4)
+    return {
+        "baseline_rank_ic": round(float(base_ic), 4),
+        "baseline_rank_ic_pvalue": round(float(base_p), 5),
+        "delta_rank_ic": delta,
+        "paired_ic_test": paired,
+        "sentiment_adds_value": bool(delta > 0 and paired["p_value"] < 0.05),
+        "sentiment_adds_value_basis": PAIRED_BASIS,
     }
 
 
@@ -447,29 +521,18 @@ def build_significance_report(
     # Honest "sentiment adds value": the full model must beat the macro-only
     # baseline on the same test rows (paired bootstrap on the IC difference).
     # A significant full model on its own is not evidence that sentiment helps.
-    baseline_model = bundle.get("baseline_model")
-    baseline_cols = bundle.get("baseline_feature_cols") or []
-    baseline_pred = None
-    if baseline_model is not None and len(baseline_cols) > 0:
-        try:
-            X_base = apply_bundle_features(bundle, test_df)[baseline_cols].to_numpy(dtype=float)
-            baseline_pred = baseline_model.predict(X_base)
-        except Exception:  # noqa: BLE001 - keep the p-value fallback
-            baseline_pred = None
-
+    # The baseline identity is embedded in the report so the definition is
+    # auditable and identical to ``fair_comparison_results.json``.
+    report["baseline"] = baseline_descriptor(bundle, model_bundle_path)
+    baseline_pred = predict_baseline(bundle, test_df)
     if baseline_pred is not None:
-        base_ic, base_p = spearman_rank_ic(y_test, baseline_pred)
-        paired = paired_ic_test(y_test, preds, baseline_pred, seed=seed)
-        delta_ic = round(float(report["rank_ic"] - base_ic), 5)
-        report["baseline_rank_ic"] = round(float(base_ic), 4)
-        report["baseline_rank_ic_pvalue"] = round(float(base_p), 5)
-        report["delta_rank_ic"] = delta_ic
-        report["paired_ic_test"] = paired
-        report["sentiment_adds_value"] = bool(delta_ic > 0 and paired["p_value"] < 0.05)
-        report["sentiment_adds_value_basis"] = (
-            "full model rank IC > baseline rank IC, paired bootstrap p < 0.05"
-        )
+        report.update(compare_to_baseline(y_test, preds, baseline_pred, seed=seed))
         report["sentiment_adds_value_note"] = None
+    else:
+        report["sentiment_adds_value_note"] = (
+            "baseline bundle tidak tersedia; sentiment_adds_value hanya derived dari "
+            "p-value model penuh (bukan perbandingan vs baseline)"
+        )
 
     artifact = check_artifact(features_parquet, provenance_path)
     report["artifact_status"] = artifact["artifact_status"]
@@ -482,10 +545,32 @@ def build_significance_report(
         name: _model_test_metrics(test_df, bundle, name) for name in trained_models
     }
     if artifact["artifact_status"] != "verified":
-        report["disclaimer"] = (
-            "Metrik pada file ini dihitung pada artifact legacy (data sintetis). "
-            "Retrain ditunda hingga provenance F1 terverifikasi. "
-            "Angka ini DIAGNOSTIK, bukan hasil akhir."
+        # Disclaimer harus sesuai jenis artifact: "stale" = data nyata yang
+        # berumur >24 jam, bukan data sintetis.  Jangan pakai pesan legacy
+        # untuk kondisi yang berbeda.
+        _DISCLAIMERS = {
+            "legacy_synthetic": (
+                "Metrik pada file ini dihitung pada artifact legacy (data sintetis). "
+                "Retrain ditunda hingga provenance F1 terverifikasi. "
+                "Angka ini DIAGNOSTIK, bukan hasil akhir."
+            ),
+            "stale": (
+                "Metrik pada file ini dihitung pada artifact data nyata yang berumur "
+                ">24 jam (provenance belum diperbarui). Angka ini DIAGNOSTIK, bukan "
+                "hasil akhir; jalankan ulang pipeline untuk memperbarui provenance."
+            ),
+            "unverified": (
+                "Provenance artifact tidak dapat diverifikasi. "
+                "Angka ini DIAGNOSTIK, bukan hasil akhir."
+            ),
+            "inconsistent": (
+                "Artifact sedang diregenerasi (parquet lebih baru dari provenance). "
+                "Angka ini DIAGNOSTIK, bukan hasil akhir."
+            ),
+        }
+        report["disclaimer"] = _DISCLAIMERS.get(
+            artifact["artifact_status"],
+            "Artifact tidak terverifikasi provenance. Angka ini DIAGNOSTIK, bukan hasil akhir.",
         )
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)

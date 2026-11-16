@@ -3,58 +3,90 @@
   "target": "ret_4h",
   "champion_name": "Ridge_Linear",
   "selection_method": "cv_mean_rank_ic",
+  "baseline": {
+    "baseline_name": "LightGBM",
+    "baseline_model_type": "LGBMRegressor",
+    "baseline_feature_count": 21,
+    "baseline_feature_cols": [
+      "z_score",
+      "surprise_val",
+      "surprise_age_hours",
+      "has_event",
+      "session_Asia",
+      "session_London",
+      "session_NewYork",
+      "sentiment_score",
+      "sentiment_min",
+      "sentiment_max",
+      "overall_sentiment_score",
+      "article_count",
+      "sentiment_x_surprise_pos",
+      "sentiment_x_surprise_neg",
+      "hour_sin",
+      "hour_cos",
+      "dow_sin",
+      "dow_cos",
+      "macro_pc1",
+      "macro_pc2",
+      "macro_pc3"
+    ],
+    "baseline_model_source": "models/champion_fair_model.joblib",
+    "baseline_definition": "bundle baseline: models/champion_fair_model.joblib -> baseline_model + baseline_feature_cols"
+  },
   "models": {
     "baseline": {
-      "mae": 0.003261,
-      "mae_pct": 0.3261,
-      "mse": 2.511e-05,
-      "rmse": 0.005011,
-      "rmse_pct": 0.5011,
-      "mape_pct": 98.64,
-      "r2": 0.0003,
-      "adj_r2": -0.0051,
-      "hit_ratio_all": 52.09,
-      "hit_ratio_sig": 52.37,
-      "hit_ratio_sig_hits": 1941,
-      "hit_ratio_sig_n": 3706,
-      "spearman_rank_ic": 0.0323,
-      "spearman_pval": 0.02003,
-      "train_mae_pct": 0.246,
-      "train_hit_ratio": 54.36,
-      "overfit_gap_hit": 1.99
+      "name": "LightGBM",
+      "feature_count": 21,
+      "spearman_rank_ic": 0.0365,
+      "ic_pvalue": 0.00856,
+      "quintile_spread": 0.000464,
+      "directional_hit_ratio": 0.5251,
+      "directional_hit_ratio_hits": 1946,
+      "directional_hit_ratio_n": 3706,
+      "hit_ratio_ci95": [
+        0.509,
+        0.5411
+      ],
+      "hit_ratio_pvalue": 0.00237,
+      "pesaran_timmermann_stat": 2.2831,
+      "pt_pvalue": 0.01121,
+      "negative_control_ic": 0.0108
     },
     "full": {
-      "mae": 0.003263,
-      "mae_pct": 0.3263,
-      "mse": 2.512e-05,
-      "rmse": 0.005012,
-      "rmse_pct": 0.5012,
-      "mape_pct": 103.05,
-      "r2": -0.0,
-      "adj_r2": -0.0055,
-      "hit_ratio_all": 51.24,
-      "hit_ratio_sig": 51.73,
-      "hit_ratio_sig_hits": 1917,
-      "hit_ratio_sig_n": 3706,
+      "name": "Ridge_Linear",
+      "feature_count": 28,
       "spearman_rank_ic": 0.0344,
-      "spearman_pval": 0.01324,
-      "train_mae_pct": 0.2466,
-      "train_hit_ratio": 53.05,
-      "overfit_gap_hit": 1.32
+      "ic_pvalue": 0.01324,
+      "quintile_spread": 0.000475,
+      "directional_hit_ratio": 0.5173,
+      "directional_hit_ratio_hits": 1917,
+      "directional_hit_ratio_n": 3706,
+      "hit_ratio_ci95": [
+        0.5012,
+        0.5333
+      ],
+      "hit_ratio_pvalue": 0.03695,
+      "pesaran_timmermann_stat": 2.2417,
+      "pt_pvalue": 0.01249,
+      "negative_control_ic": 0.0003
     }
   },
   "delta_alpha": {
-    "rank_ic_improvement": 0.0021,
-    "hit_ratio_improvement": -0.64,
+    "rank_ic_improvement": -0.0021,
+    "hit_ratio_improvement": -0.0078,
     "sentiment_adds_value": false,
-    "sentiment_adds_value_basis": "rank_ic_pvalue < 0.05 or hit_ratio_pvalue < 0.05",
+    "sentiment_adds_value_basis": "full model rank IC > baseline rank IC, paired bootstrap p < 0.05",
+    "sentiment_adds_value_note": null,
+    "paired_ic_test": {
+      "delta_mean": -0.00218,
+      "p_value": 0.593,
+      "n_boot": 1000
+    },
     "rank_ic_pvalue": 0.01324,
     "hit_ratio_pvalue": 0.03695,
     "hit_ratio_ci95": [
       0.5012,
       0.5333
     ]
-  },
-  "artifact_status": "verified",
-  "disclaimer": null
+  }
 }
