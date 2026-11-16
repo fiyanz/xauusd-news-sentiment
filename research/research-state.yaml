@@ -1,0 +1,99 @@
+# Research State — XAUUSD News Sentiment
+
+project:
+  title: "XAUUSD News Sentiment — Apakah Berita Menambah Nilai Prediksi?"
+  question: "Apakah fitur sentimen berita (VADER/LM/embedding) menambah nilai prediksi return XAUUSD 4 jam di atas baseline makro, dan representasi teks mana yang paling berpengaruh?"
+  status: active
+  started: "2026-11-15"
+  domain: "financial NLP + time-series forecasting"
+
+literature:
+  key_papers:
+    - id: "finbert_lstm_2023"
+      title: "Financial Sentiment Analysis Using FinBERT with Application in Predicting Stock Movement"
+      authors: "arXiv 2306.02136"
+      year: 2023
+      relevance: "FinBERT + LSTM mengungguli BERT/LSTM/ARIMA; menyoroti judul-only sebagai keterbatasan"
+    - id: "gold_eemd_cnn_qrlstm_2026"
+      title: "Forecasting the Price of Gold with Integrated Media Sentiment (CNN-QRLSTM)"
+      authors: "Entropy 28(3):271"
+      year: 2026
+      relevance: "Sentimen berita emas + dekomposisi sinyal; MAE turun 26.5 -> 13.2; relevan langsung ke XAUUSD"
+    - id: "news_fx_volatility"
+      title: "The Impact of News Sentiment on Exchange Rate Volatility"
+      authors: "ACM 3729706"
+      year: 2025
+      relevance: "Sentimen berita memengaruhi volatilitas FX, bukan hanya arah"
+    - id: "novel_news_eurusd"
+      title: "High-Frequency Effects of Novel News on the EURUSD Exchange Rate"
+      authors: "Tandfonline"
+      year: 2022
+      relevance: "Efek berita ada di frekuensi tinggi; penting untuk timeframe 1h/4h"
+  open_problems:
+    - "Hampir semua studi memakai judul saja; isi berita jarang"
+    - "Evaluasi jarang memakai paired bootstrap vs baseline makro (rawan klaim alpha palsu)"
+    - "Gap data historis berita (2021-2025) jarang diungkapkan"
+  evidence_gaps:
+    - "Belum ada uji embedding kontekstual (sentence-transformer) vs TF-IDF pada return XAUUSD"
+
+hypotheses:
+  - id: H1
+    statement: "Menambah fitur embedding kalimat (sentence-transformers) ke model akan meningkatkan rank IC test di atas baseline makro"
+    status: supported
+    motivation: "Embedding kontekstual menangkap makna yang tidak tertangkap TF-IDF; literatur FinBERT menunjukkan representasi teks lebih kaya membantu"
+    parent: null
+    priority: high
+    result: "bucket berita delta +0.0522 (p=0.013); chronological +0.0084 (p=0.036); out_of_time +0.0046 (p=0.124)"
+  - id: H2
+    statement: "Memakai isi berita (body) selain judul meningkatkan delta rank IC"
+    status: inconclusive
+    motivation: "FinBERT-LSTM menyatakan judul-only sebagai keterbatasan utama"
+    parent: null
+    priority: high
+    result: "body 0.1091 vs title 0.0952 (delta +0.0141, p=0.166); hanya 5.6% artikel berisi -> daya kurang"
+  - id: H3
+    statement: "Interaksi sentimen x surprise makro hanya berguna pada bucket dengan |z| > 0.5"
+    status: supported
+    motivation: "Sudah diuji: delta -0.0047 -> -0.0018 (p 0.683 -> 0.557), news_era +0.0055 (p 0.163)"
+    parent: null
+    priority: low
+  - id: H4
+    statement: "Gap 2021-2025 pada korpus berita membuat evaluasi tidak bisa menguji periode tersebut"
+    status: supported
+    motivation: "Korpus hanya punya 2022 (GDELT) dan 2026 (API); periode lain kosong"
+    parent: null
+    priority: medium
+
+experiments:
+  proxy_metric: "delta_rank_ic (full - baseline) pada split news_era + paired bootstrap p-value"
+  baseline_value: 0.0176
+  best_value: 0.1091
+  total_runs: 2
+  trajectory:
+    - run_id: "run_001"
+      hypothesis: "H1"
+      metric_value: 0.1091
+      delta: "+0.0522"
+      wall_time_min: 12
+      change_summary: "Embedding kalimat (MiniLM, PCA 16) pada bucket berita"
+      timestamp: "2026-11-15"
+    - run_id: "run_002"
+      hypothesis: "H2"
+      metric_value: 0.1091
+      delta: "+0.0522"
+      wall_time_min: 8
+      change_summary: "Embedding judul+isi vs judul saja (body vs title +0.0141, p=0.166)"
+      timestamp: "2026-11-15"
+
+outer_loop:
+  cycle: 0
+  last_direction: null
+  last_reflection: ""
+
+workspace:
+  findings: "research/findings.md"
+  log: "research/research-log.md"
+  literature_dir: "research/literature/"
+  experiments_dir: "research/experiments/"
+  to_human_dir: "research/to_human/"
+  paper_dir: "research/paper/"

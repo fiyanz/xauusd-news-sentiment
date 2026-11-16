@@ -54,3 +54,8 @@ services/sentiment-analysis/data/
 # Agent lokal: pakai .agents/skills saja (Claude Code membacanya dari sana)
 .claude/
 .hermes/
+
+# Artefak riset besar (parquet hasil eksperimen, cache embedding)
+services/sentiment-analysis/research/
+services/sentiment-analysis/models/embeddings/
+research/experiments/**/*.parquet
