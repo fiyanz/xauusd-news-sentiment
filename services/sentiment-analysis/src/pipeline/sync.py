@@ -218,6 +218,10 @@ def run_full_sync(write_prediction: bool = True) -> dict:
         print(f"[PipelineSync] Feature matrix build failed: {exc}")
 
     # 7. 4H Bucketing & Interaction Features
+    #    Di dalam builder (step 7b) kalimat bucket di-encode dengan sentence
+    #    transformer dan direduksi PCA yang difit pada train saja; bucket tanpa
+    #    berita bernilai netral 0. Embedding gagal -> status "unavailable",
+    #    pipeline tetap jalan tanpa fitur embedding.
     print("\n--- Step 7/8: 4H Bucketing & Interaction Features ---")
     bucket_mode = data_cfg.get("bucket_mode", "price_history")
     if bucket_mode == "price_history":

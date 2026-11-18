@@ -3,7 +3,7 @@ import { z } from "zod";
 export const ImpactLevelSchema = z.enum(["HIGH", "MEDIUM", "LOW"]);
 export type ImpactLevel = z.infer<typeof ImpactLevelSchema>;
 
-export const TimeframeSchema = z.enum(["1m", "5m", "15m", "1h", "4h", "1D"]);
+export const TimeframeSchema = z.enum(["1m", "5m", "15m", "30m", "1h", "4h", "1D"]);
 export type Timeframe = z.infer<typeof TimeframeSchema>;
 
 export const JobStatusSchema = z.enum(["SUCCESS", "PARTIAL", "FAILED"]);

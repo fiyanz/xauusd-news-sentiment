@@ -5,6 +5,7 @@ import type { OHLCV, Timeframe, COTReport } from "@repo/types";
 import { ExpertDataService } from "./expert-data.js";
 
 export * from "./expert-data.js";
+export * from "./deriv.js";
 
 export interface EconomicCalendarRaw {
   eventCode: string;
@@ -211,8 +212,12 @@ export class FinancialClient {
         ? 300
         : timeframe === "15m"
         ? 900
+        : timeframe === "30m"
+        ? 1800
         : timeframe === "1h"
         ? 3600
+        : timeframe === "4h"
+        ? 14400
         : 86400;
 
     const basePrice = 4122.75;

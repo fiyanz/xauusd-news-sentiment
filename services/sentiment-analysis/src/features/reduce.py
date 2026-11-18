@@ -9,6 +9,9 @@ menganggur kini ikut dipakai lewat komponen teks.
 
 Aturan anti look-ahead: PCA (dan scaler) HANYA difit pada data training
 (lipatan CV atau Train+Val final); data validasi/test hanya ditransformasi.
+Blok ``embedding`` pengecualian yang disengaja: komponennya sudah direduksi di
+pipeline dengan PCA yang difit pada train saja, jadi di sini blok tersebut
+dibekukan (tidak ada PCA kedua).
 """
 
 from __future__ import annotations
@@ -19,11 +22,16 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 # (nama blok, selector kolom, maksimum komponen PCA)
+# ``max_components=None`` menandakan blok *precomputed*: komponennya sudah
+# diproduksi oleh reducer yang difit pada data training saja di pipeline
+# (``src.features.embeddings.build_bucket_embeddings``), sehingga FeatureReducer
+# tidak memfit PCA kedua — basisnya dibekukan dan anti look-ahead tetap berlaku.
 BLOCK_SPECS = [
     ("macro", lambda c: c.startswith("macro_"), 3),
     ("topic", lambda c: c.startswith("topic_") and not c.endswith("_x_sentiment"), 2),
     ("interaction", lambda c: c.startswith("sentiment_x_"), 2),
     ("tfidf", lambda c: c.startswith("tfidf_"), 3),
+    ("embedding", lambda c: c.startswith("emb_pc"), None),
 ]
 
 # Fitur non-blok yang dipertahankan apa adanya (tidak berkorelasi tinggi).
@@ -45,6 +53,20 @@ BASE_FEATURES = [
 ]
 
 CYCLICAL = ["hour_sin", "hour_cos", "dow_sin", "dow_cos"]
+
+
+def _embedding_block_meta() -> dict:
+    """Metadata reducer embedding (``models/embeddings/bucket_reducer_meta.json``).
+
+    Bersifat pelengkap: bila file belum ada, blok embedding tetap terdaftar
+    dengan komponen apa adanya.
+    """
+    try:
+        from src.features.embeddings import load_reducer_meta
+
+        return load_reducer_meta()
+    except Exception:  # noqa: BLE001 - metadata opsional
+        return {}
 
 
 def add_cyclical_time(df: pd.DataFrame) -> pd.DataFrame:
@@ -73,9 +95,26 @@ class FeatureReducer:
 
     def fit(self, df: pd.DataFrame) -> "FeatureReducer":
         df = add_cyclical_time(df)
+        emb_meta = _embedding_block_meta()
         for name, selector, max_components in BLOCK_SPECS:
             cols = [c for c in df.columns if selector(c)]
             if not cols:
+                continue
+            if max_components is None:
+                # Blok precomputed (embedding): komponen sudah direduksi di
+                # pipeline dengan PCA yang difit pada train saja. Di sini blok
+                # hanya dicatat dan dipakai apa adanya (dengan imputasi netral
+                # untuk baris yang kehilangan kolomnya).
+                self.blocks[name] = {
+                    "cols": cols,
+                    "scaler": None,
+                    "pca": None,
+                    "comps": list(cols),
+                    "precomputed": True,
+                    "explained_variance": emb_meta.get("explained_variance"),
+                    "source": emb_meta.get("reducer_path"),
+                    "n_components": emb_meta.get("n_components"),
+                }
                 continue
             X = df[cols].fillna(self.impute).to_numpy(dtype=float)
             # Blok konstan di training (mis. TF-IDF/sentimen yang belum ada
@@ -110,6 +149,17 @@ class FeatureReducer:
         for c in self.base_cols:
             out[c] = df[c].fillna(self.impute).to_numpy(dtype=float)
         for b in self.blocks.values():
+            if b.get("precomputed"):
+                # Baris/artifact tanpa kolom embedding (legacy atau bucket tanpa
+                # berita) diberi nilai netral, bukan NaN liar.
+                Z = np.zeros((len(df), len(b["comps"])), dtype=float)
+                avail = [c for c in b["cols"] if c in df.columns]
+                if avail:
+                    idx = [b["cols"].index(c) for c in avail]
+                    Z[:, idx] = df[avail].fillna(self.impute).to_numpy(dtype=float)
+                for i, c in enumerate(b["comps"]):
+                    out[c] = Z[:, i]
+                continue
             X = df[b["cols"]].fillna(self.impute).to_numpy(dtype=float)
             Xs = b["scaler"].transform(X)
             Z = b["pca"].transform(Xs)

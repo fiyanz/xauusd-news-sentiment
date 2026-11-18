@@ -19,21 +19,34 @@ from src.process.price_buckets import (
 OUTPUT = "data/processed/bucketed_features_split_mode_test.parquet"
 
 
-def _build(split_mode: str) -> pd.DataFrame:
+def _build(split_mode: str, cache_dir: str) -> pd.DataFrame:
+    """Build with an isolated embedding cache.
+
+    The default ``models/embeddings`` holds the *production* reducer; a test
+    build (especially ``news_era``, whose train split differs) would otherwise
+    overwrite ``bucket_reducer.joblib`` / its metadata and desynchronize the
+    bundle's embedding provenance.
+    """
     return build_price_history_buckets(
         output_parquet=OUTPUT,
         split_mode=split_mode,
+        embedding_cache_dir=cache_dir,
     )
 
 
 @pytest.fixture(scope="module")
-def chronological() -> pd.DataFrame:
-    return _build("chronological")
+def emb_cache_dir(tmp_path_factory):
+    return str(tmp_path_factory.mktemp("embedding_cache"))
 
 
 @pytest.fixture(scope="module")
-def news_era() -> pd.DataFrame:
-    return _build("news_era")
+def chronological(emb_cache_dir) -> pd.DataFrame:
+    return _build("chronological", emb_cache_dir)
+
+
+@pytest.fixture(scope="module")
+def news_era(emb_cache_dir) -> pd.DataFrame:
+    return _build("news_era", emb_cache_dir)
 
 
 def test_chronological_matches_legacy_behaviour(chronological):
@@ -130,9 +143,13 @@ def test_report_split_coverage_handles_missing_columns():
     assert cov["test"]["n_buckets"] == 1
 
 
-def test_invalid_split_mode_raises():
+def test_invalid_split_mode_raises(tmp_path):
     with pytest.raises(ValueError):
-        build_price_history_buckets(output_parquet=OUTPUT, split_mode="bogus")
+        build_price_history_buckets(
+            output_parquet=OUTPUT,
+            split_mode="bogus",
+            embedding_cache_dir=str(tmp_path),
+        )
 
 
 def test_valid_split_modes_constant():

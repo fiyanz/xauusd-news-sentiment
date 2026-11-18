@@ -165,6 +165,9 @@ def build_price_history_buckets(
     split_mode: str = "chronological",
     topic_weighting: bool = False,
     gold_weighting: bool = False,
+    embeddings: bool = True,
+    embedding_n_components: int = 16,
+    embedding_cache_dir: str = "models/embeddings",
 ) -> pd.DataFrame:
     """Create 4H buckets covering the whole price history, with sparse news.
 
@@ -173,6 +176,10 @@ def build_price_history_buckets(
       history (old behaviour).
     - ``"news_era"``: split by the era covered by the news corpus, so the test
       period actually contains articles. Still strictly out-of-time.
+
+    ``embedding_cache_dir`` menyimpan cache embedding + reducer train-only.
+    Build di luar produksi (tes, eksperimen) HARUS memberi direktori sendiri
+    supaya tidak menimpa reducer produksi di ``models/embeddings/``.
     """
     if split_mode not in VALID_SPLIT_MODES:
         raise ValueError(f"split_mode must be one of {VALID_SPLIT_MODES}, got {split_mode!r}")
@@ -455,6 +462,34 @@ def build_price_history_buckets(
         tfidf_cols = [f"tfidf_{i}" for i in range(tfidf_mat.shape[1])]
         df_tfidf = pd.DataFrame(tfidf_mat, columns=tfidf_cols, index=buckets.index)
         buckets = pd.concat([buckets, df_tfidf], axis=1)
+
+    # 7b. Embedding kalimat (MiniLM -> PCA fit on train only) -----------------
+    #     Bucket tanpa berita dapat nilai netral (0), bukan NaN liar. Bila
+    #     encoder gagal, fitur ini dilewati dan status tercatat sebagai
+    #     "unavailable" — pipeline tidak crash dan tidak mengarang pengganti.
+    emb_meta: dict = {"status": "unavailable", "reason": "embeddings=False"}
+    if embeddings:
+        from src.features.embeddings import build_bucket_embeddings
+
+        df_emb, emb_meta = build_bucket_embeddings(
+            buckets,
+            text_col="text_full",
+            split_col="split",
+            n_components=embedding_n_components,
+            cache_dir=embedding_cache_dir,
+        )
+        if emb_meta.get("status") == "ok":
+            buckets = pd.concat([buckets, df_emb], axis=1)
+            print(
+                f"[PriceBuckets] Embedding: {emb_meta['n_components']} komponen "
+                f"(explained_variance={emb_meta['explained_variance']}, "
+                f"fit pada {emb_meta['n_train_fit']} bucket train berteks, "
+                f"{emb_meta['n_neutral']} bucket netral)."
+            )
+        else:
+            print(f"[PriceBuckets] Embedding dilewati: {emb_meta.get('reason')}")
+    buckets["embedding_status"] = str(emb_meta.get("status"))
+    buckets["embedding_reason"] = str(emb_meta.get("reason") or "")
 
     # 8. Direction / provenance ---------------------------------------------
     buckets["sign_4h"] = np.sign(buckets["ret_4h"]).astype(int)

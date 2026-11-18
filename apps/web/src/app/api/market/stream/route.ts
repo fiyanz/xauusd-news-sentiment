@@ -1,99 +1,77 @@
-import { getLastCachedPrice, loadH1Data } from "@/lib/candle-cache";
-
 export const dynamic = "force-dynamic";
 
 /**
- * Tick real-time merupakan SIMULASI mikro di sekitar harga nyata terakhir
- * (snapshot close candle H1 terakhir). Setiap tick ditandai `isSimulated: true`
- * dan tidak boleh dianggap sebagai harga pasar.
+ * Proxy SSE: browser -> route ini -> apps/api (/api/v1/market/xauusd/stream)
+ * -> Deriv WebSocket. Tick asli Deriv (frxXAUUSD), bukan simulasi.
+ * Kalau API mati, route mengirim satu event `status:"unavailable"` lalu tutup.
  */
+const API_BASE =
+  process.env.API_INTERNAL_URL ?? `http://localhost:${process.env.PORT_API ?? "4000"}`;
+
 export async function GET(request: Request) {
-  let timer: NodeJS.Timeout | null = null;
-  let isClosed = false;
+  const headers = {
+    "Content-Type": "text/event-stream; charset=utf-8",
+    "Cache-Control": "no-cache, no-transform",
+    Connection: "keep-alive",
+    "X-Accel-Buffering": "no",
+  };
 
-  const stream = new ReadableStream({
-    start(controller) {
+  let upstream: Response;
+  try {
+    upstream = await fetch(`${API_BASE}/api/v1/market/xauusd/stream`, {
+      headers: { Accept: "text/event-stream" },
+      signal: request.signal,
+      cache: "no-store",
+    });
+  } catch {
+    const body = JSON.stringify({
+      status: "unavailable",
+      reason: `API di ${API_BASE} tidak terjangkau.`,
+    });
+    return new Response(`data: ${body}\n\n`, { status: 200, headers });
+  }
+
+  if (!upstream.ok || !upstream.body) {
+    const body = JSON.stringify({
+      status: "unavailable",
+      reason: `API merespons HTTP ${upstream.status}.`,
+    });
+    return new Response(`data: ${body}\n\n`, { status: 200, headers });
+  }
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const reader = upstream.body!.getReader();
+      const decoder = new TextDecoder();
       const encoder = new TextEncoder();
-      const h1 = loadH1Data();
-      const lastRealPrice = h1.length > 0 ? h1[h1.length - 1]!.close : null;
+      let buffer = "";
 
-      if (lastRealPrice === null || !Number.isFinite(lastRealPrice)) {
-        controller.enqueue(
-          encoder.encode(
-            `data: ${JSON.stringify({
-              status: "unavailable",
-              reason: "Belum ada data harga nyata.",
-            })}\n\n`
-          )
-        );
-        try {
-          controller.close();
-        } catch {}
-        return;
-      }
-
-      let curPrice = getLastCachedPrice() ?? lastRealPrice;
-
-      // Emit initial tick immediately
-      const initialPayload = JSON.stringify({
-        timestampUtc: Math.floor(Date.now() / 1000),
-        price: curPrice,
-        bid: Number((curPrice - 0.12).toFixed(2)),
-        ask: Number((curPrice + 0.12).toFixed(2)),
-        volume: Math.floor(Math.random() * 20) + 5,
-        isSimulated: true,
-      });
-
-      controller.enqueue(encoder.encode(`data: ${initialPayload}\n\n`));
-
-      timer = setInterval(() => {
-        if (isClosed) return;
-        try {
-          // Micro-tick random walk with mean reversion to base
-          const delta = (Math.random() - 0.49) * 0.4;
-          curPrice = Number((curPrice + delta).toFixed(2));
-          const nowSec = Math.floor(Date.now() / 1000);
-
-          const payload = JSON.stringify({
-            timestampUtc: nowSec,
-            price: curPrice,
-            bid: Number((curPrice - 0.12).toFixed(2)),
-            ask: Number((curPrice + 0.12).toFixed(2)),
-            volume: Math.floor(Math.random() * 25) + 5,
-            isSimulated: true,
-          });
-
-          controller.enqueue(encoder.encode(`data: ${payload}\n\n`));
-        } catch {
-          isClosed = true;
-          if (timer) clearInterval(timer);
-          try {
-            controller.close();
-          } catch {}
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split("\n\n");
+          buffer = parts.pop() ?? "";
+          for (const part of parts) {
+            controller.enqueue(encoder.encode(`${part}\n\n`));
+          }
         }
-      }, 1000);
-
-      // Abort signal handling
-      request.signal.addEventListener("abort", () => {
-        isClosed = true;
-        if (timer) clearInterval(timer);
+        if (buffer) controller.enqueue(encoder.encode(buffer));
+      } catch {
+        // Koneksi upstream putus; stream ditutup di finally.
+      } finally {
         try {
           controller.close();
-        } catch {}
-      });
+        } catch {
+          // Controller sudah tertutup.
+        }
+      }
     },
     cancel() {
-      isClosed = true;
-      if (timer) clearInterval(timer);
+      // request.signal membatalkan fetch upstream secara otomatis.
     },
   });
 
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream; charset=utf-8",
-      "Cache-Control": "no-cache, no-transform",
-      "Connection": "keep-alive",
-      "X-Accel-Buffering": "no",
-    },
-  });
+  return new Response(stream, { status: 200, headers });
 }

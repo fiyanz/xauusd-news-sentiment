@@ -389,7 +389,7 @@ export default function MarketTradingTerminal() {
 
           {/* Timeframe Selector Pills */}
           <div className="flex items-center space-x-1">
-            {["5m", "15m", "1h", "4h", "1D"].map((tf) => (
+            {["15m", "30m", "1h", "4h"].map((tf) => (
               <button
                 key={tf}
                 onClick={() => {

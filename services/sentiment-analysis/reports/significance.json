@@ -2,22 +2,22 @@
   "champion_name": "Ridge_Linear",
   "selection_method": "cv_mean_rank_ic",
   "test_samples": 5189,
-  "hit_ratio_sig": 0.5173,
+  "hit_ratio_sig": 0.5183,
   "hit_ratio_ci95": [
-    0.5012,
-    0.5333
+    0.5023,
+    0.5344
   ],
-  "hit_ratio_pvalue": 0.03695,
-  "rank_ic": 0.0344,
-  "rank_ic_pvalue": 0.01324,
-  "pesaran_timmermann_stat": 2.2417,
-  "pesaran_timmermann_pvalue": 0.01249,
-  "negative_control_ic": 0.0003,
+  "hit_ratio_pvalue": 0.02657,
+  "rank_ic": 0.0385,
+  "rank_ic_pvalue": 0.00552,
+  "pesaran_timmermann_stat": 2.2215,
+  "pesaran_timmermann_pvalue": 0.01316,
+  "negative_control_ic": 0.01,
   "sentiment_adds_value": false,
   "sentiment_adds_value_basis": "full model rank IC > baseline rank IC, paired bootstrap p < 0.05",
   "sentiment_adds_value_note": null,
   "hit_ratio_sig_n": 3706,
-  "hit_ratio_sig_hits": 1917,
+  "hit_ratio_sig_hits": 1921,
   "alpha": 0.05,
   "baseline": {
     "baseline_name": "LightGBM",
@@ -49,94 +49,102 @@
     "baseline_model_source": "models/champion_fair_model.joblib",
     "baseline_definition": "bundle baseline: models/champion_fair_model.joblib -> baseline_model + baseline_feature_cols"
   },
-  "baseline_rank_ic": 0.0365,
-  "baseline_rank_ic_pvalue": 0.00856,
-  "delta_rank_ic": -0.0021,
+  "baseline_rank_ic": 0.0405,
+  "baseline_rank_ic_pvalue": 0.00352,
+  "delta_rank_ic": -0.002,
   "paired_ic_test": {
-    "delta_mean": -0.00218,
-    "p_value": 0.593,
+    "delta_mean": -0.00185,
+    "p_value": 0.58,
     "n_boot": 1000
   },
-  "artifact_status": "stale",
+  "artifact_status": "verified",
   "is_simulated": false,
-  "artifact_reason": "Kolom provenance ada tetapi generated_at tidak baru (>24 jam).",
+  "artifact_reason": "provenance.json ditemukan, generated_at baru, dan kolom data_source/generated_at ada.",
   "bundle_champion_name": "Ridge_Linear",
+  "embedding": {
+    "present": true,
+    "feature_count": 16,
+    "precomputed": true,
+    "n_components": 16,
+    "explained_variance": 0.3484,
+    "reducer_source": "models/embeddings/bucket_reducer.joblib",
+    "basis": "PCA + StandardScaler difit pada baris train berteks saja (src.features.embeddings.build_bucket_embeddings); bucket tanpa berita bernilai netral 0"
+  },
   "cv_summary": {
     "Random_Forest": {
-      "mae_pct": 0.243,
-      "rmse_pct": 0.373,
-      "r2": -0.0072,
-      "adj_r2": -0.0155,
-      "hit_ratio_sig": 50.54,
-      "rank_ic": 0.0195
+      "mae_pct": 0.2427,
+      "rmse_pct": 0.3722,
+      "r2": -0.003,
+      "adj_r2": -0.0159,
+      "hit_ratio_sig": 50.78,
+      "rank_ic": 0.0174
     },
     "XGBoost": {
-      "mae_pct": 0.2464,
-      "rmse_pct": 0.3798,
-      "r2": -0.0432,
-      "adj_r2": -0.0517,
-      "hit_ratio_sig": 50.67,
-      "rank_ic": 0.0157
+      "mae_pct": 0.2445,
+      "rmse_pct": 0.3758,
+      "r2": -0.0218,
+      "adj_r2": -0.035,
+      "hit_ratio_sig": 50.58,
+      "rank_ic": 0.0183
     },
     "LightGBM": {
-      "mae_pct": 0.2432,
-      "rmse_pct": 0.3733,
-      "r2": -0.0085,
-      "adj_r2": -0.0167,
-      "hit_ratio_sig": 51.19,
-      "rank_ic": 0.0199
+      "mae_pct": 0.2428,
+      "rmse_pct": 0.3725,
+      "r2": -0.0052,
+      "adj_r2": -0.0182,
+      "hit_ratio_sig": 50.82,
+      "rank_ic": 0.0191
     },
     "Ridge_Linear": {
-      "mae_pct": 0.2495,
-      "rmse_pct": 0.3879,
-      "r2": -0.0974,
-      "adj_r2": -0.1064,
-      "hit_ratio_sig": 51.39,
-      "rank_ic": 0.0266
+      "mae_pct": 0.2502,
+      "rmse_pct": 0.3854,
+      "r2": -0.0789,
+      "adj_r2": -0.0928,
+      "hit_ratio_sig": 51.42,
+      "rank_ic": 0.0281
     }
   },
-  "generated_at": "2026-11-16T08:40:14Z",
+  "generated_at": "2026-11-16T12:04:16Z",
   "models": {
     "Random_Forest": {
-      "rank_ic": 0.032,
-      "rank_ic_pvalue": 0.02114,
-      "hit_ratio_sig": 0.5251,
+      "rank_ic": 0.0396,
+      "rank_ic_pvalue": 0.00428,
+      "hit_ratio_sig": 0.5324,
       "hit_ratio_ci95": [
-        0.509,
-        0.5411
+        0.5163,
+        0.5484
       ],
-      "hit_ratio_pvalue": 0.00237
+      "hit_ratio_pvalue": 9e-05
     },
     "XGBoost": {
-      "rank_ic": 0.0434,
-      "rank_ic_pvalue": 0.00175,
-      "hit_ratio_sig": 0.5262,
+      "rank_ic": 0.0386,
+      "rank_ic_pvalue": 0.00543,
+      "hit_ratio_sig": 0.5356,
       "hit_ratio_ci95": [
-        0.5101,
-        0.5422
+        0.5195,
+        0.5516
       ],
-      "hit_ratio_pvalue": 0.00152
+      "hit_ratio_pvalue": 2e-05
     },
     "LightGBM": {
-      "rank_ic": 0.0323,
-      "rank_ic_pvalue": 0.02003,
-      "hit_ratio_sig": 0.5237,
+      "rank_ic": 0.0316,
+      "rank_ic_pvalue": 0.02294,
+      "hit_ratio_sig": 0.534,
       "hit_ratio_ci95": [
-        0.5076,
-        0.5398
+        0.5179,
+        0.55
       ],
-      "hit_ratio_pvalue": 0.00404
+      "hit_ratio_pvalue": 4e-05
     },
     "Ridge_Linear": {
-      "rank_ic": 0.0344,
-      "rank_ic_pvalue": 0.01324,
-      "hit_ratio_sig": 0.5173,
+      "rank_ic": 0.0385,
+      "rank_ic_pvalue": 0.00552,
+      "hit_ratio_sig": 0.5183,
       "hit_ratio_ci95": [
-        0.5012,
-        0.5333
+        0.5023,
+        0.5344
       ],
-      "hit_ratio_pvalue": 0.03695
+      "hit_ratio_pvalue": 0.02657
     }
-  },
-  "disclaimer": "Metrik pada file ini dihitung pada artifact data nyata yang berumur >24 jam (provenance belum diperbarui). Angka ini DIAGNOSTIK, bukan hasil akhir; jalankan ulang pipeline untuk memperbarui provenance."
+  }
 }

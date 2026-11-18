@@ -228,6 +228,9 @@ def train_models(
         "feature_cols": reducer.feature_cols,
         "reducer": reducer,
         "block_explained_variance": reducer.explained_variance(),
+        # Blok embedding (precomputed): metadata reducer yang difit pada train
+        # saja, dipakai laporan untuk membuktikan anti look-ahead.
+        "embedding_block": reducer.blocks.get("embedding"),
         "raw_feature_count": len(raw_cols),
         "baseline_name": baseline_name,
         "baseline_model": baseline_model,

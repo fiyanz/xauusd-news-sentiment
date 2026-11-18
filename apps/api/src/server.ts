@@ -3,15 +3,16 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import { FinancialClient } from "@repo/financial-clients";
+import { FinancialClient, DerivClient } from "@repo/financial-clients";
 import {
   calculateSurprise,
   calculateReactionWindows,
   aggregateEventStats,
 } from "@repo/core-analytics";
 import type { SurpriseResult } from "@repo/core-analytics";
-import type { EventReaction } from "@repo/types";
-import { COMPLIANCE_DISCLAIMER_FR10 } from "@repo/types";
+import type { EventReaction, Timeframe } from "@repo/types";
+import { COMPLIANCE_DISCLAIMER_FR10, TimeframeSchema } from "@repo/types";
+import { db, priceCandles, and, desc, eq, lte } from "@repo/database";
 
 /** Muat `.env` dari repo root (turbo menjalankan task dengan cwd = package). */
 function loadEnv(): void {
@@ -45,6 +46,58 @@ loadEnv();
 
 const fastify = Fastify({ logger: true });
 const client = new FinancialClient();
+
+/**
+ * Sumber tick live: Deriv (CFD Gold/USD) via WebSocket publik.
+ * Satu koneksi untuk semua klien SSE; tick TIDAK disimpan ke DB.
+ * Bid/ask Deriv tidak disediakan -> null (tidak dikarang).
+ */
+const DERIV_APP_ID = process.env.DERIV_APP_ID ?? "";
+const DERIV_SYMBOL = "frxXAUUSD";
+const sseWriters = new Set<(chunk: string) => void>();
+
+function broadcast(payload: Record<string, unknown>): void {
+  const chunk = `data: ${JSON.stringify(payload)}\n\n`;
+  for (const write of sseWriters) {
+    try {
+      write(chunk);
+    } catch {
+      // Klien sudah pergi; entri akan dibersihkan oleh event "close".
+    }
+  }
+}
+
+let derivClient: DerivClient | null = null;
+function startDeriv(): void {
+  if (!DERIV_APP_ID || derivClient) return;
+  const instance = new DerivClient({
+    appId: DERIV_APP_ID,
+    token: process.env.DERIV_API_TOKEN || undefined,
+    symbol: DERIV_SYMBOL,
+  });
+  derivClient = instance;
+
+  instance.onTick((tick) => {
+    broadcast({
+      timestampUtc: tick.epoch,
+      price: tick.price,
+      bid: null,
+      ask: null,
+      source: "deriv-cfd",
+      isSimulated: false,
+    });
+  });
+
+  instance.onDisconnect = () => {
+    broadcast({
+      status: "disconnected",
+      reason: "Deriv WebSocket tertutup; menghubung ulang otomatis.",
+    });
+  };
+
+  instance.connect();
+  instance.subscribe(DERIV_SYMBOL);
+}
 
 /**
  * Origin web yang diizinkan. Default localhost:3000; bisa daftar dipisah koma
@@ -121,71 +174,127 @@ fastify.get("/api/v1/market/xauusd/latest", async (_request, reply) => {
   };
 });
 
+type StoredCandle = {
+  symbol: string;
+  timeframe: string;
+  timestampUtc: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+};
+
+/**
+ * Candle dari `price_candles` (diisi worker dari Deriv). DB mati -> melempar,
+ * pemanggil fallback ke CSV historis.
+ */
+async function fetchStoredCandles(tf: string, limit: number, to?: number): Promise<StoredCandle[]> {
+  const conditions = [eq(priceCandles.symbol, "XAUUSD"), eq(priceCandles.timeframe, tf)];
+  if (to !== undefined && Number.isFinite(to)) {
+    conditions.push(lte(priceCandles.timestampUtc, to));
+  }
+
+  const rows = await db
+    .select()
+    .from(priceCandles)
+    .where(and(...conditions))
+    .orderBy(desc(priceCandles.timestampUtc))
+    .limit(limit);
+  rows.reverse();
+  return rows;
+}
+
 // Windowed Paginated Candles API (prevents browser lag)
 fastify.get<{ Querystring: { tf?: string; limit?: string; to?: string } }>(
   "/api/v1/market/xauusd/candles",
   async (request) => {
-    const tf = (request.query.tf as any) || "15m";
+    const tfRaw = String(request.query.tf ?? "15m");
+    const tf = TimeframeSchema.safeParse(tfRaw).success ? tfRaw : "15m";
     const limit = Math.max(1, Math.min(Number(request.query.limit) || 300, 1000)); // capped at 1000 for high performance
     const to = request.query.to ? Number(request.query.to) : undefined;
-    const candles = await client.fetchXauusdCandles(tf, limit, to);
-    const isSimulated = candles.length > 0 && candles.every((c) => c.isSimulated === true);
+
+    // 1. DB (candle Deriv yang disimpan worker).
+    let data: StoredCandle[] = [];
+    let source: "deriv-cfd" | "csv-historical" | "simulated" = "deriv-cfd";
+    let isSimulated = false;
+
+    try {
+      data = await fetchStoredCandles(tf, limit, to);
+    } catch (error) {
+      console.warn(
+        `[API] price_candles tidak bisa dibaca (${tf}): ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+
+    // 2. Fallback CSV historis bila DB kosong/mati. Synthetic selalu ditandai.
+    if (data.length === 0) {
+      const fallback = await client.fetchXauusdCandles(tf as Timeframe, limit, to);
+      isSimulated = fallback.length > 0 && fallback.every((c) => c.isSimulated === true);
+      source = isSimulated ? "simulated" : "csv-historical";
+      data = fallback.map((c) => ({
+        symbol: c.symbol,
+        timeframe: c.timeframe,
+        timestampUtc: c.timestampUtc,
+        open: c.open,
+        high: c.high,
+        low: c.low,
+        close: c.close,
+        volume: c.volume,
+      }));
+    }
+
     return {
       timeframe: tf,
-      count: candles.length,
-      data: candles,
+      count: data.length,
+      data,
+      source,
       isSimulated,
-      status: isSimulated ? "simulated" : "ok",
+      status: data.length === 0 ? "unavailable" : isSimulated ? "simulated" : "ok",
       disclaimer: COMPLIANCE_DISCLAIMER_FR10,
     };
   }
 );
 
-// Server-Sent Events (SSE) for low-overhead real-time price streaming.
-// Tick merupakan simulasi mikro di sekitar harga nyata terakhir — ditandai
-// `isSimulated: true` dan bukan dianggap sebagai harga pasar.
+// Server-Sent Events (SSE) untuk harga live Deriv (frxXAUUSD).
+// Tick asli dari WebSocket Deriv — bukan simulasi.
 fastify.get("/api/v1/market/xauusd/stream", async (request, reply) => {
   // Fastify akan menutup response begitu handler selesai; hijack supaya
-  // koneksi SSE tetap terbuka untuk tick berkala.
+  // koneksi SSE tetap terbuka.
   reply.hijack();
   reply.raw.setHeader("Content-Type", "text/event-stream");
   reply.raw.setHeader("Cache-Control", "no-cache");
   reply.raw.setHeader("Connection", "keep-alive");
   reply.raw.setHeader("Access-Control-Allow-Origin", WEB_ORIGIN[0] ?? "");
 
-  const recent = await client.fetchXauusdCandles("1h", 1);
-  const lastReal = recent[recent.length - 1]?.close ?? null;
-
-  if (lastReal === null) {
+  if (!DERIV_APP_ID) {
     reply.raw.write(
       `data: ${JSON.stringify({
         status: "unavailable",
-        reason: "Belum ada data harga nyata.",
+        reason: "DERIV_APP_ID belum diatur di environment.",
       })}\n\n`
     );
     return reply.raw.end();
   }
 
-  let basePrice = lastReal;
+  startDeriv();
 
-  const interval = setInterval(() => {
-    const delta = (Math.random() - 0.49) * 0.4;
-    basePrice = Number((basePrice + delta).toFixed(2));
-    const now = Math.floor(Date.now() / 1000);
+  const write = (chunk: string) => reply.raw.write(chunk);
+  sseWriters.add(write);
 
-    const payload = JSON.stringify({
-      timestampUtc: now,
-      price: basePrice,
-      bid: basePrice,
-      ask: Number((basePrice + 0.35).toFixed(2)),
-      isSimulated: true,
-    });
-
-    reply.raw.write(`data: ${payload}\n\n`);
-  }, 1500);
+  // Heartbeat menjaga proxy/load balancer tidak menutup koneksi yang diam
+  // (mis. saat market tutup dan tidak ada tick).
+  const heartbeat = setInterval(() => {
+    try {
+      reply.raw.write(": hb\n\n");
+    } catch {
+      // Klien sudah pergi; "close" akan membersihkan.
+    }
+  }, 25_000);
 
   request.raw.on("close", () => {
-    clearInterval(interval);
+    clearInterval(heartbeat);
+    sseWriters.delete(write);
   });
 });
 

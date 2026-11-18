@@ -345,6 +345,21 @@ export class ExpertDataService {
         targetSeries = found ? this.subdivide(windowedH1, subCount, subSec, timeframe) : [];
         source = found ? "estimated" : "unknown";
       }
+    } else if (timeframe === "30m") {
+      // Tidak ada CSV intraday 30m; turunkan dari H1 dan tandai estimasi.
+      const neededH1 = Math.ceil(limit / 2) + 5;
+      let windowedH1 = rawH1;
+      if (to !== undefined && !isNaN(to)) {
+        const endH1Idx = this.binarySearchBefore(rawH1, to);
+        windowedH1 =
+          endH1Idx === -1
+            ? []
+            : rawH1.slice(Math.max(0, endH1Idx - neededH1 + 1), Math.min(rawH1.length, endH1Idx + 2));
+      } else {
+        windowedH1 = rawH1.slice(-neededH1);
+      }
+      targetSeries = this.subdivide(windowedH1, 2, 1800, "30m");
+      source = targetSeries.length > 0 ? "estimated" : "unknown";
     } else if (timeframe === "1m") {
       const neededH1 = Math.ceil(limit / 60) + 5;
       let windowedH1 = rawH1;

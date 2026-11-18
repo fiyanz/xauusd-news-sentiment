@@ -93,3 +93,68 @@ def test_reducer_skips_constant_block():
         df[f"tfidf_{i}"] = 0.0
     r = FeatureReducer().fit(df)
     assert "tfidf_pc1" not in r.feature_cols
+
+
+def _frame_with_embeddings(n: int = 12) -> pd.DataFrame:
+    df = _frame(n)
+    rng = np.random.default_rng(1)
+    for i in range(3):
+        df[f"emb_pc{i + 1}"] = rng.normal(size=n)
+    return df
+
+
+def test_embedding_block_is_precomputed_passthrough(tmp_path, monkeypatch):
+    """Komponen embedding tidak direduksi dua kali; dipakai apa adanya."""
+    monkeypatch.chdir(tmp_path)  # metadata reducer tidak ada -> blok tetap jalan
+    df = _frame_with_embeddings()
+    r = FeatureReducer().fit(df)
+
+    block = r.blocks["embedding"]
+    assert block["precomputed"] is True
+    assert block["pca"] is None and block["scaler"] is None
+    assert block["comps"] == [f"emb_pc{i + 1}" for i in range(3)]
+    assert block["cols"] == block["comps"]
+
+    out = r.transform(df)
+    for c in block["comps"]:
+        np.testing.assert_allclose(out[c].to_numpy(), df[c].to_numpy())
+    # Embedding ikut masuk ke daftar fitur champion.
+    assert all(c in r.feature_cols for c in block["comps"])
+    # Baseline (base + macro) tidak memakai blok embedding.
+    assert not any(c.startswith("emb_pc") for c in r.base_cols)
+
+
+def test_embedding_block_missing_columns_are_neutral(tmp_path, monkeypatch):
+    """Artifact tanpa kolom embedding -> netral 0, bukan NaN liar/crash."""
+    monkeypatch.chdir(tmp_path)
+    df = _frame_with_embeddings()
+    r = FeatureReducer().fit(df)
+    stripped = df.drop(columns=[f"emb_pc{i + 1}" for i in range(3)])
+
+    out = r.transform(stripped)
+    emb_cols = r.block_columns("embedding")
+    assert list(out.columns) == r.feature_cols
+    assert (out[emb_cols] == 0.0).all().all()
+    assert out.notna().all().all()
+
+
+def test_embedding_block_reports_persisted_provenance(tmp_path, monkeypatch):
+    """Metadata reducer yang difit train-only ikut tercatat di bundle reducer."""
+    meta = {
+        "status": "ok",
+        "explained_variance": 0.6257,
+        "n_components": 16,
+        "reducer_path": "models/embeddings/bucket_reducer.joblib",
+        "n_train_fit": 2344,
+    }
+    (tmp_path / "models" / "embeddings").mkdir(parents=True)
+    (tmp_path / "models" / "embeddings" / "bucket_reducer_meta.json").write_text(
+        __import__("json").dumps(meta)
+    )
+    monkeypatch.chdir(tmp_path)
+
+    r = FeatureReducer().fit(_frame_with_embeddings())
+    block = r.blocks["embedding"]
+    assert block["source"] == meta["reducer_path"]
+    assert block["explained_variance"] == meta["explained_variance"]
+    assert block["n_components"] == meta["n_components"]

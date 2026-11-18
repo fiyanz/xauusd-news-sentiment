@@ -9,6 +9,7 @@ import {
   IChartApi,
   Time,
   SeriesMarker,
+  LineStyle,
 } from "lightweight-charts";
 import {
   Crosshair,
@@ -37,7 +38,86 @@ interface CandleItem {
   isEstimated?: boolean;
 }
 
-type ChartDataSource = "real" | "estimated" | "unknown";
+type ChartDataSource =
+  | "deriv-cfd"
+  | "csv-historical"
+  | "simulated"
+  | "real"
+  | "estimated"
+  | "unknown";
+
+interface PredictionSnapshot {
+  status: string;
+  signal: string | null;
+  confidence_pct: number | null;
+  predicted_target_price: number | null;
+  predicted_pips_delta: string | null;
+  sentiment_label: string | null;
+  bucket_time_utc: string | null;
+  timestamp_utc: string | null;
+}
+
+function signalTone(signal: string | null): "bullish" | "bearish" | "neutral" {
+  const value = (signal ?? "").toUpperCase();
+  if (value.includes("BULL") || value.includes("BUY") || value.includes("NAIK")) return "bullish";
+  if (value.includes("BEAR") || value.includes("SELL") || value.includes("TURUN")) return "bearish";
+  return "neutral";
+}
+
+const SIGNAL_COLOR: Record<"bullish" | "bearish" | "neutral", string> = {
+  bullish: "#2962FF",
+  bearish: "#F23645",
+  neutral: "#FFD000",
+};
+
+function sourceLabel(source: ChartDataSource): string {
+  switch (source) {
+    case "deriv-cfd":
+      return "Deriv CFD";
+    case "csv-historical":
+      return "CSV historis";
+    case "simulated":
+      return "Simulasi";
+    case "real":
+      return "Data nyata";
+    case "estimated":
+      return "Estimasi H1";
+    default:
+      return "Sumber tidak diketahui";
+  }
+}
+
+function sourceTitle(source: ChartDataSource): string {
+  switch (source) {
+    case "deriv-cfd":
+      return "Candle dari Deriv (CFD Gold/USD), bukan spot interbank.";
+    case "csv-historical":
+      return "Berasal dari dataset historis CSV.";
+    case "simulated":
+      return "Data sintetis — bukan harga pasar nyata.";
+    case "real":
+      return "Berasal dari dataset pasar nyata.";
+    case "estimated":
+      return "Data intraday nyata belum tersedia. Bar diturunkan dari H1 dan bukan cetakan pasar nyata.";
+    default:
+      return "API tidak melaporkan asal data.";
+  }
+}
+
+function sourceTone(source: ChartDataSource): "emerald" | "amber" | "red" | "neutral" {
+  switch (source) {
+    case "deriv-cfd":
+    case "csv-historical":
+    case "real":
+      return "emerald";
+    case "estimated":
+      return "amber";
+    case "simulated":
+      return "red";
+    default:
+      return "neutral";
+  }
+}
 
 export interface MarketChartProps {
   timeframe: string;
@@ -50,6 +130,8 @@ function getTimeframeSeconds(tf: string): number {
       return 300;
     case "15m":
       return 900;
+    case "30m":
+      return 1800;
     case "4h":
       return 14400;
     case "1D":
@@ -65,6 +147,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
+  const targetLineRef = useRef<ISeriesApi<"Line"> | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [activeTool, setActiveTool] = useState<string>("crosshair");
@@ -74,6 +157,10 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
   // Provenance of the candles currently on screen. `estimated` means the bars
   // are H1-derived and must never be read as real intraday prints.
   const [dataSource, setDataSource] = useState<ChartDataSource>("unknown");
+  const [prediction, setPrediction] = useState<PredictionSnapshot | null>(null);
+  const predictionRef = useRef<PredictionSnapshot | null>(null);
+  const lastPriceRef = useRef<number | null>(null);
+  const timeframeRef = useRef(timeframe);
 
   // Restore toolbar preferences from localStorage
   useEffect(() => {
@@ -226,6 +313,17 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
       },
     });
 
+    // Garis target prediksi (horizontal); di-update saat prediksi/candle berubah.
+    const targetLine = chart.addLineSeries({
+      color: SIGNAL_COLOR.neutral,
+      lineStyle: LineStyle.Dashed,
+      lineWidth: 1,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    });
+    targetLineRef.current = targetLine;
+
     chartRef.current = chart;
     candleSeriesRef.current = candleSeries;
     volumeSeriesRef.current = volumeSeries;
@@ -303,18 +401,18 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
         try {
           let olderCandles: CandleItem[] = [];
 
-          // 1. Try local Next.js route first
-          let res = await fetch(`/api/market/candles?tf=${timeframe}&limit=200&to=${earliestTs}`, {
+          // 1. Candle dari apps/api (DB Deriv -> CSV historis).
+          let res = await fetch(`/api/market/xauusd-candles?tf=${timeframe}&limit=200&to=${earliestTs}`, {
             cache: "no-store",
             signal: AbortSignal.timeout(5000),
           }).catch(() => null);
 
-          // 2. Fallback to external API port 4000
+          // 2. Fallback candle-cache bila API internal mati.
           if (!res || !res.ok) {
-            res = await fetch(
-              `http://localhost:4000/api/v1/market/xauusd/candles?tf=${timeframe}&limit=200&to=${earliestTs}`,
-              { cache: "no-store", signal: AbortSignal.timeout(5000) }
-            ).catch(() => null);
+            res = await fetch(`/api/market/candles?tf=${timeframe}&limit=200&to=${earliestTs}`, {
+              cache: "no-store",
+              signal: AbortSignal.timeout(5000),
+            }).catch(() => null);
           }
 
           if (res && res.ok) {
@@ -400,6 +498,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           return;
         }
         const price = tick.price as number;
+        lastPriceRef.current = price;
 
         const tfSec = getTimeframeSeconds(timeframe);
         const tickTs = tick.timestampUtc || Math.floor(Date.now() / 1000);
@@ -437,6 +536,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
         }
 
         candleSeriesRef.current.update(targetCandle);
+        applyTargetLine(predictionRef.current);
         volumeSeriesRef.current?.update({
           time: targetCandle.time,
           value: targetCandle.volume ?? 100,
@@ -544,21 +644,60 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
     isReadyRef.current = false;
     hasMoreHistoryRef.current = true;
     setIsLoading(true);
+    timeframeRef.current = timeframe;
+
+    const loadPrediction = async () => {
+      try {
+        let res = await fetch("/api/market/macro-sentiment", {
+          cache: "no-store",
+          signal: AbortSignal.timeout(5000),
+        }).catch(() => null);
+
+        if (!res || !res.ok) {
+          res = await fetch("http://localhost:4000/api/v1/analytics/macro-sentiment/latest", {
+            cache: "no-store",
+            signal: AbortSignal.timeout(5000),
+          }).catch(() => null);
+        }
+
+        if (res && res.ok) {
+          const json = await res.json();
+          const snapshot: PredictionSnapshot = {
+            status: json.status ?? "unavailable",
+            signal: json.signal ?? null,
+            confidence_pct: json.confidence_pct ?? null,
+            predicted_target_price: json.predicted_target_price ?? null,
+            predicted_pips_delta: json.predicted_pips_delta ?? null,
+            sentiment_label: json.sentiment_label ?? null,
+            bucket_time_utc: json.bucket_time_utc ?? null,
+            timestamp_utc: json.timestamp_utc ?? null,
+          };
+          predictionRef.current = snapshot;
+          setPrediction(snapshot);
+          applyTargetLine(snapshot);
+        }
+      } catch {
+        // Prediksi opsional: chart tetap jalan tanpa garis target.
+      }
+    };
 
     async function loadInitialWindow() {
       try {
         let candles: CandleItem[] = [];
         setDataSource("unknown");
 
-        // 1. Try internal Next.js API route first (<5ms cache)
-        let res = await fetch(`/api/market/candles?tf=${timeframe}&limit=250`, {
+        // 1. Candle dari apps/api: DB (Deriv via worker) -> CSV historis.
+        //    Provenance jujur: deriv-cfd / csv-historical / simulated.
+        let res = await fetch(`/api/market/xauusd-candles?tf=${timeframe}&limit=250`, {
           cache: "no-store",
           signal: AbortSignal.timeout(5000),
         }).catch(() => null);
+        let usedCandleCache = false;
 
-        // 2. Fallback to external port 4000 if needed
+        // 2. Fallback candle-cache (CSV/estimasi H1) bila API internal mati.
         if (!res || !res.ok) {
-          res = await fetch(`http://localhost:4000/api/v1/market/xauusd/candles?tf=${timeframe}&limit=250`, {
+          usedCandleCache = true;
+          res = await fetch(`/api/market/candles?tf=${timeframe}&limit=250`, {
             cache: "no-store",
             signal: AbortSignal.timeout(5000),
           }).catch(() => null);
@@ -580,15 +719,27 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           //   1. `source` reported by the API (candle-cache CandleSeriesResult).
           //   2. the per-bar `isEstimated` flag — candle-cache's subdivideCandles
           //      flags every H1-derived bar, so "any flagged bar" == estimate.
-          //   3. legacy top-level `isEstimated`.
+          //   3. legacy top-level `isSimulated` -> simulated.
           //   4. unflagged bars from this dataset are genuine prints -> real.
-          const reportedSource = json.source;
-          if (reportedSource === "real" || reportedSource === "estimated" || reportedSource === "unknown") {
+          let reportedSource = json.source as ChartDataSource;
+          // candle-cache hanya berisi CSV historis (atau estimasi H1 darinya);
+          // label "real"-nya dipetakan ke "csv-historical" supaya jujur.
+          if (usedCandleCache && reportedSource === "real") {
+            reportedSource = "csv-historical";
+          }
+          if (
+            reportedSource === "deriv-cfd" ||
+            reportedSource === "csv-historical" ||
+            reportedSource === "simulated" ||
+            reportedSource === "real" ||
+            reportedSource === "estimated" ||
+            reportedSource === "unknown"
+          ) {
             setDataSource(reportedSource);
           } else if (candles.length > 0 && candles.some((c) => c.isEstimated === true)) {
             setDataSource("estimated");
-          } else if (json.isEstimated === true) {
-            setDataSource("estimated");
+          } else if (json.isSimulated === true) {
+            setDataSource("simulated");
           } else if (candles.length > 0) {
             setDataSource("real");
           }
@@ -692,6 +843,9 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
             chartRef.current?.timeScale().scrollToRealTime();
           }
         }
+
+        lastPriceRef.current = candles[candles.length - 1]?.close ?? lastPriceRef.current;
+        loadPrediction();
       } catch {
         // Handle error gracefully
       } finally {
@@ -715,10 +869,58 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
     };
   }, [timeframe]);
 
+  // Garis target prediksi: horizontal di harga target, membentang di atas
+  // rentang candle yang tampil. Warna mengikuti sinyal.
+  const applyTargetLine = (pred: PredictionSnapshot | null) => {
+    const series = targetLineRef.current;
+    if (!series) return;
+
+    const price = pred?.predicted_target_price;
+    const bars = currentCandlesRef.current;
+    if (!price || !Number.isFinite(price) || bars.length === 0) {
+      series.setData([]);
+      return;
+    }
+
+    const from = bars[0]!.time as number;
+    const to =
+      (bars[bars.length - 1]!.time as number) + getTimeframeSeconds(timeframeRef.current);
+    series.applyOptions({ color: SIGNAL_COLOR[signalTone(pred?.signal ?? null)] });
+    series.setData([
+      { time: from as Time, value: price },
+      { time: to as Time, value: price },
+    ]);
+  };
+
   // Provenance badge: always shown for intraday timeframes (where "real" vs
   // "H1 estimate" matters), otherwise only when the API reports a source.
   const showSourceBadge =
     dataSource !== "unknown" || timeframe === "5m" || timeframe === "15m" || timeframe === "1m";
+
+  const sourceBadgeClasses: Record<string, string> = {
+    emerald: "border-emerald-500/40 text-emerald-400",
+    amber: "border-amber-500/40 text-amber-400",
+    red: "border-red-500/40 text-red-400",
+    neutral: "border-[#2A3441] text-[#788292]",
+  };
+  const sourceDotClasses: Record<string, string> = {
+    emerald: "bg-emerald-400",
+    amber: "bg-amber-400",
+    red: "bg-red-400",
+    neutral: "bg-[#788292]",
+  };
+
+  const predToneValue = signalTone(prediction?.signal ?? null);
+  const predBadgeClasses: Record<string, string> = {
+    bullish: "border-[#2962FF]/50 text-[#8FB0FF]",
+    bearish: "border-[#F23645]/50 text-[#FF8A93]",
+    neutral: "border-[#FFD000]/40 text-[#FFD000]",
+  };
+  const targetPrice = prediction?.predicted_target_price ?? null;
+  const predictionOk = prediction?.status === "ok" || prediction?.status === "success";
+  const livePrice = hoveredCandle?.close ?? null;
+  const targetDelta =
+    targetPrice !== null && livePrice !== null ? targetPrice - livePrice : null;
 
   return (
     <div className="relative w-full h-full flex bg-[#0E131A] overflow-hidden select-none">
@@ -890,39 +1092,33 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           </div>
           {showSourceBadge && (
             <span
-              title={
-                dataSource === "real"
-                  ? "Berasal dari dataset pasar nyata."
-                  : dataSource === "estimated"
-                    ? "Data intraday nyata belum tersedia. Bar diturunkan dari H1 dan bukan cetakan pasar nyata."
-                    : "API tidak melaporkan asal data."
-              }
-              className={`pointer-events-auto flex items-center space-x-1 px-1.5 py-0.5 rounded border font-mono text-[10px] ${
-                dataSource === "real"
-                  ? "border-emerald-500/40 text-emerald-400"
-                  : dataSource === "estimated"
-                    ? "border-amber-500/40 text-amber-400"
-                    : "border-[#2A3441] text-[#788292]"
-              }`}
+              title={sourceTitle(dataSource)}
+              className={`pointer-events-auto flex items-center space-x-1 px-1.5 py-0.5 rounded border font-mono text-[10px] ${sourceBadgeClasses[sourceTone(dataSource)]}`}
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  dataSource === "real"
-                    ? "bg-emerald-400"
-                    : dataSource === "estimated"
-                      ? "bg-amber-400"
-                      : "bg-[#788292]"
-                }`}
+                className={`w-1.5 h-1.5 rounded-full ${sourceDotClasses[sourceTone(dataSource)]}`}
               />
-              <span>
-                {dataSource === "real"
-                  ? "Data nyata"
-                  : dataSource === "estimated"
-                    ? "Estimasi H1"
-                    : "Sumber tidak diketahui"}
-              </span>
+              <span>{sourceLabel(dataSource)}</span>
             </span>
           )}
+          {predictionOk && targetPrice !== null ? (
+            <span
+              title={`Prediksi 4H bucket ${prediction.bucket_time_utc ?? "-"}. Harga chart: Deriv CFD, bukan spot interbank.`}
+              className={`pointer-events-auto flex items-center space-x-1 px-1.5 py-0.5 rounded border font-mono text-[10px] ${predBadgeClasses[predToneValue]}`}
+            >
+              <span>Prediksi {prediction.signal ?? "-"}</span>
+              <span>· target {targetPrice.toFixed(2)}</span>
+              {targetDelta !== null && Number.isFinite(targetDelta) ? (
+                <span>
+                  · {targetDelta >= 0 ? "+" : ""}
+                  {targetDelta.toFixed(2)}
+                </span>
+              ) : null}
+              {prediction.confidence_pct !== null ? (
+                <span>· {prediction.confidence_pct}%</span>
+              ) : null}
+            </span>
+          ) : null}
           {hoveredCandle ? (
             <div className="flex items-center space-x-2.5">
               <span>

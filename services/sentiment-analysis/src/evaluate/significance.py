@@ -357,11 +357,36 @@ def sentiment_features_present(feature_cols) -> bool:
 
     Fitur ``sentiment_score`` saja tidak cukup: di mode price_history berita
     bisa jadi nol-varians di training, sehingga blok topik/interaksi/teks
-    dilewati dan model identik dengan baseline makro.
+    dilewati dan model identik dengan baseline makro. Embedding kalimat
+    (``emb_pc*``) juga dihitung sebagai fitur teks.
     """
     return any(
-        str(c).startswith(("topic_", "sentiment_x_", "tfidf_")) for c in (feature_cols or [])
+        str(c).startswith(("topic_", "sentiment_x_", "tfidf_", "emb_pc"))
+        for c in (feature_cols or [])
     )
+
+
+def embedding_descriptor(bundle: dict) -> dict:
+    """Deskriptor blok embedding di bundle — bukti fiturnya ada & basisnya train-only."""
+    block = bundle.get("embedding_block") or {}
+    cols = [
+        c
+        for c in (bundle.get("champion_feature_cols") or [])
+        if str(c).startswith("emb_pc")
+    ]
+    return {
+        "present": bool(cols),
+        "feature_count": len(cols),
+        "precomputed": bool(block.get("precomputed")),
+        "n_components": block.get("n_components"),
+        "explained_variance": block.get("explained_variance"),
+        "reducer_source": block.get("source"),
+        "basis": (
+            "PCA + StandardScaler difit pada baris train berteks saja "
+            "(src.features.embeddings.build_bucket_embeddings); bucket tanpa "
+            "berita bernilai netral 0"
+        ),
+    }
 
 
 def compute_significance(
@@ -539,6 +564,7 @@ def build_significance_report(
     report["is_simulated"] = artifact["is_simulated"]
     report["artifact_reason"] = artifact["reason"]
     report["bundle_champion_name"] = bundle.get("champion_name")
+    report["embedding"] = embedding_descriptor(bundle)
     report["cv_summary"] = cv_summary
     report["generated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     report["models"] = {
