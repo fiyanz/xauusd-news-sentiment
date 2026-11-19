@@ -1,0 +1,68 @@
+# syntax=docker/dockerfile:1
+# Image sentiment-analysis: FastAPI + torch CPU-only (target ~1.2GB).
+# Build context = root repo; .dockerignore sudah exclude data/, .venv,
+# node_modules, research, dll. models/ dibake ke image, data/ lewat volume.
+
+# ---------- Builder: install dependency ke .venv dengan uv ----------
+FROM python:3.12-slim AS builder
+
+# uv di-pin ke versi yang sama dengan toolchain lokal.
+COPY --from=ghcr.io/astral-sh/uv:0.12.5 /uv /usr/local/bin/uv
+
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_TORCH_BACKEND=cpu
+
+WORKDIR /app/services/sentiment-analysis
+
+# Layer dependency dulu (jarang berubah) supaya cache maksimal:
+# pyproject + lock + README (readme field wajib ada saat uv baca metadata).
+COPY services/sentiment-analysis/pyproject.toml \
+     services/sentiment-analysis/uv.lock \
+     services/sentiment-analysis/README.md ./
+
+# torch sudah di-lock ke indeks pytorch-cpu (2.15.0+cpu) lewat
+# [tool.uv.sources] di pyproject, jadi --frozen tetap CPU-only.
+RUN uv sync --frozen --no-dev --no-install-project
+
+# Source code berubah lebih sering -> copy setelah dependency ter-install.
+COPY services/sentiment-analysis/src ./src
+RUN uv sync --frozen --no-dev
+
+# ---------- Runtime: hanya .venv jadi + artifact yang dibutuhkan ----------
+FROM python:3.12-slim AS runtime
+
+# User non-root untuk menjalankan service.
+RUN useradd --create-home --uid 10001 appuser
+
+WORKDIR /app/services/sentiment-analysis
+
+# .venv jadi dari builder (torch CPU, tanpa build tools).
+COPY --from=builder --chown=appuser:appuser /app/services/sentiment-analysis/.venv ./.venv
+
+# Source + model champion + embeddings dibake ke image (bukan volume).
+COPY --chown=appuser:appuser services/sentiment-analysis/src ./src
+COPY --chown=appuser:appuser services/sentiment-analysis/models ./models
+COPY --chown=appuser:appuser services/sentiment-analysis/pyproject.toml \
+     services/sentiment-analysis/uv.lock \
+     services/sentiment-analysis/config.yaml ./
+
+# Direktori data kosong sebagai mount point volume sentiment-data;
+# ownership appuser supaya pipeline bisa menulis artifact ke volume.
+# reports/ juga harus ada & writable: pipeline menulis laporan evaluasi
+# (reports/phase_model_results.json dll) relatif terhadap cwd; tanpa ini
+# step retrain gagal PermissionError dan training dilewati.
+RUN mkdir -p data/processed reports && chown -R appuser:appuser data reports
+
+ENV PATH="/app/services/sentiment-analysis/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+USER appuser
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)" || exit 1
+
+CMD ["uvicorn", "src.serve:app", "--host", "0.0.0.0", "--port", "8000"]

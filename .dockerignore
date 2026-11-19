@@ -1,0 +1,52 @@
+# =============================================================================
+# .dockerignore — dipakai bersama oleh Dockerfile.web, Dockerfile.app, dan
+# Dockerfile.sentiment (satu build context root).
+# Tujuan: data 591MB + venv 6GB + artefak riset TIDAK masuk context/image.
+# =============================================================================
+
+# Dependencies & virtualenv (di-install ulang di dalam image)
+**/node_modules
+**/.venv
+.pnpm-store
+
+# Data pipeline (591MB) — masuk lewat named volume sentiment-data, bukan image
+services/sentiment-analysis/data
+
+# Riset & eksperimen (parquet besar, cache embedding di data/)
+research
+services/sentiment-analysis/research
+# models/embeddings (119MB) SENGAJA dibake ke image sentiment: berisi
+# bucket_reducer.joblib + cache embedding yang dibutuhkan pipeline saat runtime.
+**/*.parquet
+!services/sentiment-analysis/models/**/*.parquet
+
+# VCS, dokumen, tooling lokal
+.git
+docs
+.agents
+.claude
+.hermes
+
+# Build outputs (di-generate ulang di stage build)
+**/dist
+**/.next
+**/out
+**/build
+**/*.tsbuildinfo
+**/.turbo
+
+# Cache Python
+**/__pycache__
+**/*.py[oc]
+**/.pytest_cache
+
+# RAHASIA: jangan pernah bake .env ke image (env disuntik via compose env_file)
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Log & file OS
+**/*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,214 @@
+# =============================================================================
+# compose.yaml — stack produksi canonical (JANGAN pakai docker-compose.yml).
+#
+# Server cukup `docker compose -f compose.yaml pull && up -d` (image sudah
+# dipush ke GHCR oleh .github/workflows/deploy.yml). Flag -f compose.yaml
+# PENTING supaya compose.override.yaml (dev) tidak ikut terpakai di server.
+#
+# Arsitektur: nginx -> web (Next standalone) & api (Fastify); worker cron
+# memakai image "app" yang sama dengan api; sentiment = service HTTP Python
+# terpisah; db = Postgres 16. migrate = one-shot drizzle-kit sebelum api/worker.
+#
+# Semua service app punya `image` + `build` ganda: di server tinggal pull,
+# di mesin dev bisa build lokal. Tag image sendiri memakai :latest (di-build
+# CI per commit sha-<commit> untuk rollback); image pihak ketiga dipin versi.
+# =============================================================================
+name: xauusd-news-sentiment
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ---------- Database ----------
+  db:
+    image: postgres:16.6-alpine
+    restart: unless-stopped
+    logging: *default-logging
+    env_file: .env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: xauusd_market
+      # Jangan hardcode secret: nilai dari .env; fallback hanya untuk dev lokal.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d xauusd_market"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # ---------- Migrasi skema (one-shot, idempotent) ----------
+  migrate:
+    image: ghcr.io/fiyanz/xauusd-news-sentiment/app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+      target: migrate
+    restart: "no"
+    logging: *default-logging
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://postgres:***@db:5432/xauusd_market
+      REPO_ROOT: /app
+    # drizzle-kit 0.28 me-resolve `out: "./drizzle"` relatif terhadap CWD,
+    # bukan lokasi file config -> harus jalan dari packages/database.
+    working_dir: /app/packages/database
+    command: ["bunx", "drizzle-kit", "migrate", "--config", "drizzle.config.ts"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ---------- Sentiment service (FastAPI + torch CPU, port 8000 internal) ----------
+  sentiment:
+    image: ghcr.io/fiyanz/xauusd-news-sentiment/sentiment:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.sentiment
+    restart: unless-stopped
+    init: true
+    logging: *default-logging
+    env_file: .env
+    environment:
+      PYTHONUNBUFFERED: "1"
+      REPO_ROOT: /app
+    volumes:
+      # Satu-satunya mount RW: pipeline menulis artifact ke volume ini.
+      # models/ (120MB) dibake ke image, BUKAN volume.
+      - sentiment-data:/app/services/sentiment-analysis/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      # Import torch + load model butuh waktu saat start pertama.
+      start_period: 90s
+
+  # ---------- API Fastify (image app, command api) ----------
+  api:
+    image: ghcr.io/fiyanz/xauusd-news-sentiment/app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+      target: runtime
+    restart: unless-stopped
+    init: true
+    logging: *default-logging
+    command: ["node", "apps/api/dist/server.js"]
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://postgres:***@db:5432/xauusd_market
+      REPO_ROOT: /app
+      SENTIMENT_SERVICE_URL: http://sentiment:8000
+      PORT_API: "4000"
+    volumes:
+      # READ-ONLY: khusus baca calendar CSV (financial-clients) di path yang
+      # sama dengan repo. Prediksi TIDAK dibaca dari file — lewat HTTP sentiment.
+      - sentiment-data:/app/services/sentiment-analysis/data:ro
+    depends_on:
+      sentiment:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/api/v1/system/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    stop_grace_period: 30s
+
+  # ---------- Worker cron (image app SAMA, command worker) ----------
+  worker:
+    image: ghcr.io/fiyanz/xauusd-news-sentiment/app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+      target: runtime
+    restart: unless-stopped
+    init: true
+    logging: *default-logging
+    command: ["node", "apps/worker/dist/index.js"]
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://postgres:***@db:5432/xauusd_market
+      REPO_ROOT: /app
+      SENTIMENT_SERVICE_URL: http://sentiment:8000
+    volumes:
+      # READ-ONLY: worker meng-ingest news_corpus.jsonl dari path repo
+      # (apps/worker/src/news-db.ts membaca file lokal, bukan HTTP). Tanpa
+      # mount ini ingest dilewati ("corpus tidak ditemukan"). Pola sama
+      # dengan api (calendar CSV); tulis artifact tetap hanya di sentiment.
+      - sentiment-data:/app/services/sentiment-analysis/data:ro
+    depends_on:
+      sentiment:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      # Worker menulis /tmp/worker-heartbeat (epoch ms) tiap akhir cycle.
+      # Sehat bila mtime file < 20 menit.
+      test: ["CMD", "node", "-e", "try{const s=require('fs').statSync('/tmp/worker-heartbeat');process.exit(Date.now()-s.mtimeMs<1200000?0:1)}catch{process.exit(1)}"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      # Cycle pertama bisa menunggu sync sentiment sampai ~20 menit
+      # (poll /sync/status timeout 20 menit) sebelum heartbeat pertama.
+      start_period: 25m
+
+  # ---------- Web Next.js standalone ----------
+  web:
+    image: ghcr.io/fiyanz/xauusd-news-sentiment/web:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    restart: unless-stopped
+    init: true
+    logging: *default-logging
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+      PORT_API: "4000"
+      # Dipakai route handler server-side apps/web (proxy SSE, candles, dll).
+      API_INTERNAL_URL: http://api:4000
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ---------- Reverse proxy publik ----------
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    logging: *default-logging
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      web:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  pgdata:
+  sentiment-data:

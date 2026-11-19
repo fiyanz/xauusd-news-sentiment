@@ -1,0 +1,103 @@
+# =============================================================================
+# compose.override.yaml — DEV ONLY (di-load otomatis oleh docker compose).
+# Di server SELALU pakai `docker compose -f compose.yaml ...` supaya file ini
+# tidak ikut terpakai (bind mount source + command dev tidak untuk produksi).
+#
+# Dev: image di-build dengan target yang masih punya devDeps (bun), source
+# di-bind mount, tsx watch / next dev / uvicorn --reload, port debug dibuka.
+# Jalankan: docker compose up --build
+# =============================================================================
+
+services:
+  db:
+    ports:
+      - "${DB_PORT:-5432}:5432"
+
+  api:
+    build:
+      target: build
+    command: ["bunx", "tsx", "watch", "apps/api/src/server.ts"]
+    environment:
+      NODE_ENV: development
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./apps/api/src:/app/apps/api/src
+      - ./packages/core-analytics/src:/app/packages/core-analytics/src
+      - ./packages/database/src:/app/packages/database/src
+      - ./packages/financial-clients/src:/app/packages/financial-clients/src
+      - ./packages/types/src:/app/packages/types/src
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/api/src
+          target: /app/apps/api/src
+        - action: sync
+          path: ./packages
+          target: /app/packages
+        - action: rebuild
+          path: ./bun.lock
+        - action: rebuild
+          path: ./apps/api/package.json
+
+  worker:
+    build:
+      target: build
+    command: ["bunx", "tsx", "watch", "apps/worker/src/index.ts"]
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./apps/worker/src:/app/apps/worker/src
+      - ./packages/core-analytics/src:/app/packages/core-analytics/src
+      - ./packages/database/src:/app/packages/database/src
+      - ./packages/financial-clients/src:/app/packages/financial-clients/src
+      - ./packages/types/src:/app/packages/types/src
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/worker/src
+          target: /app/apps/worker/src
+        - action: sync
+          path: ./packages
+          target: /app/packages
+        - action: rebuild
+          path: ./bun.lock
+        - action: rebuild
+          path: ./apps/worker/package.json
+
+  web:
+    build:
+      target: builder
+    command: ["bun", "run", "--cwd", "apps/web", "dev"]
+    environment:
+      NODE_ENV: development
+      API_INTERNAL_URL: http://api:4000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/web/src:/app/apps/web/src
+      - ./apps/web/public:/app/apps/web/public
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/web/src
+          target: /app/apps/web/src
+        - action: rebuild
+          path: ./bun.lock
+        - action: rebuild
+          path: ./apps/web/package.json
+
+  sentiment:
+    working_dir: /app/services/sentiment-analysis
+    command: ["uvicorn", "src.serve:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./services/sentiment-analysis/src:/app/services/sentiment-analysis/src
+    develop:
+      watch:
+        - action: sync
+          path: ./services/sentiment-analysis/src
+          target: /app/services/sentiment-analysis/src
+        - action: rebuild
+          path: ./services/sentiment-analysis/uv.lock

@@ -9,7 +9,9 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.165.0",
     "feedparser>=6.0.14",
+    "httpx>=0.28.1",
     "lightgbm>=4.7.0",
     "matplotlib>=3.11.2",
     "nltk>=3.10.4",
@@ -20,6 +22,8 @@ dependencies = [
     "pyyaml>=6.0.3",
     "scikit-learn>=1.9.1",
     "sentence-transformers>=6.3.0",
+    "torch>=2.15.0",
+    "uvicorn>=0.54.0",
     "xgboost>=3.4.1",
     "yfinance>=1.8.0",
 ]
@@ -30,6 +34,17 @@ sentiment-analysis = "sentiment_analysis:main"
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
 build-backend = "uv_build"
+
+# Indeks PyTorch CPU-only: wheel torch tanpa CUDA supaya image Docker kecil.
+# `explicit = true` artinya indeks ini hanya dipakai untuk paket yang di-pin
+# lewat [tool.uv.sources] (torch), bukan untuk seluruh dependency.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

@@ -1,0 +1,66 @@
+# syntax=docker/dockerfile:1
+# =============================================================================
+# Dockerfile.web — Next.js 15 standalone (image ~300MB).
+# Multi-stage: deps (bun install) -> builder (next build) -> runner (node slim).
+#
+# next.config.mjs mengatur output: "standalone" + outputFileTracingRoot ke
+# root monorepo, sehingga .next/standalone berisi server.js + node_modules
+# minimal dengan struktur apps/web/... yang sama dengan repo.
+#
+# Tidak ada process.env.NEXT_PUBLIC_* di apps/web/src (sudah di-grep), jadi
+# tidak ada build args. URL API server-side dibaca saat runtime dari env
+# API_INTERNAL_URL (compose: http://api:4000).
+# =============================================================================
+
+# ---------- 1. Dependencies ----------
+FROM oven/bun:1.4.2 AS deps
+WORKDIR /app
+COPY --chown=bun:bun package.json bun.lock ./
+COPY --chown=bun:bun apps/api/package.json apps/api/
+COPY --chown=bun:bun apps/worker/package.json apps/worker/
+COPY --chown=bun:bun apps/web/package.json apps/web/
+COPY --chown=bun:bun packages/core-analytics/package.json packages/core-analytics/
+COPY --chown=bun:bun packages/database/package.json packages/database/
+COPY --chown=bun:bun packages/financial-clients/package.json packages/financial-clients/
+COPY --chown=bun:bun packages/tsconfig/package.json packages/tsconfig/
+COPY --chown=bun:bun packages/types/package.json packages/types/
+# Fix ownership (sama dengan Dockerfile.app): WORKDIR /app dibuat root dan
+# COPY --chown tidak meng-chown direktori /app -> bun install gagal ENOENT
+# "failed to link" karena node_modules tidak bisa dibuat. chown dulu.
+RUN chown -R bun:bun /app
+USER bun
+# --linker=hoisted WAJIB: default bun 1.4 (isolated) menaruh @types/node
+# hanya di workspace yang mendeklarasikannya; packages/database tidak,
+# sehingga tsc gagal TS2580 "Cannot find name 'process'". Layout hoisted
+# (gaya npm) membuat @types/* terlihat dari semua workspace via root.
+RUN bun install --frozen-lockfile --linker=hoisted
+
+# ---------- 2. Build Next.js ----------
+FROM deps AS builder
+COPY --chown=bun:bun turbo.json ./
+COPY --chown=bun:bun packages packages
+COPY --chown=bun:bun apps/web apps/web
+# Direktori tujuan yang sudah ada sejak deps tetap root-owned; next build
+# menulis .next/ di apps/web -> chown direktori workspace (isi sudah bun-owned).
+RUN chown bun:bun /app/apps /app/apps/web /app/packages /app/packages/*
+ENV NEXT_TELEMETRY_DISABLED=1
+# next build menghasilkan .next/standalone (lihat next.config.mjs).
+RUN cd apps/web && bun run build
+
+# ---------- 3. Runtime standalone ----------
+FROM node:22-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
+# Standalone sudah termasuk node_modules minimal + server.js per workspace.
+COPY --from=builder --chown=node:node /app/apps/web/.next/standalone ./
+# Aset statis & public tidak ikut otomatis ke standalone — salin manual.
+COPY --from=builder --chown=node:node /app/apps/web/.next/static apps/web/.next/static
+COPY --from=builder --chown=node:node /app/apps/web/public apps/web/public
+USER node
+EXPOSE 3000
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=5 \
+  CMD node -e "fetch('http://localhost:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+CMD ["node", "apps/web/server.js"]

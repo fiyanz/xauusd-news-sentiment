@@ -1,0 +1,132 @@
+# =============================================================================
+# deploy.yml — build 3 image ke GHCR saat push main + deploy opsional via SSH.
+#
+# Image (matrix): web (Dockerfile.web), app (Dockerfile.app, target runtime
+# default = stage terakhir; api & worker berbagi image ini), sentiment
+# (Dockerfile.sentiment). Tag: sha-<commit> + latest.
+#
+# Job deploy dilewati dengan anggun bila secrets SSH kosong — build & push
+# tetap jalan. Secrets yang dipakai (Settings > Secrets and variables >
+# Actions):
+#   SSH_HOST    : host/IP VPS
+#   SSH_USER    : user SSH (mis. deploy)
+#   SSH_KEY     : private key SSH (pemakaian: appleboy/ssh-action)
+#   DEPLOY_PATH : path repo di VPS (mis. /opt/xauusd-news-sentiment)
+# GITHUB_TOKEN otomatis tersedia (permissions packages: write di bawah).
+# Lihat docs/deployment.md untuk setup lengkap.
+# =============================================================================
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - "services/**"
+      - "Dockerfile*"
+      - "compose.yaml"
+      - "nginx.conf"
+      # Lockfile/manifest root & .dockerignore mengubah isi image juga —
+      # tanpa ini, upgrade dependency saja tidak men-trigger rebuild.
+      - "bun.lock"
+      - "package.json"
+      - ".dockerignore"
+      - ".github/workflows/deploy.yml"
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-push:
+    name: Build & push (${{ matrix.image }})
+    runs-on: ubuntu-latest
+    # Sentiment (torch CPU ~1GB download) bisa lama; batas aman 45 menit.
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: web
+            dockerfile: Dockerfile.web
+          - image: app
+            dockerfile: Dockerfile.app
+          - image: sentiment
+            dockerfile: Dockerfile.sentiment
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login ke GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Metadata image (tag sha-<commit> + latest)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/${{ matrix.image }}
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  deploy:
+    name: Deploy ke VPS (opsional)
+    needs: build-push
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Secrets tidak bisa dibaca langsung di `if`, jadi lewat env job.
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+    steps:
+      - name: Deploy via SSH (pull image + up -d)
+        if: env.SSH_HOST != '' && env.SSH_USER != '' && env.SSH_KEY != '' && env.DEPLOY_PATH != ''
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script_stop: true
+          script: |
+            set -e
+            cd "${{ secrets.DEPLOY_PATH }}"
+            # Ambil compose.yaml/nginx.conf terbaru dulu (perubahan infra tidak
+            # ikut lewat image). --ff-only: gagal aman bila ada edit lokal di VPS.
+            git pull --ff-only
+            # -f compose.yaml: JANGAN load compose.override.yaml (dev) di server.
+            docker compose -f compose.yaml pull
+            docker compose -f compose.yaml up -d
+            docker compose -f compose.yaml ps
+
+      - name: Lewati deploy (secrets SSH kosong)
+        if: env.SSH_HOST == '' || env.SSH_USER == '' || env.SSH_KEY == '' || env.DEPLOY_PATH == ''
+        run: |
+          echo "Secrets SSH (SSH_HOST/SSH_USER/SSH_KEY/DEPLOY_PATH) belum diisi."
+          echo "Deploy dilewati — image tetap ter-build & ter-push ke GHCR."
+          echo "Deploy manual: lihat docs/deployment.md."
