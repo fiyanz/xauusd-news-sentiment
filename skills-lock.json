@@ -1,47 +1,61 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
+    "docker-compose-patterns": {
+      "source": "docker/skills",
+      "commit": "a65ae5b65d22f0613375d6c3e5ea8bb287698cc0",
+      "sourceType": "github",
+      "skillPath": "skills/docker-compose-patterns/SKILL.md",
+      "computedHash": "fd752b44e789bbf42f8c0edd92df89c84871d46aee92785230e5260f866e8f99"
+    },
     "finance-news": {
       "source": "sundial-org/awesome-openclaw-skills",
       "sourceType": "github",
       "skillPath": "skills/finance-news/SKILL.md",
-      "computedHash": "e5eddb7c6fa9f55fe9e261cb4a94c1b49e43d799ec8c989eefdebe5e197f931d"
+      "computedHash": "05be046cc2e4830df2a2cf4a9466bb11fb0bd26ae848969de9b3b4b76f028837"
     },
     "firecrawl-website-design-clone": {
       "source": "firecrawl/firecrawl-workflows",
       "sourceType": "github",
       "skillPath": "skills/firecrawl-website-design-clone/SKILL.md",
-      "computedHash": "4fa165f3047db051e0af30416e60f44eac63a30b8135c82350fb2e5b5f6a8b38"
+      "computedHash": "d1d7198b5ac5799095814fa3893795a63ce356049ff20d4c9d510959b6c40feb"
     },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
       "skillPath": "skills/frontend-design/SKILL.md",
-      "computedHash": "89496d5dd00f4810205f351759594fc2742bf8eea85a2f2b2d1de59f4bd91576"
+      "computedHash": "83485963700bcf11d5bf78118facb301676b69d918fee2e45a95e7f1a2840f6c"
     },
     "image-to-ui": {
       "source": "uizze/uizze",
       "sourceType": "github",
       "skillPath": "skills/image-to-ui/SKILL.md",
-      "computedHash": "e70577db48a840192978307d0258790289bc6bd8c604f9ce4be3d9bbd158cb0d"
+      "computedHash": "68d82d6ad06a3b0e93afb9927df621c6194765d250fae25810a9bd7adc6b453b"
+    },
+    "multi-stage-dockerfile": {
+      "source": "github/awesome-copilot",
+      "commit": "1a8e8f1302a31ddb60089e2db15b21bbd148e8ff",
+      "sourceType": "github",
+      "skillPath": "skills/multi-stage-dockerfile/SKILL.md",
+      "computedHash": "c74ad7dbfdc563e9a95308b7ff812882fa79872a097a2950c4f8346c815bdab6"
     },
     "tailwind-design-system": {
       "source": "wshobson/agents",
       "sourceType": "github",
       "skillPath": "plugins/frontend-mobile-development/skills/tailwind-design-system/SKILL.md",
-      "computedHash": "4e5bfe5af9b5da504752432dc45ed605af350cf1489a58419afad4123a514f89"
+      "computedHash": "c807f0c9619e8c389879f55846c2e395956f1073ab6d01a93fbb30b340015ab1"
     },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/web-design-guidelines/SKILL.md",
-      "computedHash": "a6a44d5498f7e8f68289902f3dedfc6f38ae0cee1e96527c80724cf27f727c2a"
+      "computedHash": "4f68ae07187fb0d1fb78c88b503d089da4cf5a9d9625d1f2e425b1590bf96d92"
     },
     "yahoo-finance": {
       "source": "gracefullight/stock-checker",
       "sourceType": "github",
       "skillPath": ".agents/skills/yahoo-finance/SKILL.md",
-      "computedHash": "e9fc6fa8cdb390f72f708126f32b882f789ff1e4efb6f9736c232b0e431a7b0b"
+      "computedHash": "89b7af2d07f5f6062af15553727d8e8b25ed29e68b65830e98d7835aa0b54c2d"
     }
   }
 }

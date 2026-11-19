@@ -1,5 +1,5 @@
 {
-  "test_samples": 5189,
+  "test_samples": 5192,
   "target": "ret_4h",
   "champion_name": "Ridge_Linear",
   "selection_method": "cv_mean_rank_ic",
@@ -37,56 +37,56 @@
     "baseline": {
       "name": "LightGBM",
       "feature_count": 21,
-      "spearman_rank_ic": 0.0405,
-      "ic_pvalue": 0.00352,
-      "quintile_spread": 0.000475,
-      "directional_hit_ratio": 0.5264,
-      "directional_hit_ratio_hits": 1951,
-      "directional_hit_ratio_n": 3706,
+      "spearman_rank_ic": 0.0354,
+      "ic_pvalue": 0.01065,
+      "quintile_spread": 0.000378,
+      "directional_hit_ratio": 0.5248,
+      "directional_hit_ratio_hits": 1947,
+      "directional_hit_ratio_n": 3710,
       "hit_ratio_ci95": [
-        0.5103,
-        0.5425
+        0.5087,
+        0.5408
       ],
-      "hit_ratio_pvalue": 0.00136,
-      "pesaran_timmermann_stat": 2.611,
-      "pt_pvalue": 0.00451,
+      "hit_ratio_pvalue": 0.00266,
+      "pesaran_timmermann_stat": 2.334,
+      "pt_pvalue": 0.0098,
       "negative_control_ic": -0.0031
     },
     "full": {
       "name": "Ridge_Linear",
       "feature_count": 44,
-      "spearman_rank_ic": 0.0385,
-      "ic_pvalue": 0.00552,
-      "quintile_spread": 0.0006,
-      "directional_hit_ratio": 0.5183,
-      "directional_hit_ratio_hits": 1921,
-      "directional_hit_ratio_n": 3706,
+      "spearman_rank_ic": 0.0396,
+      "ic_pvalue": 0.00428,
+      "quintile_spread": 0.000606,
+      "directional_hit_ratio": 0.5202,
+      "directional_hit_ratio_hits": 1930,
+      "directional_hit_ratio_n": 3710,
       "hit_ratio_ci95": [
-        0.5023,
-        0.5344
+        0.5041,
+        0.5363
       ],
-      "hit_ratio_pvalue": 0.02657,
-      "pesaran_timmermann_stat": 2.2215,
-      "pt_pvalue": 0.01316,
-      "negative_control_ic": 0.01
+      "hit_ratio_pvalue": 0.01442,
+      "pesaran_timmermann_stat": 2.3549,
+      "pt_pvalue": 0.00926,
+      "negative_control_ic": 0.0114
     }
   },
   "delta_alpha": {
-    "rank_ic_improvement": -0.002,
-    "hit_ratio_improvement": -0.0081,
+    "rank_ic_improvement": 0.0042,
+    "hit_ratio_improvement": -0.0046,
     "sentiment_adds_value": false,
     "sentiment_adds_value_basis": "full model rank IC > baseline rank IC, paired bootstrap p < 0.05",
     "sentiment_adds_value_note": null,
     "paired_ic_test": {
-      "delta_mean": -0.00185,
-      "p_value": 0.58,
+      "delta_mean": 0.00423,
+      "p_value": 0.339,
       "n_boot": 1000
     },
-    "rank_ic_pvalue": 0.00552,
-    "hit_ratio_pvalue": 0.02657,
+    "rank_ic_pvalue": 0.00428,
+    "hit_ratio_pvalue": 0.01442,
     "hit_ratio_ci95": [
-      0.5023,
-      0.5344
+      0.5041,
+      0.5363
     ]
   }
 }

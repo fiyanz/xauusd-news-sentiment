@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "scientific-writing",
+  "owner": "sologa",
+  "repo": "codex-pipeline",
+  "path": ".codex/skills/scientific-writing",
+  "branch": "main",
+  "sha": "f06d3de75e4fe799648fb72c1a4f891370b40675",
+  "source": "manual"
+}
