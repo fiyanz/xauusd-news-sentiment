@@ -149,6 +149,17 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
   const volumeSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
   const targetLineRef = useRef<ISeriesApi<"Line"> | null>(null);
 
+  // Pane volume hanya tampil bila ada volume ASLI. Deriv tidak menyediakan volume
+  // (semua 0); tanpa ini margin bawah 20% jadi dead space kosong + batang tick-volume
+  // stray yang menarik autoscale ke bawah dan terlihat seperti 'gep'/celah.
+  function syncVolumePane(data: CandleItem[]) {
+    const hasRealVolume = data.some((c) => (c.volume ?? 0) > 0);
+    volumeSeriesRef.current?.applyOptions({ visible: hasRealVolume });
+    chartRef.current?.priceScale("right").applyOptions({
+      scaleMargins: { top: 0.1, bottom: hasRealVolume ? 0.2 : 0.05 },
+    });
+  }
+
   const [isLoading, setIsLoading] = useState(true);
   const [activeTool, setActiveTool] = useState<string>("crosshair");
   const [isLocked, setIsLocked] = useState(false);
@@ -314,6 +325,8 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
     });
 
     // Garis target prediksi (horizontal); di-update saat prediksi/candle berubah.
+    // autoscaleInfoProvider null: garis target TIDAK ikut menarik skala harga,
+    // supaya candle tidak gepeng saat target jauh dari harga berjalan.
     const targetLine = chart.addLineSeries({
       color: SIGNAL_COLOR.neutral,
       lineStyle: LineStyle.Dashed,
@@ -321,6 +334,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
       priceLineVisible: false,
       lastValueVisible: false,
       crosshairMarkerVisible: false,
+      autoscaleInfoProvider: () => null,
     });
     targetLineRef.current = targetLine;
 
@@ -375,8 +389,10 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
     chart.timeScale().subscribeVisibleLogicalRangeChange(async (newRange) => {
       if (!newRange) return;
 
-      // Persist visible view to localStorage once user interacted or initial load finished
-      if (userHasInteractedRef.current || isReadyRef.current) {
+      // Persist visible view ONLY after real user interaction (wheel/pointer/touch).
+      // Programmatic range changes (setData awal, restore, prepend history) tidak
+      // boleh menimpa posisi tersimpan di localStorage.
+      if (userHasInteractedRef.current && isReadyRef.current) {
         if (saveRangeTimer) clearTimeout(saveRangeTimer);
         saveRangeTimer = setTimeout(() => {
           try {
@@ -402,14 +418,17 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           let olderCandles: CandleItem[] = [];
 
           // 1. Candle dari apps/api (DB Deriv -> CSV historis).
-          let res = await fetch(`/api/market/xauusd-candles?tf=${timeframe}&limit=200&to=${earliestTs}`, {
+          // `to` STRICTLY older (earliestTs - 1): kalau inklusif, DB mengembalikan
+          // baris boundary yang sudah ada -> CSV fallback tidak kepanggil ->
+          // hasMoreHistory=false permanen dan history tidak bisa di-load.
+          let res = await fetch(`/api/market/xauusd-candles?tf=${timeframe}&limit=200&to=${earliestTs - 1}`, {
             cache: "no-store",
             signal: AbortSignal.timeout(5000),
           }).catch(() => null);
 
           // 2. Fallback candle-cache bila API internal mati.
           if (!res || !res.ok) {
-            res = await fetch(`/api/market/candles?tf=${timeframe}&limit=200&to=${earliestTs}`, {
+            res = await fetch(`/api/market/candles?tf=${timeframe}&limit=200&to=${earliestTs - 1}`, {
               cache: "no-store",
               signal: AbortSignal.timeout(5000),
             }).catch(() => null);
@@ -441,10 +460,11 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
 
                 const volumeData = merged.map((c) => ({
                   time: c.time,
-                  value: c.volume ?? 100,
+                  value: c.volume ?? 0,
                   color: c.close >= c.open ? "rgba(41, 98, 255, 0.35)" : "rgba(242, 54, 69, 0.35)",
                 }));
                 volumeSeries.setData(volumeData);
+                syncVolumePane(merged);
               } else {
                 hasMoreHistoryRef.current = false;
               }
@@ -458,14 +478,15 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
       }
     });
 
-    // ResizeObserver ensures instant responsive adjustment without jank
+    // ResizeObserver ensures instant responsive adjustment without jank.
+    // Container flex-1 + min-h-0 di semua ancestor membuat ukuran container
+    // benar-benar menyusut/membesar mengikuti layout; chart mengikuti via resize().
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        if (entry.contentRect && chartRef.current) {
-          chartRef.current.applyOptions({
-            width: entry.contentRect.width,
-            height: entry.contentRect.height,
-          });
+        const w = Math.round(entry.contentRect.width);
+        const h = Math.round(entry.contentRect.height);
+        if (w > 0 && h > 0 && chartRef.current) {
+          chartRef.current.resize(w, h);
         }
       }
     });
@@ -516,7 +537,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
             high: price,
             low: price,
             close: price,
-            volume: 1,
+            volume: 0,
           };
           currentCandlesRef.current.push(targetCandle);
         } else {
@@ -527,7 +548,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
             high: Math.max(lastCandle.high, price),
             low: Math.min(lastCandle.low, price),
             close: price,
-            volume: (lastCandle.volume ?? 100) + 1,
+            volume: lastCandle.volume ?? 0,
           };
           lastCandle.high = targetCandle.high;
           lastCandle.low = targetCandle.low;
@@ -539,7 +560,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
         applyTargetLine(predictionRef.current);
         volumeSeriesRef.current?.update({
           time: targetCandle.time,
-          value: targetCandle.volume ?? 100,
+          value: targetCandle.volume ?? 0,
           color: targetCandle.close >= targetCandle.open ? "rgba(41, 98, 255, 0.35)" : "rgba(242, 54, 69, 0.35)",
         });
 
@@ -753,10 +774,11 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
 
           const volumeData = candles.map((c) => ({
             time: c.time,
-            value: c.volume ?? 100,
+            value: c.volume ?? 0,
             color: c.close >= c.open ? "rgba(41, 98, 255, 0.35)" : "rgba(242, 54, 69, 0.35)",
           }));
           volumeSeriesRef.current.setData(volumeData);
+          syncVolumePane(candles);
 
           // Place economic news event markers (e.g. CPI, NFP, FOMC)
           try {
@@ -812,7 +834,9 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
             onPriceUpdateRef.current?.(val);
           }
 
-          // Restore user's customized chart zoom and position if saved
+          // Restore user's customized chart zoom and position if saved.
+          // Range di-clamp ke data yang tersedia (window bisa lebih pendek dari
+          // sesi sebelumnya) dengan mempertahankan lebar zoom pengguna.
           let restored = false;
           try {
             const savedRangeStr = localStorage.getItem(`xau_chart_range_${timeframe}`);
@@ -823,11 +847,16 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
                 typeof saved.to === "number" &&
                 saved.to > saved.from
               ) {
+                const span = saved.to - saved.from;
+                const maxTo = candles.length - 1 + 15;
+                let to = Math.min(saved.to, maxTo);
+                let from = to - span;
+                if (from < 0) {
+                  from = 0;
+                  to = Math.min(span, maxTo);
+                }
                 requestAnimationFrame(() => {
-                  chartRef.current?.timeScale().setVisibleLogicalRange({
-                    from: saved.from,
-                    to: saved.to,
-                  });
+                  chartRef.current?.timeScale().setVisibleLogicalRange({ from, to });
                 });
                 restored = true;
               }
@@ -898,16 +927,16 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
     dataSource !== "unknown" || timeframe === "5m" || timeframe === "15m" || timeframe === "1m";
 
   const sourceBadgeClasses: Record<string, string> = {
-    emerald: "border-emerald-500/40 text-emerald-400",
-    amber: "border-amber-500/40 text-amber-400",
-    red: "border-red-500/40 text-red-400",
-    neutral: "border-[#2A3441] text-[#788292]",
+    emerald: "border-ex-blue/40 text-ex-blue",
+    amber: "border-ex-yellow/40 text-ex-yellow",
+    red: "border-ex-red/40 text-ex-red",
+    neutral: "border-ex-border text-ex-muted",
   };
   const sourceDotClasses: Record<string, string> = {
-    emerald: "bg-emerald-400",
-    amber: "bg-amber-400",
-    red: "bg-red-400",
-    neutral: "bg-[#788292]",
+    emerald: "bg-ex-blue",
+    amber: "bg-ex-yellow",
+    red: "bg-ex-red",
+    neutral: "bg-ex-muted",
   };
 
   const predToneValue = signalTone(prediction?.signal ?? null);
@@ -925,13 +954,13 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
   return (
     <div className="relative w-full h-full flex bg-[#0E131A] overflow-hidden select-none">
       {/* 1. Authentic Vertical Drawing Toolbar (Lucide SVG Vector Icons) */}
-      <aside className="w-10 border-r border-[#1E2633] bg-[#141A22] flex flex-col items-center py-2 space-y-1 z-20 shrink-0 select-none">
+      <aside className="w-10 border-r border-[#1E2633] bg-[#141A22] flex flex-col items-center py-2 space-y-1 z-20 shrink-0 select-none overflow-y-auto dock-scroll">
         {/* Drawing & Cursor Tools */}
         <button
           type="button"
           onClick={() => handleSelectTool("crosshair")}
           title="Crosshair (Pointer)"
-          className={`p-1.5 rounded transition-colors ${
+          className={`p-1.5 transition-colors ${
             activeTool === "crosshair"
               ? "text-[#E0E3EB] bg-[#1E2633]"
               : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
@@ -944,7 +973,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           type="button"
           onClick={() => handleSelectTool("trendline")}
           title="Trend Line"
-          className={`p-1.5 rounded transition-colors ${
+          className={`p-1.5 transition-colors ${
             activeTool === "trendline"
               ? "text-[#E0E3EB] bg-[#1E2633]"
               : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
@@ -957,7 +986,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           type="button"
           onClick={() => handleSelectTool("spline")}
           title="Spline & Fibonacci"
-          className={`p-1.5 rounded transition-colors ${
+          className={`p-1.5 transition-colors ${
             activeTool === "spline"
               ? "text-[#E0E3EB] bg-[#1E2633]"
               : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
@@ -970,7 +999,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           type="button"
           onClick={() => handleSelectTool("brush")}
           title="Paintbrush & Highlighter"
-          className={`p-1.5 rounded transition-colors ${
+          className={`p-1.5 transition-colors ${
             activeTool === "brush"
               ? "text-[#E0E3EB] bg-[#1E2633]"
               : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
@@ -983,7 +1012,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           type="button"
           onClick={() => handleSelectTool("text")}
           title="Text Annotation"
-          className={`p-1.5 rounded transition-colors ${
+          className={`p-1.5 transition-colors ${
             activeTool === "text"
               ? "text-[#E0E3EB] bg-[#1E2633]"
               : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
@@ -996,7 +1025,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           type="button"
           onClick={() => handleSelectTool("smile")}
           title="Markers & Stickers"
-          className={`p-1.5 rounded transition-colors ${
+          className={`p-1.5 transition-colors ${
             activeTool === "smile"
               ? "text-[#E0E3EB] bg-[#1E2633]"
               : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
@@ -1009,7 +1038,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           type="button"
           onClick={() => handleSelectTool("ruler")}
           title="Price & Time Measure"
-          className={`p-1.5 rounded transition-colors ${
+          className={`p-1.5 transition-colors ${
             activeTool === "ruler"
               ? "text-[#E0E3EB] bg-[#1E2633]"
               : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
@@ -1025,7 +1054,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           type="button"
           onClick={() => chartRef.current?.timeScale().fitContent()}
           title="Zoom Fit Content"
-          className="p-1.5 rounded text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633] transition-colors"
+          className="p-1.5 text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633] transition-colors"
         >
           <ZoomIn className="w-4 h-4" />
         </button>
@@ -1034,7 +1063,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           type="button"
           onClick={handleToggleMagnet}
           title={isMagnet ? "Magnet Mode: ON" : "Magnet Mode: OFF"}
-          className={`p-1.5 rounded transition-colors ${
+          className={`p-1.5 transition-colors ${
             isMagnet ? "text-[#2962FF] bg-[#1E2633]" : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
           }`}
         >
@@ -1045,7 +1074,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           type="button"
           onClick={handleToggleLock}
           title={isLocked ? "Drawings: Locked" : "Lock All Drawings"}
-          className={`p-1.5 rounded transition-colors ${
+          className={`p-1.5 transition-colors ${
             isLocked ? "text-ex-yellow bg-[#1E2633]" : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
           }`}
         >
@@ -1056,7 +1085,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           type="button"
           onClick={handleToggleDrawings}
           title={showDrawings ? "Drawings: Visible" : "Drawings: Hidden"}
-          className={`p-1.5 rounded transition-colors ${
+          className={`p-1.5 transition-colors ${
             !showDrawings ? "text-ex-red bg-[#1E2633]" : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
           }`}
         >
@@ -1067,7 +1096,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           type="button"
           onClick={() => handleSelectTool("crosshair")}
           title="Clear Chart Objects"
-          className="p-1.5 rounded text-[#788292] hover:text-ex-red hover:bg-[#1E2633] transition-colors"
+          className="p-1.5 text-[#788292] hover:text-ex-red hover:bg-[#1E2633] transition-colors"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -1075,25 +1104,25 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
         <button
           type="button"
           title="Indicators & Layers"
-          className="p-1.5 rounded text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633] transition-colors"
+          className="p-1.5 text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633] transition-colors"
         >
           <Layers className="w-4 h-4" />
         </button>
       </aside>
 
       {/* 2. Chart Canvas Area */}
-      <div className="relative flex-1 h-full min-w-0 flex flex-col">
+      <div className="relative flex-1 h-full min-w-0 min-h-0 flex flex-col">
         {/* Terminal Chart Header Overlay: Gold vs US Dollar · Timeframe · O H L C */}
-        <div className="absolute top-2.5 left-4 z-10 flex items-center space-x-3 text-[11px] font-mono text-ex-muted pointer-events-none select-none">
+        <div className="absolute top-2.5 left-4 right-4 z-10 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-mono text-ex-muted pointer-events-none select-none">
           <div className="flex items-center space-x-1.5 font-sans text-ex-text font-bold">
             <span className="w-2.5 h-2.5 rounded-full bg-ex-yellow inline-block"></span>
-            <span>Gold vs US Dollar</span>
+            <span className="hidden sm:inline">Gold vs US Dollar</span>
             <span className="text-ex-muted font-normal">· {timeframe.toUpperCase()} ·</span>
           </div>
           {showSourceBadge && (
             <span
               title={sourceTitle(dataSource)}
-              className={`pointer-events-auto flex items-center space-x-1 px-1.5 py-0.5 rounded border font-mono text-[10px] ${sourceBadgeClasses[sourceTone(dataSource)]}`}
+              className={`pointer-events-auto flex items-center space-x-1 px-1.5 py-0.5 border font-mono text-[10px] ${sourceBadgeClasses[sourceTone(dataSource)]}`}
             >
               <span
                 className={`w-1.5 h-1.5 rounded-full ${sourceDotClasses[sourceTone(dataSource)]}`}
@@ -1104,7 +1133,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           {predictionOk && targetPrice !== null ? (
             <span
               title={`Prediksi 4H bucket ${prediction.bucket_time_utc ?? "-"}. Harga chart: Deriv CFD, bukan spot interbank.`}
-              className={`pointer-events-auto flex items-center space-x-1 px-1.5 py-0.5 rounded border font-mono text-[10px] ${predBadgeClasses[predToneValue]}`}
+              className={`pointer-events-auto hidden md:flex items-center space-x-1 px-1.5 py-0.5 border font-mono text-[10px] ${predBadgeClasses[predToneValue]}`}
             >
               <span>Prediksi {prediction.signal ?? "-"}</span>
               <span>· target {targetPrice.toFixed(2)}</span>
@@ -1121,13 +1150,13 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           ) : null}
           {hoveredCandle ? (
             <div className="flex items-center space-x-2.5">
-              <span>
+              <span className="hidden sm:inline">
                 O <span className="text-ex-text font-semibold">{hoveredCandle.open.toFixed(3)}</span>
               </span>
-              <span>
+              <span className="hidden sm:inline">
                 H <span className="text-ex-text font-semibold">{hoveredCandle.high.toFixed(3)}</span>
               </span>
-              <span>
+              <span className="hidden sm:inline">
                 L <span className="text-ex-text font-semibold">{hoveredCandle.low.toFixed(3)}</span>
               </span>
               <span>
@@ -1165,8 +1194,9 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           </div>
         )}
 
-        {/* Canvas DOM container */}
-        <div ref={chartContainerRef} className="w-full flex-1 min-h-[350px]" />
+        {/* Canvas DOM container: min-h-0 (bukan min-h tetap) supaya flex bisa
+            menyusut saat viewport/dock berubah — chart tidak pernah overflow. */}
+        <div ref={chartContainerRef} className="w-full flex-1 min-h-0" />
       </div>
     </div>
   );

@@ -19,6 +19,9 @@ interface CalendarEvent {
   actual: number | null;
   forecast: number | null;
   previous: number | null;
+  /** Provenance jujur dari CSV: sumber data + flag simulasi (placeholder). */
+  source: string;
+  isSimulated: boolean;
 }
 
 let cachedCalendar: CalendarEvent[] | null = null;
@@ -132,6 +135,8 @@ function loadCalendarData(): CalendarEvent[] {
   const idxActual = indexOf("actual");
   const idxForecast = indexOf("forecast");
   const idxPrevious = indexOf("previous");
+  const idxSource = indexOf("source");
+  const idxSimulated = indexOf("is_simulated");
 
   const events: CalendarEvent[] = [];
 
@@ -155,6 +160,10 @@ function loadCalendarData(): CalendarEvent[] {
       actual: idxActual === -1 ? null : parseOptionalNumber(cells[idxActual]),
       forecast: idxForecast === -1 ? null : parseOptionalNumber(cells[idxForecast]),
       previous: idxPrevious === -1 ? null : parseOptionalNumber(cells[idxPrevious]),
+      source: idxSource === -1 ? "" : (cells[idxSource] ?? "").trim(),
+      isSimulated:
+        idxSimulated !== -1 &&
+        (cells[idxSimulated] ?? "").trim().toLowerCase() === "true",
     });
   }
 
