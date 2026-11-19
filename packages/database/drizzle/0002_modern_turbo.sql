@@ -1,0 +1,1 @@
+ALTER TABLE "price_candles" ADD COLUMN "source" text DEFAULT 'deriv-cfd' NOT NULL;

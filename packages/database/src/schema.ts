@@ -1,4 +1,4 @@
-import { pgTable, text, integer, doublePrecision, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, doublePrecision, boolean, timestamp, index } from "drizzle-orm/pg-core";
 
 export const eventTypes = pgTable("event_types", {
   id: text("id").primaryKey(),
@@ -40,6 +40,10 @@ export const priceCandles = pgTable(
     low: doublePrecision("low").notNull(),
     close: doublePrecision("close").notNull(),
     volume: doublePrecision("volume").notNull().default(0),
+    // Provenance jujur: 'deriv-cfd' (candle Deriv real), 'csv-historical'
+    // (CSV historis 2010+), 'simulated' (sintetis, selalu ditandai).
+    // Default melabeli baris Deriv yang sudah ada sebelum kolom ini dibuat.
+    source: text("source").notNull().default("deriv-cfd"),
   },
   (table) => [
     index("candles_sym_tf_ts_idx").on(table.symbol, table.timeframe, table.timestampUtc),
@@ -96,3 +100,30 @@ export const collectionLogs = pgTable("collection_logs", {
   errorLog: text("error_log"),
   executedAtUtc: integer("executed_at_utc").notNull(),
 });
+
+/**
+ * Artikel berita hasil pipeline sentiment-analysis (corpus JSONL).
+ * Di-ingest worker secara incremental (watermark time_published_utc),
+ * deduplikasi lewat unique url + ON CONFLICT DO NOTHING.
+ */
+export const newsArticles = pgTable(
+  "news_articles",
+  {
+    id: text("id").primaryKey(),
+    url: text("url").notNull().unique(),
+    title: text("title").notNull(),
+    summary: text("summary"),
+    publisher: text("publisher"),
+    sourceFeed: text("source_feed"),
+    timePublishedUtc: timestamp("time_published_utc", { withTimezone: true }).notNull(),
+    sentimentScore: doublePrecision("sentiment_score"),
+    sentimentLabel: text("sentiment_label"),
+    sentimentLm: doublePrecision("sentiment_lm"),
+    topics: text("topics"), // JSON string, mis. ["commodities","forex"]
+    ingestedAt: timestamp("ingested_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // Query utama: berita terbaru (ORDER BY time_published_utc DESC).
+    index("news_time_published_idx").on(table.timePublishedUtc.desc()),
+  ]
+);

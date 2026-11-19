@@ -40,7 +40,14 @@ loadEnv();
 const connectionString =
   process.env.DATABASE_URL || "postgres://postgres@localhost:5432/xauusd_market";
 
-export const client = postgres(connectionString, { max: 10 });
+// TLS kondisional: DB managed (mis. TiDB Cloud) wajib SSL via ?sslmode=require.
+// Lokal tanpa sslmode -> tanpa SSL (tetap jalan). Regex (bukan new URL) supaya
+// tidak crash saat password masih placeholder berisi karakter '<'/'>'.
+const needsSsl = /[?&]sslmode=(require|verify-full)/.test(connectionString);
+export const client = postgres(connectionString, {
+  max: 10,
+  ...(needsSsl ? { ssl: "require" as const } : {}),
+});
 export const db = drizzle(client, { schema });
 export * from "./schema.js";
-export { sql, and, desc, eq, lte } from "drizzle-orm";
+export { sql, and, desc, eq, lte, like, gt } from "drizzle-orm";

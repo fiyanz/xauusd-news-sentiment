@@ -1,6 +1,4 @@
 import fs from "node:fs";
-import path from "node:path";
-import { spawn } from "node:child_process";
 import { FinancialClient, DerivClient } from "@repo/financial-clients";
 import { db, priceCandles, sql } from "@repo/database";
 import {
@@ -8,21 +6,126 @@ import {
   calculateReactionWindows,
   aggregateEventStats,
 } from "@repo/core-analytics";
+import { ingestNewsCorpus } from "./news-db.js";
 
 const client = new FinancialClient();
 
-function repoRoot(): string {
-  return process.env.REPO_ROOT
-    ? path.resolve(process.env.REPO_ROOT)
-    : path.resolve(process.cwd(), "../..");
+/**
+ * Sentiment-analysis sekarang service HTTP terpisah (bukan spawn uv lokal).
+ * Semua akses pipeline/prediksi lewat URL ini sesuai kontrak deploy.
+ */
+const SENTIMENT_SERVICE_URL = (
+  process.env.SENTIMENT_SERVICE_URL || "http://localhost:8000"
+).replace(/\/+$/, "");
+const SYNC_POLL_INTERVAL_MS = 10_000;
+const SYNC_TIMEOUT_MS = 20 * 60 * 1000;
+/** Heartbeat worker: dibaca healthcheck container (mtime file). */
+const HEARTBEAT_PATH = "/tmp/worker-heartbeat";
+
+interface SyncStatus {
+  running: boolean;
+  last_started_at: string | null;
+  last_finished_at: string | null;
+  last_result: "success" | "error" | null;
+  last_error: string | null;
 }
 
-function getPythonServiceDir(): string {
-  const direct = path.resolve(process.cwd(), "services/sentiment-analysis");
-  if (fs.existsSync(direct)) return direct;
-  const fromApps = path.resolve(process.cwd(), "../../services/sentiment-analysis");
-  if (fs.existsSync(fromApps)) return fromApps;
-  return path.resolve(repoRoot(), "services/sentiment-analysis");
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Tulis timestamp epoch ms tiap akhir cycle job (kegagalan tidak menghentikan worker). */
+function writeHeartbeat(): void {
+  try {
+    fs.writeFileSync(HEARTBEAT_PATH, String(Date.now()));
+  } catch (error) {
+    console.warn(
+      `[Worker] Gagal menulis heartbeat: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+/**
+ * Trigger pipeline sentiment lewat POST /sync, lalu poll GET /sync/status
+ * tiap 10 detik sampai running=false (maks 20 menit). 409 berarti sync sudah
+ * berjalan di service -> tetap tunggu sampai selesai. Prediksi akhir dibaca
+ * dari GET /prediction (tidak lagi dari file).
+ */
+async function syncSentimentPipeline(): Promise<void> {
+  try {
+    const res = await fetch(`${SENTIMENT_SERVICE_URL}/sync`, {
+      method: "POST",
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (res.status === 409) {
+      console.log("[Worker] Sentiment sync sudah berjalan (409) — menunggu selesai.");
+    } else if (!res.ok) {
+      console.warn(`[Worker] POST /sync ditolak sentiment service: HTTP ${res.status}.`);
+      return;
+    } else {
+      console.log(`[Worker] Sentiment sync diterima service (HTTP ${res.status}).`);
+    }
+  } catch (error) {
+    console.warn(
+      `[Worker] Sentiment service tidak bisa dihubungi (${SENTIMENT_SERVICE_URL}): ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return;
+  }
+
+  const deadline = Date.now() + SYNC_TIMEOUT_MS;
+  let finished = false;
+  while (Date.now() < deadline) {
+    await sleep(SYNC_POLL_INTERVAL_MS);
+    try {
+      const res = await fetch(`${SENTIMENT_SERVICE_URL}/sync/status`, {
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!res.ok) continue;
+      const status = (await res.json()) as SyncStatus;
+      if (!status.running) {
+        finished = true;
+        if (status.last_result === "error") {
+          console.warn(
+            `[Worker] Sentiment sync selesai dengan error: ${status.last_error ?? "tidak diketahui"}`
+          );
+        } else {
+          console.log("[Worker] Sentiment sync selesai.");
+        }
+        break;
+      }
+    } catch {
+      // Service sempat tidak merespons; coba lagi di poll berikutnya.
+    }
+  }
+  if (!finished) {
+    console.warn("[Worker] Sentiment sync melewati batas 20 menit — lanjut tanpa menunggu.");
+  }
+
+  // Log prediksi terbaru dari service (bukan baca file lagi).
+  try {
+    const res = await fetch(`${SENTIMENT_SERVICE_URL}/prediction`, {
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (res.ok) {
+      const pred = (await res.json()) as {
+        signal?: string;
+        sentiment_label?: string;
+        predicted_target_price?: number;
+        predicted_pips_delta?: number;
+      };
+      console.log(
+        `[Worker] AI Model 4H Forecast: ${pred.signal} (${pred.sentiment_label}) | Target: $${pred.predicted_target_price} (${pred.predicted_pips_delta})`
+      );
+    } else {
+      console.warn(`[Worker] GET /prediction: HTTP ${res.status} (prediksi belum tersedia).`);
+    }
+  } catch (error) {
+    console.warn(
+      `[Worker] GET /prediction gagal: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
 }
 
 const DERIV_APP_ID = process.env.DERIV_APP_ID ?? "";
@@ -67,6 +170,7 @@ async function syncDerivCandles(): Promise<void> {
           low: candle.low,
           close: candle.close,
           volume: 0,
+          source: "deriv-cfd",
         }));
 
         await db
@@ -80,6 +184,8 @@ async function syncDerivCandles(): Promise<void> {
               low: sql`EXCLUDED.low`,
               close: sql`EXCLUDED.close`,
               volume: sql`EXCLUDED.volume`,
+              // Label mengikuti nilai yang ditulis (provenance tetap jujur).
+              source: sql`EXCLUDED.source`,
             },
           });
 
@@ -121,6 +227,8 @@ async function runIngestionJob() {
           low: c.low,
           close: c.close,
           volume: c.volume,
+          // Jujur: baris ini dari CSV/sintetis FinancialClient, bukan Deriv.
+          source: c.isSimulated ? "simulated" : "csv-historical",
         }));
         await db
           .insert(priceCandles)
@@ -133,6 +241,8 @@ async function runIngestionJob() {
               low: sql`EXCLUDED.low`,
               close: sql`EXCLUDED.close`,
               volume: sql`EXCLUDED.volume`,
+              // Label mengikuti nilai yang ditulis (provenance tetap jujur).
+              source: sql`EXCLUDED.source`,
             },
           });
         console.log(`[Worker] Persisted batch of ${rows.length} candles to PostgreSQL.`);
@@ -171,26 +281,17 @@ async function runIngestionJob() {
         : "[Worker] CFTC COT Report unavailable (sumber CFTC tidak bisa diakses)."
     );
 
-    // 5. Trigger Python Macro-Sentiment & Price Pipeline Sync
-    const pythonServiceDir = getPythonServiceDir();
-    if (fs.existsSync(pythonServiceDir)) {
-      console.log("[Worker] Running Python Macro-Sentiment Pipeline Sync...");
-      await new Promise<void>((resolve) => {
-        const proc = spawn("uv", ["run", "python", "-m", "src.pipeline.sync"], {
-          cwd: pythonServiceDir,
-          stdio: "ignore",
-        });
-        proc.on("close", () => resolve());
-        proc.on("error", () => resolve());
-      });
+    // 5. Trigger Macro-Sentiment & Price Pipeline Sync via HTTP sentiment service
+    console.log("[Worker] Running Macro-Sentiment Pipeline Sync (HTTP)...");
+    await syncSentimentPipeline();
 
-      const predFile = path.join(pythonServiceDir, "data/processed/latest_prediction.json");
-      if (fs.existsSync(predFile)) {
-        const pred = JSON.parse(fs.readFileSync(predFile, "utf-8"));
-        console.log(
-          `[Worker] AI Model 4H Forecast: ${pred.signal} (${pred.sentiment_label}) | Target: $${pred.predicted_target_price} (${pred.predicted_pips_delta})`
-        );
-      }
+    // 6. Ingest corpus berita ke news_articles (watermark + batch 1000, dedup url)
+    try {
+      await ingestNewsCorpus();
+    } catch (error) {
+      console.warn(
+        `[Worker] Ingest news corpus gagal: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
 
     const duration = Date.now() - start;
@@ -212,6 +313,8 @@ async function scheduleNextJob() {
     await runIngestionJob();
   } finally {
     isJobRunning = false;
+    // Heartbeat tiap akhir cycle (sukses maupun gagal) untuk healthcheck container.
+    writeHeartbeat();
     const intervalSec = process.env.NODE_ENV === "production" ? 15 * 60 : 5 * 60;
     setTimeout(scheduleNextJob, intervalSec * 1000);
   }
