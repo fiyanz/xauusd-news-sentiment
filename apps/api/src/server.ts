@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { spawn } from "node:child_process";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import { FinancialClient, DerivClient } from "@repo/financial-clients";
+import { FinancialClient, DerivClient, getCandles } from "@repo/financial-clients";
+import type { CandleDbPort, CandleProvenance } from "@repo/financial-clients";
 import {
   calculateSurprise,
   calculateReactionWindows,
@@ -12,7 +12,7 @@ import {
 import type { SurpriseResult } from "@repo/core-analytics";
 import type { EventReaction, Timeframe } from "@repo/types";
 import { COMPLIANCE_DISCLAIMER_FR10, TimeframeSchema } from "@repo/types";
-import { db, priceCandles, and, desc, eq, lte } from "@repo/database";
+import { db, priceCandles, newsArticles, and, desc, eq, lte, like } from "@repo/database";
 
 /** Muat `.env` dari repo root (turbo menjalankan task dengan cwd = package). */
 function loadEnv(): void {
@@ -174,38 +174,35 @@ fastify.get("/api/v1/market/xauusd/latest", async (_request, reply) => {
   };
 });
 
-type StoredCandle = {
-  symbol: string;
-  timeframe: string;
-  timestampUtc: number;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
+/**
+ * Adapter DB produksi untuk port candle-repository (drizzle/TiDB).
+ * Candle dari `price_candles` (Deriv recent + backfill CSV historis); kolom
+ * `source` ikut dibaca supaya provenance per-baris jujur. Window terurut
+ * naik, `to` inklusif (<=). DB mati -> melempar; modul fallback ke CSV.
+ * Baris diteruskan apa adanya (termasuk `id`) — kontrak response tidak berubah.
+ */
+const candleDbPort: CandleDbPort = {
+  async queryCandles(tf, limit, to) {
+    const conditions = [eq(priceCandles.symbol, "XAUUSD"), eq(priceCandles.timeframe, tf)];
+    if (to !== undefined && Number.isFinite(to)) {
+      conditions.push(lte(priceCandles.timestampUtc, to));
+    }
+
+    const rows = await db
+      .select()
+      .from(priceCandles)
+      .where(and(...conditions))
+      .orderBy(desc(priceCandles.timestampUtc))
+      .limit(limit);
+    rows.reverse();
+    return rows.map((row) => ({ ...row, source: row.source as CandleProvenance }));
+  },
 };
 
-/**
- * Candle dari `price_candles` (diisi worker dari Deriv). DB mati -> melempar,
- * pemanggil fallback ke CSV historis.
- */
-async function fetchStoredCandles(tf: string, limit: number, to?: number): Promise<StoredCandle[]> {
-  const conditions = [eq(priceCandles.symbol, "XAUUSD"), eq(priceCandles.timeframe, tf)];
-  if (to !== undefined && Number.isFinite(to)) {
-    conditions.push(lte(priceCandles.timestampUtc, to));
-  }
-
-  const rows = await db
-    .select()
-    .from(priceCandles)
-    .where(and(...conditions))
-    .orderBy(desc(priceCandles.timestampUtc))
-    .limit(limit);
-  rows.reverse();
-  return rows;
-}
-
-// Windowed Paginated Candles API (prevents browser lag)
+// Windowed Paginated Candles API (prevents browser lag).
+// Seluruh resolusi (DB-first -> CSV -> estimasi -> sintetis) + pelabelan
+// provenance tinggal di modul deep candle-repository; endpoint ini hanya
+// mem-parse query dan meng-inject adapter DB drizzle.
 fastify.get<{ Querystring: { tf?: string; limit?: string; to?: string } }>(
   "/api/v1/market/xauusd/candles",
   async (request) => {
@@ -214,45 +211,7 @@ fastify.get<{ Querystring: { tf?: string; limit?: string; to?: string } }>(
     const limit = Math.max(1, Math.min(Number(request.query.limit) || 300, 1000)); // capped at 1000 for high performance
     const to = request.query.to ? Number(request.query.to) : undefined;
 
-    // 1. DB (candle Deriv yang disimpan worker).
-    let data: StoredCandle[] = [];
-    let source: "deriv-cfd" | "csv-historical" | "simulated" = "deriv-cfd";
-    let isSimulated = false;
-
-    try {
-      data = await fetchStoredCandles(tf, limit, to);
-    } catch (error) {
-      console.warn(
-        `[API] price_candles tidak bisa dibaca (${tf}): ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
-
-    // 2. Fallback CSV historis bila DB kosong/mati. Synthetic selalu ditandai.
-    if (data.length === 0) {
-      const fallback = await client.fetchXauusdCandles(tf as Timeframe, limit, to);
-      isSimulated = fallback.length > 0 && fallback.every((c) => c.isSimulated === true);
-      source = isSimulated ? "simulated" : "csv-historical";
-      data = fallback.map((c) => ({
-        symbol: c.symbol,
-        timeframe: c.timeframe,
-        timestampUtc: c.timestampUtc,
-        open: c.open,
-        high: c.high,
-        low: c.low,
-        close: c.close,
-        volume: c.volume,
-      }));
-    }
-
-    return {
-      timeframe: tf,
-      count: data.length,
-      data,
-      source,
-      isSimulated,
-      status: data.length === 0 ? "unavailable" : isSimulated ? "simulated" : "ok",
-      disclaimer: COMPLIANCE_DISCLAIMER_FR10,
-    };
+    return getCandles(tf as Timeframe, limit, to, { db: candleDbPort });
   }
 );
 
@@ -558,41 +517,36 @@ fastify.get("/api/v1/reports/daily/latest", async () => {
   };
 });
 
-function repoRoot(): string {
-  return process.env.REPO_ROOT
-    ? path.resolve(process.env.REPO_ROOT)
-    : path.resolve(process.cwd(), "../..");
-}
-
-function getPythonServiceDir(): string {
-  const direct = path.resolve(process.cwd(), "services/sentiment-analysis");
-  if (fs.existsSync(direct)) return direct;
-  const fromApps = path.resolve(process.cwd(), "../../services/sentiment-analysis");
-  if (fs.existsSync(fromApps)) return fromApps;
-  return path.resolve(repoRoot(), "services/sentiment-analysis");
-}
+/**
+ * Sentiment-analysis sekarang service HTTP terpisah (bukan spawn uv lokal).
+ * Prediksi dan trigger sync diakses lewat URL ini sesuai kontrak deploy.
+ */
+const SENTIMENT_SERVICE_URL = (
+  process.env.SENTIMENT_SERVICE_URL || "http://localhost:8000"
+).replace(/\/+$/, "");
 
 fastify.get("/api/v1/analytics/macro-sentiment/latest", async () => {
-  const pythonServiceDir = getPythonServiceDir();
-  const predFile = path.join(pythonServiceDir, "data/processed/latest_prediction.json");
-
-  if (fs.existsSync(predFile)) {
-    try {
-      const pred = JSON.parse(fs.readFileSync(predFile, "utf-8"));
+  // Prediksi dibaca dari sentiment service (timeout 5 detik), bukan file lagi.
+  try {
+    const res = await fetch(`${SENTIMENT_SERVICE_URL}/prediction`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (res.ok) {
+      const pred = (await res.json()) as Record<string, unknown>;
       return {
         ...pred,
         status: "ok",
         disclaimer: COMPLIANCE_DISCLAIMER_FR10,
       };
-    } catch {
-      // File ada tapi rusak -> unavailable (bukan angka karangan).
     }
+  } catch {
+    // Service mati/timeout/rusak -> unavailable (bukan angka karangan).
   }
 
   return {
     status: "unavailable",
     reason:
-      "latest_prediction.json belum tersedia atau tidak bisa dibaca — pipeline sentiment-analysis belum dijalankan.",
+      "Prediksi sentiment belum tersedia — sentiment service tidak merespons atau pipeline belum dijalankan.",
     model_champion: null,
     current_price: null,
     prediction_horizon: null,
@@ -607,10 +561,63 @@ fastify.get("/api/v1/analytics/macro-sentiment/latest", async () => {
   };
 });
 
-let isSyncRunning = false;
+/** Kolom topics disimpan sebagai JSON string; kembalikan array bila valid. */
+function parseTopics(raw: string | null): unknown[] | null {
+  if (!raw) return null;
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+// Berita terbaru dari news_articles (di-ingest worker dari corpus sentiment).
+fastify.get<{ Querystring: { limit?: string; topic?: string } }>(
+  "/api/v1/news/latest",
+  async (request, reply) => {
+    const limit = Math.max(1, Math.min(Number(request.query.limit) || 50, 200));
+    const topic = (request.query.topic ?? "").trim();
+
+    try {
+      // Filter topic opsional lewat kolom topics (JSON string) dengan LIKE.
+      const topicFilter = topic
+        ? like(newsArticles.topics, `%${topic.replace(/[\\%_]/g, "\\$&")}%`)
+        : undefined;
+      const rows = await db
+        .select()
+        .from(newsArticles)
+        .where(topicFilter)
+        .orderBy(desc(newsArticles.timePublishedUtc))
+        .limit(limit);
+
+      const articles = rows.map((row) => ({
+        ...row,
+        topics: parseTopics(row.topics),
+      }));
+      return {
+        status: "ok",
+        count: articles.length,
+        articles,
+        disclaimer: COMPLIANCE_DISCLAIMER_FR10,
+      };
+    } catch (error) {
+      // DB mati/tabel belum ada -> unavailable, bukan data karangan.
+      console.warn(
+        `[API] news_articles tidak bisa dibaca: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return reply.status(503).send({
+        status: "unavailable",
+        reason: "Database berita tidak bisa diakses.",
+        count: 0,
+        articles: [],
+        disclaimer: COMPLIANCE_DISCLAIMER_FR10,
+      });
+    }
+  }
+);
+
 const PIPELINE_SYNC_TOKEN = process.env.PIPELINE_SYNC_TOKEN || "";
-const PIPELINE_SYNC_TIMEOUT_MS =
-  Number(process.env.PIPELINE_SYNC_TIMEOUT_MS) || 15 * 60 * 1000;
 
 fastify.post("/api/v1/pipeline/sync", async (request, reply) => {
   if (!PIPELINE_SYNC_TOKEN) {
@@ -636,51 +643,44 @@ fastify.post("/api/v1/pipeline/sync", async (request, reply) => {
     });
   }
 
-  if (isSyncRunning) {
-    return reply.status(409).send({
-      statusCode: 409,
-      error: "Conflict",
-      message: "Pipeline sync already in progress.",
+  // Teruskan ke sentiment service; lock single-flight ada di service (cross-request),
+  // 409 already_running diteruskan dengan response shape lama.
+  try {
+    const res = await fetch(`${SENTIMENT_SERVICE_URL}/sync`, {
+      method: "POST",
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (res.status === 409) {
+      return reply.status(409).send({
+        statusCode: 409,
+        error: "Conflict",
+        message: "Pipeline sync already in progress.",
+        timestamp: new Date().toISOString(),
+      });
+    }
+    if (res.ok) {
+      return {
+        status: "sync_dispatched",
+        message: "Automated macro-sentiment pipeline sync triggered in background.",
+        timestamp: new Date().toISOString(),
+      };
+    }
+    return reply.status(503).send({
+      statusCode: 503,
+      status: "unavailable",
+      error: "Service Unavailable",
+      reason: `Sentiment service menolak sync (HTTP ${res.status}).`,
+      timestamp: new Date().toISOString(),
+    });
+  } catch {
+    return reply.status(503).send({
+      statusCode: 503,
+      status: "unavailable",
+      error: "Service Unavailable",
+      reason: `Sentiment service tidak bisa dihubungi di ${SENTIMENT_SERVICE_URL}.`,
       timestamp: new Date().toISOString(),
     });
   }
-
-  const pythonServiceDir = getPythonServiceDir();
-  if (fs.existsSync(pythonServiceDir)) {
-    isSyncRunning = true;
-    const proc = spawn("uv", ["run", "python", "-m", "src.pipeline.sync"], {
-      cwd: pythonServiceDir,
-      stdio: "ignore",
-    });
-
-    // Batas waktu maksimal: cegah proses menggantung memblokir endpoint selamanya.
-    const killTimer = setTimeout(() => {
-      try {
-        proc.kill("SIGKILL");
-      } catch {
-        // Proses sudah keluar.
-      }
-    }, PIPELINE_SYNC_TIMEOUT_MS);
-
-    const clearRun = () => {
-      clearTimeout(killTimer);
-      isSyncRunning = false;
-    };
-    proc.on("exit", clearRun);
-    proc.on("error", clearRun);
-
-    return {
-      status: "sync_dispatched",
-      message: "Automated macro-sentiment pipeline sync triggered in background.",
-      timestamp: new Date().toISOString(),
-    };
-  }
-
-  return reply.status(404).send({
-    statusCode: 404,
-    status: "service_not_found",
-    timestamp: new Date().toISOString(),
-  });
 });
 
 const port = Number(process.env.PORT_API) || 4000;

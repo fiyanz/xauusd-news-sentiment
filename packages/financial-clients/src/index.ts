@@ -1,9 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
-import type { OHLCV, Timeframe, COTReport } from "@repo/types";
-import { ExpertDataService } from "./expert-data.js";
+import type { Timeframe, COTReport } from "@repo/types";
+import { fetchExpertCandles, parseCsvLine } from "./candle-repository.js";
+import type { XauusdCandle } from "./candle-repository.js";
 
+export * from "./candle-repository.js";
 export * from "./expert-data.js";
 export * from "./deriv.js";
 
@@ -24,10 +26,10 @@ export interface EconomicCalendarRaw {
 }
 
 /**
- * Candle XAUUSD. `isSimulated: true` menandai candle sintetis yang digenerate
- * ketika dataset historis tidak tersedia — bukan data pasar nyata.
+ * Candle XAUUSD (tipe didefinisikan di candle-repository, di-re-export di sini).
+ * `isSimulated: true` menandai candle sintetis — bukan data pasar nyata.
  */
-export type XauusdCandle = OHLCV & { isSimulated?: boolean };
+export type { XauusdCandle } from "./candle-repository.js";
 
 function repoRoot(): string {
   return process.env.REPO_ROOT
@@ -73,37 +75,7 @@ function parseBooleanFlag(value: string | undefined): boolean {
   return normalized === "true" || normalized === "1" || normalized === "yes";
 }
 
-function parseCsvLine(line: string): string[] {
-  const cells: string[] = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i]!;
-    if (inQuotes) {
-      if (ch === '"') {
-        if (line[i + 1] === '"') {
-          current += '"';
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        current += ch;
-      }
-    } else if (ch === '"') {
-      inQuotes = true;
-    } else if (ch === ",") {
-      cells.push(current);
-      current = "";
-    } else {
-      current += ch;
-    }
-  }
-
-  cells.push(current);
-  return cells;
-}
+// Parser CSV kanonik kini satu tempat di candle-repository (parseCsvLine).
 
 function classifyEventCode(eventName: string): string {
   const name = eventName.toUpperCase();
@@ -185,69 +157,16 @@ function parseCotReport(text: string): COTReport | null {
 }
 
 export class FinancialClient {
-  private expertService: ExpertDataService;
-
-  constructor() {
-    this.expertService = new ExpertDataService();
-  }
-
+  /**
+   * Delegate tipis ke candle-repository: CSV expert -> estimasi H1 ->
+   * sintetis (isSimulated). Perilaku lama dipertahankan persis.
+   */
   async fetchXauusdCandles(
     timeframe: Timeframe = "15m",
     limit: number = 300,
     to?: number
   ): Promise<XauusdCandle[]> {
-    // 1. Try loading real historical candles from expert dataset
-    const realCandles = await this.expertService.getRecentCandles(timeframe, limit, to);
-    if (realCandles && realCandles.length > 0) {
-      // Data historis nyata — tidak ada penanda isSimulated.
-      return realCandles;
-    }
-
-    // 2. Fallback synthetic generator — SELALU ditandai isSimulated: true.
-    const now = Math.floor(Date.now() / 1000);
-    const intervalSec =
-      timeframe === "1m"
-        ? 60
-        : timeframe === "5m"
-        ? 300
-        : timeframe === "15m"
-        ? 900
-        : timeframe === "30m"
-        ? 1800
-        : timeframe === "1h"
-        ? 3600
-        : timeframe === "4h"
-        ? 14400
-        : 86400;
-
-    const basePrice = 4122.75;
-    const candles: XauusdCandle[] = [];
-
-    let curClose = basePrice;
-    for (let i = limit; i >= 0; i--) {
-      const ts = now - i * intervalSec;
-      const variation = (Math.random() - 0.48) * 3.5;
-      const open = curClose;
-      const close = Number((open + variation).toFixed(2));
-      const high = Number((Math.max(open, close) + Math.random() * 2.0).toFixed(2));
-      const low = Number((Math.min(open, close) - Math.random() * 2.0).toFixed(2));
-      const volume = Math.floor(Math.random() * 800) + 100;
-
-      curClose = close;
-      candles.push({
-        symbol: "XAUUSD",
-        timeframe,
-        timestampUtc: ts,
-        open,
-        high,
-        low,
-        close,
-        volume,
-        isSimulated: true,
-      });
-    }
-
-    return candles;
+    return fetchExpertCandles(timeframe, limit, to);
   }
 
   /**

@@ -149,13 +149,13 @@ export class DerivClient {
     });
   }
 
-  async fetchCandles(symbol: string, granularitySec: number, count: number): Promise<DerivCandle[]> {
+  async fetchCandles(symbol: string, granularitySec: number, count: number, end: number | "latest" = "latest"): Promise<DerivCandle[]> {
     await this.ready();
     const response = (await this.request({
       ticks_history: symbol,
       adjust_start_time: 1,
       count,
-      end: "latest",
+      end,
       style: "candles",
       granularity: granularitySec,
     })) as DerivHistoryMessage;
