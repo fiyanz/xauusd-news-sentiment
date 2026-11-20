@@ -11,21 +11,12 @@ import {
   SeriesMarker,
   LineStyle,
 } from "lightweight-charts";
+import { ZoomIn } from "lucide-react";
 import {
-  Crosshair,
-  TrendingUp,
-  Spline,
-  Paintbrush,
-  Type,
-  Smile,
-  Ruler,
-  ZoomIn,
-  Magnet,
-  Lock,
-  Eye,
-  Trash2,
-  Layers,
-} from "lucide-react";
+  VIEWPORT_CONFIG,
+  restoreRange,
+  shouldPrepend,
+} from "../lib/chart-viewport";
 
 interface CandleItem {
   time: Time;
@@ -156,15 +147,13 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
     const hasRealVolume = data.some((c) => (c.volume ?? 0) > 0);
     volumeSeriesRef.current?.applyOptions({ visible: hasRealVolume });
     chartRef.current?.priceScale("right").applyOptions({
-      scaleMargins: { top: 0.1, bottom: hasRealVolume ? 0.2 : 0.05 },
+      scaleMargins: hasRealVolume
+        ? VIEWPORT_CONFIG.priceScaleMargins
+        : VIEWPORT_CONFIG.priceScaleMarginsNoVolume,
     });
   }
 
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTool, setActiveTool] = useState<string>("crosshair");
-  const [isLocked, setIsLocked] = useState(false);
-  const [isMagnet, setIsMagnet] = useState(false);
-  const [showDrawings, setShowDrawings] = useState(true);
   // Provenance of the candles currently on screen. `estimated` means the bars
   // are H1-derived and must never be read as real intraday prints.
   const [dataSource, setDataSource] = useState<ChartDataSource>("unknown");
@@ -173,56 +162,10 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
   const lastPriceRef = useRef<number | null>(null);
   const timeframeRef = useRef(timeframe);
 
-  // Restore toolbar preferences from localStorage
-  useEffect(() => {
-    try {
-      const savedTool = localStorage.getItem("xau_chart_tool");
-      if (savedTool) setActiveTool(savedTool);
-      const savedLocked = localStorage.getItem("xau_chart_locked");
-      if (savedLocked !== null) setIsLocked(savedLocked === "true");
-      const savedMagnet = localStorage.getItem("xau_chart_magnet");
-      if (savedMagnet !== null) setIsMagnet(savedMagnet === "true");
-      const savedDrawings = localStorage.getItem("xau_chart_drawings");
-      if (savedDrawings !== null) setShowDrawings(savedDrawings === "true");
-    } catch {}
-  }, []);
-
-  const handleSelectTool = (tool: string) => {
-    setActiveTool(tool);
-    try {
-      localStorage.setItem("xau_chart_tool", tool);
-    } catch {}
-  };
-
-  const handleToggleMagnet = () => {
-    setIsMagnet((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem("xau_chart_magnet", String(next));
-      } catch {}
-      return next;
-    });
-  };
-
-  const handleToggleLock = () => {
-    setIsLocked((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem("xau_chart_locked", String(next));
-      } catch {}
-      return next;
-    });
-  };
-
-  const handleToggleDrawings = () => {
-    setShowDrawings((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem("xau_chart_drawings", String(next));
-      } catch {}
-      return next;
-    });
-  };
+  // Toolbar drawing lama (activeTool/isMagnet/isLocked/showDrawings) dihapus:
+  // deletion test membuktikan state-nya tidak pernah memengaruhi chart —
+  // cuma styling tombol + localStorage, tanpa implementasi drawing nyata.
+  // Satu-satunya tool fungsional (ZoomIn -> fitContent) dipertahankan.
 
   const [hoveredCandle, setHoveredCandle] = useState<{
     open: number;
@@ -271,18 +214,15 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
       },
       rightPriceScale: {
         borderColor: "#232B38",
-        scaleMargins: {
-          top: 0.1,
-          bottom: 0.2,
-        },
+        scaleMargins: VIEWPORT_CONFIG.priceScaleMargins,
       },
       timeScale: {
         borderColor: "#232B38",
         timeVisible: true,
         secondsVisible: false,
-        barSpacing: 12,
-        minBarSpacing: 2,
-        rightOffset: 15,
+        barSpacing: VIEWPORT_CONFIG.barSpacing,
+        minBarSpacing: VIEWPORT_CONFIG.minBarSpacing,
+        rightOffset: VIEWPORT_CONFIG.rightOffset,
         lockVisibleTimeRangeOnResize: true,
       },
       handleScale: {
@@ -315,13 +255,23 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
         type: "volume",
       },
       priceScaleId: "",
+      // Autoscale robust: cap di persentil-90 volume non-nol supaya SATU spike
+      // outlier (mis. volume CSV historis 35247) tidak menarik skala dan membuat
+      // semua batang volume lain invisible (bug "volume cuma satu batang").
+      autoscaleInfoProvider: () => {
+        const vd = volumeSeriesRef.current?.data() ?? [];
+        const vals = vd
+          .map((d) => (d as { value: number }).value)
+          .filter((v) => v > 0)
+          .sort((a, b) => a - b);
+        if (vals.length === 0) return null;
+        const p90 = vals[Math.min(vals.length - 1, Math.floor(vals.length * 0.9))];
+        return { priceRange: { minValue: 0, maxValue: Math.max(p90, 1) } };
+      },
     });
 
     volumeSeries.priceScale().applyOptions({
-      scaleMargins: {
-        top: 0.82,
-        bottom: 0,
-      },
+      scaleMargins: VIEWPORT_CONFIG.volumeScaleMargins,
     });
 
     // Garis target prediksi (horizontal); di-update saat prediksi/candle berubah.
@@ -404,13 +354,14 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
               })
             );
           } catch {}
-        }, 120);
+        }, VIEWPORT_CONFIG.saveRangeDebounceMs);
       }
 
       if (isFetchingOlderRef.current || !hasMoreHistoryRef.current) return;
 
-      // When user scrolls near left boundary (first 15 bars)
-      if (newRange.from < 15 && currentCandlesRef.current.length > 0) {
+      // Prepend history lama saat user scroll mendekati batas kiri
+      // (ambang bar dari VIEWPORT_CONFIG, pure shouldPrepend).
+      if (shouldPrepend(newRange) && currentCandlesRef.current.length > 0) {
         isFetchingOlderRef.current = true;
         const earliestTs = currentCandlesRef.current[0]!.time as number;
 
@@ -452,6 +403,12 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
               const freshOlder = olderCandles.filter((c) => !existingMap.has(c.time));
 
               if (freshOlder.length > 0) {
+                // Tangkap view user SEBELUM setData: setData(merged) mereset
+                // visible logical range, dan index bar bergeser sebanyak bar
+                // lama yang di-prepend. Tanpa re-apply shift, view loncat ke
+                // default (ini bug "refresh kembali ke default bukan chart
+                // terakhir" — restore view lama memicu prepend lalu reset).
+                const prevRange = chartRef.current?.timeScale().getVisibleLogicalRange() ?? null;
                 const merged = [...freshOlder, ...currentCandlesRef.current].sort(
                   (a, b) => (a.time as number) - (b.time as number)
                 );
@@ -465,6 +422,16 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
                 }));
                 volumeSeries.setData(volumeData);
                 syncVolumePane(merged);
+
+                // Pertahankan view user: geser logical range sebanyak bar yang
+                // di-prepend supaya candle yang sama tetap terlihat (bukan reset).
+                if (prevRange) {
+                  const shift = freshOlder.length;
+                  chartRef.current?.timeScale().setVisibleLogicalRange({
+                    from: prevRange.from + shift,
+                    to: prevRange.to + shift,
+                  });
+                }
               } else {
                 hasMoreHistoryRef.current = false;
               }
@@ -834,29 +801,18 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
             onPriceUpdateRef.current?.(val);
           }
 
-          // Restore user's customized chart zoom and position if saved.
-          // Range di-clamp ke data yang tersedia (window bisa lebih pendek dari
-          // sesi sebelumnya) dengan mempertahankan lebar zoom pengguna.
+          // Restore view tersimpan: clamp + preservasi span dikerjakan module
+          // chart-viewport (maxTo = candleCount-1+rightOffset, satu sumber
+          // config — saved-view tidak reintroduce gep margin kanan).
           let restored = false;
           try {
             const savedRangeStr = localStorage.getItem(`xau_chart_range_${timeframe}`);
             if (savedRangeStr) {
-              const saved = JSON.parse(savedRangeStr);
-              if (
-                typeof saved.from === "number" &&
-                typeof saved.to === "number" &&
-                saved.to > saved.from
-              ) {
-                const span = saved.to - saved.from;
-                const maxTo = candles.length - 1 + 15;
-                let to = Math.min(saved.to, maxTo);
-                let from = to - span;
-                if (from < 0) {
-                  from = 0;
-                  to = Math.min(span, maxTo);
-                }
+              const range = restoreRange(JSON.parse(savedRangeStr), candles.length);
+              if (range) {
+                // rAF: tunggu koordinat layout series settle pasca setData().
                 requestAnimationFrame(() => {
-                  chartRef.current?.timeScale().setVisibleLogicalRange({ from, to });
+                  chartRef.current?.timeScale().setVisibleLogicalRange(range);
                 });
                 restored = true;
               }
@@ -864,10 +820,10 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           } catch {}
 
           if (!restored) {
-            // Institutional comfortable default: nice readable candles, 15 bars margin on right
+            // View default nyaman: candle terbaca, margin kanan 3 bar (config).
             chartRef.current?.timeScale().applyOptions({
-              barSpacing: 12,
-              rightOffset: 15,
+              barSpacing: VIEWPORT_CONFIG.barSpacing,
+              rightOffset: VIEWPORT_CONFIG.rightOffset,
             });
             chartRef.current?.timeScale().scrollToRealTime();
           }
@@ -884,7 +840,7 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
             if (!isCancelled) {
               isReadyRef.current = true;
             }
-          }, 350);
+          }, VIEWPORT_CONFIG.readyDelayMs);
         }
       }
     }
@@ -953,103 +909,10 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
 
   return (
     <div className="relative w-full h-full flex bg-[#0E131A] overflow-hidden select-none">
-      {/* 1. Authentic Vertical Drawing Toolbar (Lucide SVG Vector Icons) */}
+      {/* 1. Toolbar vertikal ramping — hanya tool yang benar-benar berfungsi.
+          Tool drawing mati (trendline/spline/brush/text/magnet/lock/eye/trash/
+          layers) dihapus: tidak pernah ada implementasi drawing di chart. */}
       <aside className="w-10 border-r border-[#1E2633] bg-[#141A22] flex flex-col items-center py-2 space-y-1 z-20 shrink-0 select-none overflow-y-auto dock-scroll">
-        {/* Drawing & Cursor Tools */}
-        <button
-          type="button"
-          onClick={() => handleSelectTool("crosshair")}
-          title="Crosshair (Pointer)"
-          className={`p-1.5 transition-colors ${
-            activeTool === "crosshair"
-              ? "text-[#E0E3EB] bg-[#1E2633]"
-              : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
-          }`}
-        >
-          <Crosshair className="w-4 h-4" />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleSelectTool("trendline")}
-          title="Trend Line"
-          className={`p-1.5 transition-colors ${
-            activeTool === "trendline"
-              ? "text-[#E0E3EB] bg-[#1E2633]"
-              : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
-          }`}
-        >
-          <TrendingUp className="w-4 h-4" />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleSelectTool("spline")}
-          title="Spline & Fibonacci"
-          className={`p-1.5 transition-colors ${
-            activeTool === "spline"
-              ? "text-[#E0E3EB] bg-[#1E2633]"
-              : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
-          }`}
-        >
-          <Spline className="w-4 h-4" />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleSelectTool("brush")}
-          title="Paintbrush & Highlighter"
-          className={`p-1.5 transition-colors ${
-            activeTool === "brush"
-              ? "text-[#E0E3EB] bg-[#1E2633]"
-              : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
-          }`}
-        >
-          <Paintbrush className="w-4 h-4" />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleSelectTool("text")}
-          title="Text Annotation"
-          className={`p-1.5 transition-colors ${
-            activeTool === "text"
-              ? "text-[#E0E3EB] bg-[#1E2633]"
-              : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
-          }`}
-        >
-          <Type className="w-4 h-4" />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleSelectTool("smile")}
-          title="Markers & Stickers"
-          className={`p-1.5 transition-colors ${
-            activeTool === "smile"
-              ? "text-[#E0E3EB] bg-[#1E2633]"
-              : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
-          }`}
-        >
-          <Smile className="w-4 h-4" />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleSelectTool("ruler")}
-          title="Price & Time Measure"
-          className={`p-1.5 transition-colors ${
-            activeTool === "ruler"
-              ? "text-[#E0E3EB] bg-[#1E2633]"
-              : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
-          }`}
-        >
-          <Ruler className="w-4 h-4" />
-        </button>
-
-        <div className="w-5 h-[1px] bg-[#1E2633] my-1"></div>
-
-        {/* Utilities & Management */}
         <button
           type="button"
           onClick={() => chartRef.current?.timeScale().fitContent()}
@@ -1057,56 +920,6 @@ export function MarketChart({ timeframe, onPriceUpdate }: MarketChartProps) {
           className="p-1.5 text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633] transition-colors"
         >
           <ZoomIn className="w-4 h-4" />
-        </button>
-
-        <button
-          type="button"
-          onClick={handleToggleMagnet}
-          title={isMagnet ? "Magnet Mode: ON" : "Magnet Mode: OFF"}
-          className={`p-1.5 transition-colors ${
-            isMagnet ? "text-[#2962FF] bg-[#1E2633]" : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
-          }`}
-        >
-          <Magnet className="w-4 h-4" />
-        </button>
-
-        <button
-          type="button"
-          onClick={handleToggleLock}
-          title={isLocked ? "Drawings: Locked" : "Lock All Drawings"}
-          className={`p-1.5 transition-colors ${
-            isLocked ? "text-ex-yellow bg-[#1E2633]" : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
-          }`}
-        >
-          <Lock className="w-4 h-4" />
-        </button>
-
-        <button
-          type="button"
-          onClick={handleToggleDrawings}
-          title={showDrawings ? "Drawings: Visible" : "Drawings: Hidden"}
-          className={`p-1.5 transition-colors ${
-            !showDrawings ? "text-ex-red bg-[#1E2633]" : "text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633]"
-          }`}
-        >
-          <Eye className="w-4 h-4" />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleSelectTool("crosshair")}
-          title="Clear Chart Objects"
-          className="p-1.5 text-[#788292] hover:text-ex-red hover:bg-[#1E2633] transition-colors"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-
-        <button
-          type="button"
-          title="Indicators & Layers"
-          className="p-1.5 text-[#788292] hover:text-[#E0E3EB] hover:bg-[#1E2633] transition-colors"
-        >
-          <Layers className="w-4 h-4" />
         </button>
       </aside>
 

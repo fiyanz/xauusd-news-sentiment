@@ -43,6 +43,10 @@ const MarketChart = dynamic(
 const DOCK_MIN = 150;
 const DOCK_DEFAULT = 320;
 const DOCK_STORAGE_KEY = "xau_terminal_dock_height";
+// Tinggi minimum chart + chrome atas (header h-12=48 + strip h-10=40). Dock
+// tidak boleh mendesak chart di bawah CHART_MIN supaya tidak "terpotong"/squashed.
+const CHART_MIN = 280;
+const CHROME_H = 88;
 
 function clampDock(h: number, max: number) {
   return Math.min(Math.max(Math.round(h), DOCK_MIN), Math.max(DOCK_MIN, max));
@@ -69,7 +73,7 @@ export default function MarketTradingTerminal() {
     () =>
       Math.max(
         DOCK_MIN,
-        (typeof window !== "undefined" ? window.innerHeight : 900) - 210
+        (typeof window !== "undefined" ? window.innerHeight : 900) - CHROME_H - CHART_MIN
       ),
     []
   );
@@ -165,7 +169,7 @@ export default function MarketTradingTerminal() {
       if (savedHeight) {
         const parsed = Number(savedHeight);
         if (Number.isFinite(parsed)) {
-          const max = Math.max(DOCK_MIN, window.innerHeight - 210);
+          const max = Math.max(DOCK_MIN, window.innerHeight - CHROME_H - CHART_MIN);
           setDockHeight(clampDock(parsed, max));
         }
       }
