@@ -1,10 +1,10 @@
 import fs from "node:fs";
 import { FinancialClient, DerivClient } from "@repo/financial-clients";
-import { db, priceCandles, sql } from "@repo/database";
+import { db, sql, eventTypes, economicReleases, eventReactions } from "@repo/database";
 import {
-  calculateSurprise,
-  calculateReactionWindows,
-  aggregateEventStats,
+  runEventStudy,
+  type EventStudyPorts,
+  type EventStudyReport,
 } from "@repo/core-analytics";
 import { ingestNewsCorpus } from "./news-db.js";
 import { healAllCandleGaps } from "./candle-gap-service.js";
@@ -147,11 +147,109 @@ async function syncDerivCandles(): Promise<void> {
   const deriv = new DerivClient({ appId: DERIV_APP_ID, symbol: DERIV_SYMBOL });
   try {
     // Gap-healing sadar-gap: tutup bolong candle akibat server mati/reconnect
-    // (MAX(timestamp_utc) -> now) sebelum live lanjut. Lihat candle-gap-service.
+    // (MAX(timestamp_utc) deriv-cfd -> now) sebelum live lanjut. Lihat candle-gap-service.
     await healAllCandleGaps(deriv, DERIV_SYMBOL);
   } finally {
     deriv.close();
   }
+}
+
+/**
+ * Adapter persistensi hasil event study (worker): event_types ->
+ * economic_releases -> event_reactions (urutan hormati FK). Id kanonik dari
+ * modul: evt-<CODE>, rel-<CODE>-<epoch>, <releaseId>-<window>m. Upsert
+ * idempotent — cycle berikutnya memperbarui nilai, bukan menduplikasi.
+ * Hanya rilis LAMPAU dengan actual + surprise nyata (stdDev kalender valid)
+ * yang dipersist; rilis masa depan / tanpa stdDev tidak dikarang jadi baris DB.
+ */
+async function persistEventStudy(
+  report: EventStudyReport
+): Promise<{ releases: number; reactions: number }> {
+  const studied = report.releaseResults.filter((r) => !r.isFuture);
+  const first = studied.find((r) => r.release.actual !== null && r.surprise !== null);
+  if (!first || first.release.actual === null || first.surprise === null) {
+    return { releases: 0, reactions: 0 };
+  }
+  const stdDev = first.release.historicalStdDev;
+  if (stdDev == null || stdDev <= 0) return { releases: 0, reactions: 0 };
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  const eventTypeId = `evt-${report.eventCode}`;
+  await db
+    .insert(eventTypes)
+    .values({
+      id: eventTypeId,
+      code: report.eventCode,
+      name: first.release.eventName,
+      country: "USD",
+      impact: "HIGH",
+      historicalStdDev: stdDev,
+      createdAt: nowSec,
+    })
+    .onConflictDoUpdate({
+      target: eventTypes.id,
+      set: { name: first.release.eventName, historicalStdDev: stdDev },
+    });
+
+  let releases = 0;
+  let reactions = 0;
+  for (const r of studied) {
+    if (r.release.actual === null || r.surprise === null) continue;
+    await db
+      .insert(economicReleases)
+      .values({
+        id: r.releaseId,
+        eventTypeId,
+        releaseDateUtc: r.release.dateUtc,
+        actual: r.release.actual,
+        forecast: r.release.forecast,
+        previous: r.release.previous,
+        surpriseVal: r.surprise.surpriseVal,
+        zScore: r.surprise.zScore,
+      })
+      .onConflictDoUpdate({
+        target: economicReleases.id,
+        set: {
+          actual: r.release.actual,
+          forecast: r.release.forecast,
+          previous: r.release.previous,
+          surpriseVal: r.surprise.surpriseVal,
+          zScore: r.surprise.zScore,
+        },
+      });
+    releases++;
+    if (r.reactions.length > 0) {
+      const rows = r.reactions.map((x) => ({
+        id: x.id,
+        releaseId: x.releaseId,
+        windowMinutes: x.windowMinutes,
+        basePrice: x.basePrice,
+        endPrice: x.endPrice,
+        deltaPips: x.deltaPips,
+        maxSpikePips: x.maxSpikePips,
+        maxDrawdownPips: x.maxDrawdownPips,
+        isRetraced: x.isRetraced,
+        retraceMinutes: x.retraceMinutes,
+      }));
+      await db
+        .insert(eventReactions)
+        .values(rows)
+        .onConflictDoUpdate({
+          target: eventReactions.id,
+          set: {
+            basePrice: sql`EXCLUDED.base_price`,
+            endPrice: sql`EXCLUDED.end_price`,
+            deltaPips: sql`EXCLUDED.delta_pips`,
+            maxSpikePips: sql`EXCLUDED.max_spike_pips`,
+            maxDrawdownPips: sql`EXCLUDED.max_drawdown_pips`,
+            isRetraced: sql`EXCLUDED.is_retraced`,
+            retraceMinutes: sql`EXCLUDED.retrace_minutes`,
+          },
+        });
+      reactions += rows.length;
+    }
+  }
+  return { releases, reactions };
 }
 
 async function runIngestionJob() {
@@ -162,71 +260,47 @@ async function runIngestionJob() {
     // 0. Candle historis Deriv (15m/30m/1h/4h) -> price_candles
     await syncDerivCandles();
 
-    // 1. Ingest XAUUSD Candles
-    console.log("[Worker] Fetching XAUUSD multi-timeframe candles...");
-    const candles15m = await client.fetchXauusdCandles("15m", 30);
-    console.log(`[Worker] Synced ${candles15m.length} candles for 15m timeframe.`);
-
-    // Batch DB persistence (Warm Path)
-    try {
-      if (candles15m.length > 0) {
-        const rows = candles15m.map((c) => ({
-          id: `${c.symbol}_${c.timeframe}_${c.timestampUtc}`,
-          symbol: c.symbol,
-          timeframe: c.timeframe,
-          timestampUtc: c.timestampUtc,
-          open: c.open,
-          high: c.high,
-          low: c.low,
-          close: c.close,
-          volume: c.volume,
-          // Jujur: baris ini dari CSV/sintetis FinancialClient, bukan Deriv.
-          source: c.isSimulated ? "simulated" : "csv-historical",
-        }));
-        await db
-          .insert(priceCandles)
-          .values(rows)
-          .onConflictDoUpdate({
-            target: priceCandles.id,
-            set: {
-              open: sql`EXCLUDED.open`,
-              high: sql`EXCLUDED.high`,
-              low: sql`EXCLUDED.low`,
-              close: sql`EXCLUDED.close`,
-              volume: sql`EXCLUDED.volume`,
-              // Label mengikuti nilai yang ditulis (provenance tetap jujur).
-              source: sql`EXCLUDED.source`,
-            },
-          });
-        console.log(`[Worker] Persisted batch of ${rows.length} candles to PostgreSQL.`);
-      }
-    } catch (dbErr: any) {
-      console.warn(`[Worker] Database batch persist notice: ${dbErr?.message || dbErr}`);
-    }
-
-    // 2. Ingest Economic Calendar
+    // 1. Ingest Economic Calendar
     console.log("[Worker] Fetching economic calendar events...");
     const releases = await client.fetchEconomicCalendar();
     console.log(`[Worker] Synced ${releases.length} economic releases.`);
 
-    // 3. Process Event Study for High Impact
-    for (const rel of releases) {
-      if (rel.impact === "HIGH" && rel.actual !== null) {
-        const surprise = calculateSurprise(rel.actual, rel.forecast, rel.previous, 0.2);
-        const reactions = calculateReactionWindows(
-          `rel-${rel.eventCode}`,
-          rel.dateUtc,
-          candles15m,
-          [5, 15, 60]
-        );
-        const stats = aggregateEventStats(reactions);
+    // 2. Event study per kode HIGH-impact di seam runEventStudy (core-analytics):
+    // stdDev NYATA dari kalender (bukan 0.2 hardcoded) + window candle 15m
+    // sekitar tanggal rilis (event+1j15m, 400 baris), bukan 30 candle terakhir.
+    // Hasil dipersist ke event_types/economic_releases/event_reactions.
+    // Catatan: tulis candle 15m CSV/sintetis (step-1 lama) DIHAPUS — 15m/30m
+    // Deriv-only; jalur tulis price_candles kini satu pintu di candle-store.
+    const studyCodes = [
+      ...new Set(
+        releases
+          .filter((r) => r.impact === "HIGH" && r.actual !== null)
+          .map((r) => r.eventCode)
+      ),
+    ];
+    const studyPorts: EventStudyPorts = {
+      candles: {
+        fetchCandlesUpTo: (endUtc, limit) => client.fetchXauusdCandles("15m", limit, endUtc),
+      },
+      calendar: { fetchReleases: async () => releases },
+    };
+    for (const code of studyCodes) {
+      try {
+        const report = await runEventStudy(code, studyPorts);
+        const persisted = await persistEventStudy(report);
         console.log(
-          `[Worker] Event Study [${rel.eventCode}]: Surprise Z=${surprise.zScore}, Consistency=${stats.directionalConsistency}%`
+          `[Worker] Event Study [${code}]: Surprise Z=${report.surprise?.zScore ?? "n/a"} (stdDev nyata kalender), ` +
+            `Consistency=${report.aggregatedStats?.directionalConsistency ?? 0}% | ` +
+            `persist ${persisted.releases} rilis + ${persisted.reactions} reaksi`
+        );
+      } catch (error) {
+        console.warn(
+          `[Worker] Event study ${code} gagal: ${error instanceof Error ? error.message : String(error)}`
         );
       }
     }
 
-    // 4. Ingest COT Report
+    // 3. Ingest COT Report
     const cot = await client.fetchLatestCOTReport();
     console.log(
       cot
@@ -234,11 +308,11 @@ async function runIngestionJob() {
         : "[Worker] CFTC COT Report unavailable (sumber CFTC tidak bisa diakses)."
     );
 
-    // 5. Trigger Macro-Sentiment & Price Pipeline Sync via HTTP sentiment service
+    // 4. Trigger Macro-Sentiment & Price Pipeline Sync via HTTP sentiment service
     console.log("[Worker] Running Macro-Sentiment Pipeline Sync (HTTP)...");
     await syncSentimentPipeline();
 
-    // 6. Ingest corpus berita ke news_articles (watermark + batch 1000, dedup url)
+    // 5. Ingest corpus berita ke news_articles (watermark + batch 1000, dedup url)
     try {
       await ingestNewsCorpus();
     } catch (error) {

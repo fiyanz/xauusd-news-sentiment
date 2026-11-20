@@ -7,6 +7,7 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "dev": "tsx watch src/index.ts",
+    "test": "bunx vitest@2.1.9 run",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {

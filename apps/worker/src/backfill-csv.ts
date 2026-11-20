@@ -9,23 +9,27 @@
  * - 15m/30m TIDAK dibuat dari CSV (tidak ada data intraday nyata di CSV H1;
  *   timeframe itu tetap Deriv-only sesuai keputusan user).
  *
- * Idempotent: onConflictDoNothing(id). Id CSV = `XAUUSD_<tf>_<epoch>` sama
+ * Idempotent: kebijakan skip-existing di candle-store (onConflictDoNothing
+ * per id). Id CSV = `XAUUSD_<tf>_<epoch>` dibangun modul candle-store, sama
  * dengan id Deriv, jadi pada overlap baris Deriv recent MENANG (tidak ditimpa).
+ * Konvensi id + batch 500 + retry backoff tinggal di candle-store / adapter
+ * drizzle-nya (createDrizzleCandleStorePort) — bukan di file ini.
  *
  * Jalankan dari apps/worker: bunx tsx src/backfill-csv.ts
  * DATABASE_URL dibaca otomatis dari .env root oleh @repo/database.
  */
 import fs from "node:fs";
 import path from "node:path";
-import { db, priceCandles, sql, client, and, eq } from "@repo/database";
+import { db, priceCandles, sql, client } from "@repo/database";
 import { parseCsvLine, aggregateCandles } from "@repo/financial-clients";
 import type { OHLCV } from "@repo/types";
+import { createCandleStore } from "./candle-store.js";
+import { createDrizzleCandleStorePort } from "./candle-gap-service.js";
 
-const BATCH = 500; // ukuran batch insert (1000 memicu CONNECTION_CLOSED di gateway TiDB)
-const MAX_ATTEMPTS = 4; // retry per batch; aman karena onConflictDoNothing idempotent
+const store = createCandleStore(createDrizzleCandleStorePort());
 const H1_SEC = 3600;
 const H4_SEC = 14400;
-const SOURCE = "csv-historical";
+const SOURCE = "csv-historical" as const;
 
 // Path CSV relatif repo root (cwd saat dijalankan = apps/worker).
 const root = process.env.REPO_ROOT
@@ -125,57 +129,37 @@ function aggregate4h(rows: CsvCandle[]): CsvCandle[] {
   }));
 }
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-/** Insert per batch; konflik id (baris Deriv recent) dilewati, bukan ditimpa. */
+/**
+ * Insert lewat candle-store (kebijakan skip-existing): konflik id (baris
+ * Deriv recent) dilewati, bukan ditimpa. Batch 500 + retry backoff ditangani
+ * modul/adapter drizzle — file ini hanya menyiapkan baris + resume.
+ */
 async function insertRows(tf: string, rows: CsvCandle[]): Promise<void> {
   // Resume: insert ascending + batch atomik -> semua epoch <= max yang sudah
   // tersimpan pasti masuk. Lewati agar rerun tidak mengirim ulang puluhan ribu
-  // baris konflik (latency gateway TiDB tinggi).
-  const [existing] = await db
-    .select({ maxTs: sql<number | null>`max(${priceCandles.timestampUtc})` })
-    .from(priceCandles)
-    .where(and(eq(priceCandles.timeframe, tf), eq(priceCandles.source, SOURCE)));
-  const maxTs = existing?.maxTs == null ? null : Number(existing.maxTs);
+  // baris konflik (latency gateway TiDB tinggi). MAX difilter source CSV saja.
+  const maxTs = await store.getMaxTimestamp(tf, SOURCE);
   const pending = maxTs == null ? rows : rows.filter((r) => r.epoch > maxTs);
   if (pending.length < rows.length) {
     console.log(
       `[backfill-csv] ${tf}: resume — ${rows.length - pending.length} baris sudah ada, lanjut ${pending.length}`
     );
   }
-  for (let i = 0; i < pending.length; i += BATCH) {
-    const batch = pending.slice(i, i + BATCH).map((r) => ({
-      id: `XAUUSD_${tf}_${r.epoch}`,
-      symbol: "XAUUSD",
-      timeframe: tf,
-      timestampUtc: r.epoch,
-      open: r.open,
-      high: r.high,
-      low: r.low,
-      close: r.close,
-      volume: r.volume,
-      source: SOURCE,
-    }));
-    // Retry dengan backoff: gateway TiDB kadang menutup koneksi (CONNECTION_CLOSED).
-    // onConflictDoNothing membuat retry aman (baris yang sudah masuk dilewati).
-    for (let attempt = 1; ; attempt++) {
-      try {
-        await db.insert(priceCandles).values(batch).onConflictDoNothing();
-        break;
-      } catch (err) {
-        if (attempt >= MAX_ATTEMPTS) throw err;
-        console.warn(
-          `[backfill-csv] ${tf} batch ${i / BATCH + 1} gagal (percobaan ${attempt}): ` +
-            `${err instanceof Error ? err.message : String(err)} — retry...`
-        );
-        await sleep(1000 * attempt);
-      }
-    }
-    const done = Math.min(i + BATCH, pending.length);
-    if (done % 10000 === 0 || done === pending.length) {
-      console.log(`[backfill-csv] ${tf}: ${done}/${pending.length} baris diproses`);
-    }
-  }
+  if (pending.length === 0) return;
+  const stored = pending.map((r) => ({
+    symbol: "XAUUSD",
+    timeframe: tf,
+    timestampUtc: r.epoch,
+    open: r.open,
+    high: r.high,
+    low: r.low,
+    close: r.close,
+    volume: r.volume,
+    source: SOURCE,
+  }));
+  console.log(`[backfill-csv] ${tf}: menulis ${stored.length} baris via candle-store (skip-existing)`);
+  await store.upsertPriceCandles(stored, "skip-existing");
+  console.log(`[backfill-csv] ${tf}: ${stored.length}/${pending.length} baris diproses`);
 }
 
 (async () => {

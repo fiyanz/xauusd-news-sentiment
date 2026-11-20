@@ -17,7 +17,11 @@
 import type { StoredCandleRow } from "./candle-repository.js";
 
 export interface GapDbPort {
-  /** MAX(timestamp_utc) untuk tf; null bila belum ada baris. */
+  /**
+   * MAX(timestamp_utc) untuk tf; null bila belum ada baris. Adapter produksi
+   * (worker candle-gap-service) MEMFILTER source='deriv-cfd' supaya healing
+   * murni Deriv — baris CSV/sintetis tidak boleh menciptakan "no-gap" palsu.
+   */
   getMaxTimestamp(tf: string): Promise<number | null>;
   /** Upsert baris (onConflict id); kembalikan jumlah baris BARU yang ditambah. */
   upsertCandles(rows: StoredCandleRow[]): Promise<number>;
