@@ -7,6 +7,7 @@ import {
   aggregateEventStats,
 } from "@repo/core-analytics";
 import { ingestNewsCorpus } from "./news-db.js";
+import { healAllCandleGaps } from "./candle-gap-service.js";
 
 const client = new FinancialClient();
 
@@ -130,13 +131,6 @@ async function syncSentimentPipeline(): Promise<void> {
 
 const DERIV_APP_ID = process.env.DERIV_APP_ID ?? "";
 const DERIV_SYMBOL = "frxXAUUSD";
-/** timeframe -> granularity (detik) untuk ticks_history Deriv. */
-const DERIV_TIMEFRAMES = [
-  ["15m", 900],
-  ["30m", 1800],
-  ["1h", 3600],
-  ["4h", 14400],
-] as const;
 
 /**
  * Candle historis dari Deriv (CFD Gold/USD) -> price_candles.
@@ -152,50 +146,9 @@ async function syncDerivCandles(): Promise<void> {
 
   const deriv = new DerivClient({ appId: DERIV_APP_ID, symbol: DERIV_SYMBOL });
   try {
-    for (const [timeframe, granularity] of DERIV_TIMEFRAMES) {
-      try {
-        const candles = await deriv.fetchCandles(DERIV_SYMBOL, granularity, 300);
-        if (candles.length === 0) {
-          console.warn(`[Worker] Deriv ${timeframe}: tidak ada candle.`);
-          continue;
-        }
-
-        const rows = candles.map((candle) => ({
-          id: `XAUUSD_${timeframe}_${candle.epoch}`,
-          symbol: "XAUUSD",
-          timeframe,
-          timestampUtc: candle.epoch,
-          open: candle.open,
-          high: candle.high,
-          low: candle.low,
-          close: candle.close,
-          volume: 0,
-          source: "deriv-cfd",
-        }));
-
-        await db
-          .insert(priceCandles)
-          .values(rows)
-          .onConflictDoUpdate({
-            target: priceCandles.id,
-            set: {
-              open: sql`EXCLUDED.open`,
-              high: sql`EXCLUDED.high`,
-              low: sql`EXCLUDED.low`,
-              close: sql`EXCLUDED.close`,
-              volume: sql`EXCLUDED.volume`,
-              // Label mengikuti nilai yang ditulis (provenance tetap jujur).
-              source: sql`EXCLUDED.source`,
-            },
-          });
-
-        console.log(`[Worker] Deriv ${timeframe}: ${rows.length} candle disimpan.`);
-      } catch (error) {
-        console.warn(
-          `[Worker] Deriv ${timeframe} gagal: ${error instanceof Error ? error.message : String(error)}`
-        );
-      }
-    }
+    // Gap-healing sadar-gap: tutup bolong candle akibat server mati/reconnect
+    // (MAX(timestamp_utc) -> now) sebelum live lanjut. Lihat candle-gap-service.
+    await healAllCandleGaps(deriv, DERIV_SYMBOL);
   } finally {
     deriv.close();
   }

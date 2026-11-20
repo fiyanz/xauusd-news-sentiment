@@ -6,6 +6,7 @@ import { fetchExpertCandles, parseCsvLine } from "./candle-repository.js";
 import type { XauusdCandle } from "./candle-repository.js";
 
 export * from "./candle-repository.js";
+export * from "./gap-recovery.js";
 export * from "./expert-data.js";
 export * from "./deriv.js";
 
